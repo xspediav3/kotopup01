@@ -673,18 +673,20 @@
         let chosenService = null;
         let hasAppliedInitialSelection = false;
 
+        function normText(str) {
+            return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
         function matchOptionCaseInsensitive(selectEl, targetVal) {
             if (!targetVal || !selectEl) return false;
-            const lowerTarget = targetVal.toLowerCase().trim();
-            for (const opt of selectEl.options) {
-                if (!opt.value) continue;
-                const optLower = opt.value.toLowerCase().trim();
-                if (optLower === lowerTarget || optLower.includes(lowerTarget) || lowerTarget.includes(optLower)) {
-                    selectEl.value = opt.value;
-                    return true;
-                }
-            }
-            return false;
+            const t = normText(targetVal);
+            if (!t) return false;
+            const opts = [...selectEl.options].filter(o => o.value);
+            let opt = opts.find(o => normText(o.value) === t);
+            if (!opt) opt = opts.find(o => normText(o.value).includes(t) || t.includes(normText(o.value)));
+            if (!opt) return false;
+            selectEl.value = opt.value;
+            return true;
         }
 
         function updateSelectedGameBanner(count) {
@@ -732,21 +734,29 @@
             searchProductInput.disabled = true;
 
             try {
+                const requestPriceList = async (payload) => {
+                    const response = await fetch('/api/webtrx/layanan/price-list', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ message: `Gagal mengambil daftar harga: ${response.statusText}` }));
+                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    return Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : null;
+                };
+
                 const payload = {};
                 if (activeTargetGame) payload.game = activeTargetGame;
                 if (activeTargetCategory) payload.category = activeTargetCategory;
 
-                const response = await fetch('/api/webtrx/layanan/price-list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ message: `Gagal mengambil daftar harga: ${response.statusText}` }));
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                let listData = await requestPriceList(payload);
+                if ((!listData || listData.length === 0) && Object.keys(payload).length) {
+                    // Filter server kosong (nama game beda format): ambil semua, lalu pilih di client
+                    listData = await requestPriceList({});
                 }
-                const data = await response.json();
-                const listData = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : null;
                 if (listData) {
                     allServicesFromAPI = listData;
                     populateCategoryFilter();
@@ -849,12 +859,18 @@
             }
 
             const pricesToDisplay = currentlyFilteredServices.slice(displayedPricesCount, displayedPricesCount + pricesPerLoad);
-            pricesToDisplay.forEach((service, idx) => {
+            let didSelect = false;
+            pricesToDisplay.forEach((service) => {
                 const row = renderPriceListItem(service);
-                if (resetCount && idx === 0 && (providerFilter || categoryFilter || initialCodeFromUrl)) {
+                if (resetCount && !didSelect && initialCodeFromUrl && String(service.code) === initialCodeFromUrl) {
                     handleSelectServiceRow(service, row);
+                    didSelect = true;
                 }
             });
+            if (resetCount && !didSelect && pricesToDisplay.length && (providerFilter || categoryFilter || initialCodeFromUrl)) {
+                const firstRow = priceListTableBody.querySelector('tr.clickable-row');
+                handleSelectServiceRow(pricesToDisplay[0], firstRow);
+            }
 
             displayedPricesCount += pricesToDisplay.length;
 
