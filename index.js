@@ -1059,6 +1059,33 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
   }
 });
 
+// ===== Email OTP (Gmail) =====
+const mailer = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+async function sendVerificationEmail(toEmail, otpCode, username) {
+  const safeName = String(username || "").replace(/[<>&"]/g, "");
+  const html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
+      <h2 style="color:#166534;margin:0 0 8px;">Verifikasi Email</h2>
+      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk memverifikasi email akun Anda:</p>
+      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
+      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.</p>
+    </div>`;
+
+  await mailer.sendMail({
+    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+    to: toEmail,
+    subject: "Kode Verifikasi Email - Felix TopUp",
+    html,
+  });
+}
+
 app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
   // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
@@ -1067,32 +1094,54 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
       message: "Admin sudah terverifikasi",
     });
   }
-  
+
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
     }
-
-    const now = new Date();
-    if (user.otpCodeExpired && user.otpCodeExpired > now) {
-    } else {
-      await User.updateOne({ _id: user._id }, { $set: { otpCode: null, otpCodeExpired: null } });
+    if (user.isVerified) {
+      return res.status(400).json({ success: false, message: "Email sudah terverifikasi" });
     }
+    if (!user.email) {
+      return res.status(400).json({ success: false, message: "Email akun belum diatur" });
+    }
+
+    const now = Date.now();
+    // Cooldown 60 detik supaya email tidak dikirim berulang-ulang
+    if (user.otpCodeExpired && user.otpCodeExpired.getTime() - now > 4 * 60 * 1000) {
+      return res.status(429).json({
+        success: false,
+        message: "Tunggu 60 detik sebelum meminta kode baru",
+      });
+    }
+
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 10 menit
-    await User.findByIdAndUpdate(
-      user._id,
-      {
-        otpCode,
-        otpCodeExpired: otpExpiry,
-        aktifitas: "Verify H2H"
-      }
+    const otpExpiry = new Date(now + 5 * 60 * 1000); // berlaku 5 menit
+
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { otpCode, otpCodeExpired: otpExpiry, aktifitas: "Verify H2H" } }
     );
+
+    try {
+      await sendVerificationEmail(user.email, otpCode, user.username);
+    } catch (mailErr) {
+      console.error("Gagal kirim email OTP:", mailErr);
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { otpCode: null, otpCodeExpired: null } }
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Gagal mengirim email, coba lagi nanti",
+      });
+    }
+
+    // Kode OTP TIDAK dikirim ke browser, hanya ke email
     return res.json({
       success: true,
-      message: "OTP berhasil dibuat, silakan Verify H2H",
-      otp: otpCode 
+      message: "Kode verifikasi sudah dikirim ke email Anda",
     });
   } catch (err) {
     console.error("Error generate OTP:", err);
