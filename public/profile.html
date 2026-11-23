@@ -355,6 +355,18 @@
       padding: 2px 6px;
       font-size: 14px;
     }
+    .trash-btn {
+      background: none;
+      border: 1.5px solid #fca5a5;
+      color: var(--danger);
+      border-radius: 8px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .trash-btn:hover { background: #fff5f5; }
     code {
       font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 12px;
@@ -536,18 +548,13 @@
         <div class="table-wrap">
           <table class="log">
             <thead>
-              <tr><th>Alamat IP</th><th>Waktu Login</th></tr>
+              <tr><th>Alamat IP</th><th>Waktu Login</th><th></th></tr>
             </thead>
             <tbody id="logBody"></tbody>
           </table>
         </div>
       </div>
 
-      <div class="card">
-        <h3 class="card-title"><i class="fas fa-right-from-bracket"></i> Keluar dari Semua Perangkat</h3>
-        <p class="muted">Semua perangkat yang sedang login akan dikeluarkan, termasuk perangkat ini.</p>
-        <button class="btn-danger" id="logoutAllBtn" type="button">Keluarkan dari semua perangkat</button>
-      </div>
     </section>
 
     <!-- ================= API ================= -->
@@ -615,14 +622,21 @@
       toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
     }
 
-    // Baca respons sebagai teks dulu, supaya error HTML/500 tidak membuat JSON.parse crash
+    // Baca respons sebagai teks dulu; batas 20 detik supaya tombol tidak loading selamanya
     async function api(url, options = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000);
       let res, text;
       try {
-        res = await fetch(url, { credentials: "include", ...options });
+        res = await fetch(url, { credentials: "include", signal: controller.signal, ...options });
         text = await res.text();
       } catch (err) {
-        return { success: false, message: "Tidak dapat terhubung ke server" };
+        const msg = err.name === "AbortError"
+          ? "Server terlalu lama merespons, coba lagi"
+          : "Tidak dapat terhubung ke server";
+        return { success: false, message: msg };
+      } finally {
+        clearTimeout(timer);
       }
       let data;
       try {
@@ -813,7 +827,7 @@
       const tb = $("logBody");
       tb.innerHTML = "";
       if (!logs.length) {
-        tb.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:14px">Belum ada data login</td></tr>';
+        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data login</td></tr>';
         return;
       }
       logs.forEach((l) => {
@@ -822,11 +836,43 @@
         ipTd.className = "mono";
         ipTd.textContent = l.ip || "-";
         const timeTd = document.createElement("td");
-        timeTd.textContent = formatDate(l.time);
-        tr.append(ipTd, timeTd);
+        timeTd.textContent = formatDate(l.time) + (l.current ? " (perangkat ini)" : "");
+        const actTd = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "trash-btn";
+        btn.dataset.id = l._id;
+        btn.setAttribute("aria-label", "Keluarkan perangkat ini");
+        btn.title = "Keluarkan perangkat ini";
+        btn.innerHTML = '<i class="fas fa-trash-can"></i>';
+        actTd.appendChild(btn);
+        tr.append(ipTd, timeTd, actTd);
         tb.appendChild(tr);
       });
     }
+
+    $("logBody").addEventListener("click", async (e) => {
+      const btn = e.target.closest(".trash-btn");
+      if (!btn) return;
+      const isCurrent = btn.closest("tr").textContent.includes("(perangkat ini)");
+      const msg = isCurrent
+        ? "Keluarkan perangkat ini? Anda akan keluar dari akun."
+        : "Keluarkan perangkat ini dari akun?";
+      if (!confirm(msg)) return;
+      setLoading(btn, true);
+      const d = await postJson("/profile/login-log/delete", { logId: btn.dataset.id });
+      if (d.loggedOut) {
+        window.location.href = "/auth/login";
+        return;
+      }
+      if (d.success) {
+        toast(d.message || "Perangkat berhasil dikeluarkan", "success");
+        await loadUser();
+      } else {
+        setLoading(btn, false);
+        toast(d.message || "Gagal mengeluarkan perangkat", "error");
+      }
+    });
 
     /* ---------- Populate ---------- */
     function populate(u) {
@@ -1049,19 +1095,6 @@
       } finally {
         setLoading(btn, false);
       }
-    });
-
-    $("logoutAllBtn").addEventListener("click", async () => {
-      if (!confirm("Keluarkan akun dari semua perangkat? Perangkat ini juga akan keluar.")) return;
-      const btn = $("logoutAllBtn");
-      setLoading(btn, true);
-      const d = await api("/profile/logout-all", { method: "POST" });
-      if (d.success) {
-        window.location.href = "/auth/login";
-        return;
-      }
-      setLoading(btn, false);
-      toast(d.message || "Gagal mengeluarkan perangkat", "error");
     });
 
     /* ---------- API key ---------- */
