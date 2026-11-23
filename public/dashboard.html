@@ -9,7 +9,7 @@
     <meta name="keywords" content="topup, pulsa, data internet, voucher game, e-money, PLN, aplikasi premium, H2H">
     <meta name="author" content="Riky Shop">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#EC4899">
+    <meta name="theme-color" content="#16A34A">
     <meta property="og:title" content="Riky Shop Dashboard">
     <meta property="og:description" content="Platform topup terpercaya dengan berbagai layanan digital">
     <meta property="og:type" content="website">
@@ -33,11 +33,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         :root {
-            --primary-hue: 335;
-            --vp-primary: hsl(var(--primary-hue), 85%, 60%);
-            --vp-primary-rgb: 240, 56, 131;
-            --vp-primary-light: hsl(var(--primary-hue), 85%, 96%);
-            --vp-primary-dark: hsl(var(--primary-hue), 85%, 50%);
+            --primary-hue: 145;
+            --vp-primary: #22c55e;
+            --vp-primary-rgb: 34, 197, 94;
+            --vp-primary-light: #ecfdf3;
+            --vp-primary-dark: #15803d;
             --vp-secondary: #6c757d;
             --vp-secondary-rgb: 108, 117, 125;
             --vp-success: #198754;
@@ -49,10 +49,10 @@
             --vp-danger-rgb: 220, 53, 69;
             --vp-light: #f8f9fa;
             --vp-dark: #212529;
-            --vp-body-bg: hsl(var(--primary-hue), 20%, 98%);
+            --vp-body-bg: #f2fbf4;
             --vp-card-bg: #ffffff;
-            --vp-text-muted: hsl(var(--primary-hue), 10%, 45%);
-            --vp-border-color: hsl(var(--primary-hue), 20%, 92%);
+            --vp-text-muted: #66776b;
+            --vp-border-color: #dcefe1;
             --vp-font-main: 'Manrope', sans-serif;
             --vp-font-heading: 'Poppins', sans-serif;
             --vp-transition: 0.2s ease-in-out;
@@ -69,20 +69,20 @@
         }
 
         [data-theme="dark"] {
-            --vp-primary: rgba(0,244,255,0.3)%);
-            --vp-primary-rgb: 245, 102, 203;
-            --vp-primary-light: rgba(var(--vp-primary-rgb), 0.15);
-            --vp-primary-dark: rgba(0,244,255,0.3)(325, 90%, 60%);
-            --vp-body-bg: #1a161d;
-            --vp-card-bg: #251f28;
-            --vp-text-muted: #9e92a8;
-            --vp-border-color: #3c3240;
-            --vp-dark: #f0e6fc;
-            --vp-light: #21262d;
+            --vp-primary: #4ade80;
+            --vp-primary-rgb: 74, 222, 128;
+            --vp-primary-light: rgba(74, 222, 128, 0.15);
+            --vp-primary-dark: #22c55e;
+            --vp-body-bg: #101b14;
+            --vp-card-bg: #17251b;
+            --vp-text-muted: #a4b8a8;
+            --vp-border-color: #2b4432;
+            --vp-dark: #eaf5ec;
+            --vp-light: #213328;
             --vp-shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --vp-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
             --vp-shadow-lg: 0 8px 25px rgba(0,0,0,0.5);
-            --vp-header-bg-dark-transparent: rgba(37, 31, 40, 0.5);
+            --vp-header-bg-dark-transparent: rgba(23, 37, 27, 0.78);
         }
 
         * {
@@ -1453,6 +1453,219 @@
         [data-theme="dark"] .vp-notification-title {
             color: var(--vp-light);
         }
+    
+
+        /* Fresh green gradient theme and mobile-style bottom navigation */
+        body {
+            background: linear-gradient(180deg, #effcf2 0%, #f8fff9 42%, #ffffff 100%);
+        }
+
+        [data-theme="dark"] body,
+        body[data-theme="dark"] {
+            background: linear-gradient(180deg, #101b14 0%, #14251a 48%, #101b14 100%);
+        }
+
+        .vp-topbar {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: #dcefe1;
+        }
+
+        [data-theme="dark"] .vp-topbar {
+            background: rgba(23, 37, 27, 0.88);
+            border-color: var(--vp-border-color);
+        }
+
+        .vp-balance-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .48rem;
+            padding: .58rem .75rem;
+            border: 1px solid rgba(34, 197, 94, .12);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #e7f8ec 0%, #d5f3df 100%);
+            color: #16803d;
+            font-weight: 800;
+            font-size: .9rem;
+            line-height: 1;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, .08);
+            transition: transform var(--vp-transition), box-shadow var(--vp-transition);
+        }
+
+        .vp-balance-pill:hover {
+            color: #11632f;
+            transform: translateY(-1px);
+            box-shadow: 0 7px 18px rgba(34, 197, 94, .14);
+        }
+
+        .vp-balance-pill > i { font-size: 1rem; }
+        .vp-balance-plus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 23px;
+            height: 23px;
+            margin: -.2rem -.35rem -.2rem .05rem;
+            border-radius: 50%;
+            color: #ffffff;
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+        }
+
+        .vp-theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            color: #248448;
+            border-radius: 50%;
+        }
+
+        .vp-theme-toggle:hover { background: #e7f8ec; color: #166534; }
+
+        .vp-section,
+        .vp-history-section,
+        .vp-user-summary-card {
+            border-color: rgba(34, 197, 94, .12);
+            box-shadow: 0 8px 24px rgba(22, 101, 52, .045);
+        }
+
+        .vp-service-item:hover .icon-wrapper,
+        .vp-service-item .icon-wrapper {
+            background: linear-gradient(135deg, #effcf2 0%, #d8f7e1 100%);
+        }
+
+        .vp-service-item:hover .icon-wrapper .bi { color: #15803d; }
+
+        .btn-primary,
+        .vp-history-table .btn-primary {
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+            border-color: #22c55e;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover,
+        .vp-history-table .btn-primary:hover {
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+            border-color: #15803d;
+            color: #ffffff;
+        }
+
+        .mobile-bottom-nav { display: none; }
+
+        @media (max-width: 991.98px) {
+            .vp-main-container { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1040;
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-around;
+                min-height: 78px;
+                padding: 7px 5px calc(7px + env(safe-area-inset-bottom));
+                border-top: 1px solid rgba(34, 197, 94, .14);
+                background: rgba(255, 255, 255, .96);
+                box-shadow: 0 -8px 28px rgba(22, 101, 52, .10);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
+
+            .mobile-bottom-nav__item {
+                position: relative;
+                display: flex;
+                flex: 1 1 20%;
+                min-width: 0;
+                min-height: 60px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 3px;
+                padding: 5px 1px 0;
+                border-radius: 12px;
+                color: #758277;
+                font-size: .69rem;
+                font-weight: 600;
+                line-height: 1.2;
+                text-decoration: none;
+                transition: color .2s ease, background .2s ease;
+            }
+
+            .mobile-bottom-nav__item > i {
+                font-size: 1.45rem;
+                line-height: 1.25;
+            }
+
+            .mobile-bottom-nav__item.active,
+            .mobile-bottom-nav__item:hover {
+                color: #16803d;
+            }
+
+            .mobile-bottom-nav__item.active:not(.mobile-bottom-nav__item--primary) {
+                background: linear-gradient(180deg, rgba(220, 252, 231, .65), rgba(240, 253, 244, .1));
+            }
+
+            .mobile-bottom-nav__item--primary {
+                overflow: visible;
+                justify-content: flex-start;
+                gap: 0;
+                padding-top: 0;
+                color: #166534;
+            }
+
+            .mobile-bottom-nav__main-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 67px;
+                height: 67px;
+                margin-top: -35px;
+                margin-bottom: 2px;
+                border: 5px solid #ffffff;
+                border-radius: 50%;
+                background: linear-gradient(145deg, #4ade80 0%, #16a34a 72%, #15803d 100%);
+                color: #ffffff;
+                box-shadow: 0 8px 22px rgba(22, 163, 74, .30);
+            }
+
+            .mobile-bottom-nav__main-icon i { font-size: 1.75rem; }
+
+            .mobile-bottom-nav__main-label {
+                margin-top: 0;
+                font-size: .69rem;
+                font-weight: 800;
+                white-space: nowrap;
+            }
+
+            .vp-topbar-actions { gap: .2rem; }
+            .vp-balance-pill { padding: .55rem .65rem; gap: .35rem; }
+            .vp-theme-toggle { width: 38px; height: 38px; padding: .45rem; }
+            .vp-notification-wrapper { display: none; }
+
+            .vp-content-wrapper { padding-bottom: .8rem; }
+            footer { margin-bottom: 0; }
+        }
+
+        @media (max-width: 390px) {
+            .vp-topbar { gap: .25rem; }
+            .vp-topbar-brand-toggler { gap: .35rem; }
+            .vp-topbar-brand-text { font-size: 1rem; }
+            .vp-topbar-logo { height: 22px; }
+            .vp-topbar-actions { gap: .05rem; }
+            .vp-balance-pill { padding: .5rem .55rem; font-size: .8rem; }
+            .mobile-bottom-nav__item { font-size: .64rem; }
+            .mobile-bottom-nav__main-label { font-size: .64rem; }
+        }
+
+        @media (min-width: 992px) {
+            .mobile-bottom-nav { display: none !important; }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -1565,18 +1778,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="dropdown vp-profile-dropdown">
-                        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://via.placeholder.com/150/EC4899/FFFFFF?Text=C" alt="User" id="userProfileImageNav">
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><h6 class="dropdown-header" id="userFullnameNavDropdown">Nama Pengguna</h6></li>
-                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person-fill"></i>Profil</a></li>
-                            <li><a class="dropdown-item" href="/support"><i class="fas fa-headset"></i> &nbsp;Support</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="bi bi-box-arrow-right"></i>Logout</a></li>
-                        </ul>
-                    </div>
+                    <a class="vp-balance-pill" href="/deposit" aria-label="Saldo dan top up">
+                        <i class="bi bi-wallet2" aria-hidden="true"></i>
+                        <span id="userSaldoTopbar">Rp 0</span>
+                        <span class="vp-balance-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+                    </a>
                 </div>
             </header>
 
@@ -1939,6 +2145,30 @@
 
     <div class="vp-sidebar-overlay" id="sidebarOverlay"></div>
 
+    <nav class="mobile-bottom-nav" aria-label="Navigasi utama">
+        <a href="/dashboard" class="mobile-bottom-nav__item" data-bottom-nav="home">
+            <i class="bi bi-house-door" aria-hidden="true"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="/order" class="mobile-bottom-nav__item" data-bottom-nav="history">
+            <i class="bi bi-clock-history" aria-hidden="true"></i>
+            <span>Riwayat</span>
+        </a>
+        <a href="/beli-otp" class="mobile-bottom-nav__item mobile-bottom-nav__item--primary" data-bottom-nav="otp" aria-label="Beli OTP">
+            <span class="mobile-bottom-nav__main-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span>
+            <span class="mobile-bottom-nav__main-label">Beli OTP</span>
+        </a>
+        <a href="/deposit" class="mobile-bottom-nav__item" data-bottom-nav="topup">
+            <i class="bi bi-wallet2" aria-hidden="true"></i>
+            <span>Top Up</span>
+        </a>
+        <a href="/profile" class="mobile-bottom-nav__item" data-bottom-nav="account">
+            <i class="bi bi-person" aria-hidden="true"></i>
+            <span>Akun</span>
+        </a>
+    </nav>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
@@ -2004,9 +2234,9 @@
 
         function updateThemeIcon(theme) {
             if (theme === 'dark') {
-                themeIcon.className = 'bi bi-sun-fill';
-            } else {
                 themeIcon.className = 'bi bi-moon-fill';
+            } else {
+                themeIcon.className = 'bi bi-sun-fill';
             }
         }
 
@@ -2087,6 +2317,27 @@
                     link.classList.add('active');
                 }
             });
+        }
+
+        function setActiveBottomNav() {
+            const path = window.location.pathname;
+            const search = window.location.search;
+            const items = document.querySelectorAll('.mobile-bottom-nav__item');
+            items.forEach(item => item.classList.remove('active'));
+
+            let activeKey = 'home';
+            if (path === '/order' || path.startsWith('/mutation-order') || path.startsWith('/mutation-deposit')) {
+                activeKey = 'history';
+            } else if (path === '/deposit') {
+                activeKey = 'topup';
+            } else if (path === '/profile' || path === '/api-key-page') {
+                activeKey = 'account';
+            } else if (path === '/beli-otp' || (path === '/produk-detail' && /category=OTP/i.test(search))) {
+                activeKey = 'otp';
+            }
+
+            const activeItem = document.querySelector(`[data-bottom-nav="${activeKey}"]`);
+            if (activeItem) activeItem.classList.add('active');
         }
 
         function getTimeAgo(dateString) {
@@ -2251,23 +2502,13 @@
         }
 
         function displayUserData(user) {
-            document.getElementById('userSaldo').textContent = `Rp ${user.saldo.toLocaleString('id-ID')}`;
+            document.getElementById('userSaldo').textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
             document.getElementById('userRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
             
-            const profileImgNav = document.getElementById('userProfileImageNav');
-            const userFullnameNavDropdown = document.getElementById('userFullnameNavDropdown');
-            
-            userFullnameNavDropdown.textContent = user.fullname || 'Pengguna';
-            
-            if (user.profileUrl && user.profileUrl.startsWith('http')) {
-                profileImgNav.src = user.profileUrl;
-            } else {
-                profileImgNav.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'C T')}&background=EC4899&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
+            const saldoTopbar = document.getElementById('userSaldoTopbar');
+            if (saldoTopbar) {
+                saldoTopbar.textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
             }
-            
-            profileImgNav.onerror = function() {
-                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'C T')}&background=EC4899&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
-            };
         }
 
         function renderHistory(userData) {
@@ -2755,6 +2996,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateLayoutForSidebar();
             setActiveSidebarLink();
+            setActiveBottomNav();
             fetchDashboardData();
             fetchNotifications();
         });
