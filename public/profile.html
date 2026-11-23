@@ -580,7 +580,7 @@
       <div class="card">
         <h3 class="card-title"><i class="fas fa-shield-halved"></i> Whitelist IP API</h3>
         <p class="muted">
-          Hanya IP di daftar ini yang boleh memakai API Key Anda. Kosongkan = semua IP boleh.
+          Masukkan satu IP. IP baru otomatis menggantikan IP sebelumnya. Isi 0.0.0.0 untuk mengizinkan semua IP.
           <span id="myIpWrap" class="hidden">IP Anda sekarang: <code id="myIp">-</code></span>
         </p>
         <div class="row">
@@ -765,8 +765,7 @@
     function renderIps() {
       const box = $("ipList");
       box.innerHTML = "";
-      const shown = ipList.filter((ip) => ip !== DEFAULT_IP);
-      if (!shown.length) {
+      if (!ipList.length) {
         const p = document.createElement("p");
         p.className = "muted";
         p.style.margin = "0";
@@ -774,24 +773,19 @@
         box.appendChild(p);
         return;
       }
-      shown.forEach((ip) => {
+      ipList.forEach((ip) => {
         const row = document.createElement("div");
         row.className = "ip-row";
         const span = document.createElement("span");
         span.textContent = ip;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.setAttribute("aria-label", "Hapus IP " + ip);
-        btn.innerHTML = '<i class="fas fa-xmark"></i>';
-        btn.addEventListener("click", () => saveIps(ipList.filter((x) => x !== ip && x !== DEFAULT_IP)));
-        row.append(span, btn);
+        row.appendChild(span);
         box.appendChild(row);
       });
     }
 
-    // Kirim seluruh daftar ke server. Kosong = kirim 0.0.0.0 (semua IP boleh).
+    // Kirim IP ke server. IP baru otomatis menggantikan IP yang lama.
     async function saveIps(nextList) {
-      const payload = nextList.length ? nextList : [DEFAULT_IP];
+      const payload = nextList;
       const d = await postJson("/profile/whitelist-ip/set", { ips: payload });
       if (d.success) {
         ipList = [...payload];
@@ -811,14 +805,14 @@
         toast("Format IP tidak valid (contoh: 103.10.20.30)", "error");
         return;
       }
-      if (ipList.includes(ip)) {
-        toast("IP sudah ada di daftar", "info");
+      if (ipList.length === 1 && ipList[0] === ip) {
+        toast("IP ini sudah aktif", "info");
         return;
       }
       const btn = $("ipAddBtn");
       setLoading(btn, true);
       try {
-        const ok = await saveIps([...ipList.filter((x) => x !== DEFAULT_IP), ip]);
+        const ok = await saveIps([ip]);
         if (ok) input.value = "";
       } finally {
         setLoading(btn, false);
