@@ -336,7 +336,6 @@
       return (words[0][0] + words[1][0]).toUpperCase();
     }
 
-    // Mengarahkan ke /produk-harga dengan query parameter yang konsisten
     function bukaProdukHarga(item) {
       const gameName = item.game || item.provider || "";
       const params = new URLSearchParams();
@@ -437,8 +436,8 @@
       `;
 
       const endpoints = [
-        `/api/webtrx/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`,
-        `/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`
+        `/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`,
+        `/api/webtrx/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`
       ];
 
       for (const url of endpoints) {
@@ -459,7 +458,7 @@
       gamesGrid.innerHTML = `
         <div class="message-box">
           <strong>Gagal memuat daftar game</strong>
-          <p>Periksa koneksi atau pastikan endpoint <code>/produk</code> / <code>/api/webtrx/produk</code> aktif.</p>
+          <p>Periksa koneksi atau pastikan endpoint <code>/produk</code> aktif.</p>
         </div>
       `;
     }

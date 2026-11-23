@@ -36,7 +36,7 @@
     }
 
     .container {
-      max-width: 1040px;
+      max-width: 1080px;
       margin: 0 auto;
     }
 
@@ -148,6 +148,11 @@
       color: var(--ink);
     }
 
+    .pill-flash {
+      background: #ffe4e6;
+      color: #9f1239;
+    }
+
     .sub-text {
       color: var(--muted);
       font-size: 0.92rem;
@@ -198,7 +203,7 @@
 
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
       gap: 12px;
     }
 
@@ -227,6 +232,13 @@
       box-shadow: 5px 5px 0px var(--primary-dark);
     }
 
+    .item-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
     .item-code {
       font-size: 0.74rem;
       font-weight: 800;
@@ -234,8 +246,22 @@
       background: #eef3f0;
       padding: 2px 8px;
       border-radius: 7px;
-      align-self: flex-start;
       border: 1.5px solid var(--border);
+    }
+
+    .item-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border);
+      background: var(--zone-bg);
+      color: var(--zone-ink);
+    }
+
+    .item-badge-flash {
+      background: var(--warn);
+      color: var(--ink);
     }
 
     .item-name {
@@ -244,14 +270,27 @@
       line-height: 1.3;
     }
 
-    .item-note {
-      font-size: 0.78rem;
+    .item-meta {
+      font-size: 0.76rem;
       color: var(--muted);
+      font-weight: 600;
+    }
+
+    .price-wrap {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .item-price-ori {
+      font-size: 0.78rem;
+      color: #888;
+      text-decoration: line-through;
     }
 
     .item-price {
-      margin-top: auto;
-      font-size: 1.05rem;
+      font-size: 1.06rem;
       font-weight: 900;
       color: var(--primary-dark);
     }
@@ -347,7 +386,7 @@
   <div class="container">
     <div class="top-nav">
       <div class="nav-group">
-        <a href="/produk-detail" class="btn btn-white">&larr; Pilih Game</a>
+        <a href="/produk" class="btn btn-white">&larr; Pilih Game</a>
         <a href="/dashboard" class="btn">Dashboard</a>
       </div>
       <span class="btn btn-green">PRICE LIST DITZNESIA</span>
@@ -358,6 +397,7 @@
       <div class="game-heading">
         <h1 id="gameTitle">Memuat Game...</h1>
         <span id="zonePill" class="pill pill-neutral">Cek Zone...</span>
+        <span id="checkNamePill" class="pill pill-neutral">Cek Akun...</span>
         <span id="totalPill" class="pill pill-neutral">0 Nominal</span>
       </div>
       <p class="sub-text" id="gameSubtitle">Pilih nominal layanan di bawah ini lalu isi ID tujuan untuk memesan.</p>
@@ -400,6 +440,10 @@
           <div class="summary-row">
             <span>Kode</span>
             <span id="summaryCode">-</span>
+          </div>
+          <div class="summary-row">
+            <span>Zone ID</span>
+            <span id="summaryZone">-</span>
           </div>
           <div class="summary-row">
             <span>Harga</span>
@@ -463,6 +507,7 @@
     const gameTitleEl = document.getElementById("gameTitle");
     const gameSubtitleEl = document.getElementById("gameSubtitle");
     const zonePillEl = document.getElementById("zonePill");
+    const checkNamePillEl = document.getElementById("checkNamePill");
     const totalPillEl = document.getElementById("totalPill");
     const productsGridEl = document.getElementById("productsGrid");
     const searchNominalInput = document.getElementById("searchNominalInput");
@@ -471,6 +516,7 @@
     const summaryGameEl = document.getElementById("summaryGame");
     const summaryProductEl = document.getElementById("summaryProduct");
     const summaryCodeEl = document.getElementById("summaryCode");
+    const summaryZoneEl = document.getElementById("summaryZone");
     const summaryPriceEl = document.getElementById("summaryPrice");
 
     const orderForm = document.getElementById("orderForm");
@@ -490,9 +536,14 @@
 
     function updateZoneRequirement(required) {
       needZone = Boolean(required);
-      zonePillEl.textContent = needZone ? "Butuh Zone ID" : "Tanpa Zone ID";
+      zonePillEl.textContent = needZone ? "need_zone: true" : "need_zone: false";
       zoneInput.required = needZone;
       zoneGroup.style.display = needZone ? "block" : "none";
+      summaryZoneEl.textContent = needZone ? "Wajib diisi" : "Tidak diperlukan";
+    }
+
+    function updateCheckNameBadge(canCheck) {
+      checkNamePillEl.textContent = canCheck ? "Cek Nickname: Aktif" : "Cek Nickname: Tidak";
     }
 
     function showAlert(type, message) {
@@ -513,6 +564,9 @@
       if (typeof item.need_zone === "boolean") {
         updateZoneRequirement(item.need_zone);
       }
+      if (typeof item.check_name === "boolean") {
+        updateCheckNameBadge(item.check_name);
+      }
 
       summaryProductEl.textContent = item.name || item.code;
       summaryCodeEl.textContent = item.code || "-";
@@ -521,6 +575,25 @@
       submitOrderBtn.disabled = false;
       submitOrderBtn.textContent = `Order Sekarang (${formatRupiah(item.price)})`;
       orderAlert.className = "alert";
+    }
+
+    // Normalisasi respons baik dari /layanan/price-list maupun langsung array Ditznesia /tp-products
+    function normalizeProducts(rawPayload) {
+      const arr = Array.isArray(rawPayload?.data)
+        ? rawPayload.data
+        : Array.isArray(rawPayload)
+        ? rawPayload
+        : [];
+
+      const filtered = selectedGame
+        ? arr.filter(
+            (item) =>
+              String(item.game || item.provider || item.category || "").toLowerCase() ===
+              String(selectedGame).toLowerCase()
+          )
+        : arr;
+
+      return filtered.length > 0 ? filtered : arr;
     }
 
     function renderProducts(list) {
@@ -550,11 +623,23 @@
             String(item.status).toLowerCase()
           );
 
+        const oriPriceNum = parseInt(item.price_original, 10);
+        const hasOriPrice = Number.isFinite(oriPriceNum) && oriPriceNum > (parseInt(item.price, 10) || 0);
+
         card.innerHTML = `
-          <span class="item-code">Kode: ${item.code}</span>
+          <div class="item-top">
+            <span class="item-code">code: ${item.code}</span>
+            ${item.need_zone ? `<span class="item-badge">need_zone: true</span>` : ""}
+            ${item.check_name ? `<span class="item-badge">check_name: true</span>` : ""}
+            ${item.flash ? `<span class="item-badge item-badge-flash">Flash</span>` : ""}
+          </div>
           <div class="item-name">${item.name || "-"}</div>
-          ${item.note ? `<div class="item-note">${item.note}</div>` : ""}
-          <div class="item-price">${isUnavailable ? "Gangguan" : formatRupiah(item.price)}</div>
+          <div class="item-meta">game: ${item.game || selectedGame || "-"}</div>
+          ${item.note ? `<div class="item-meta">${item.note}</div>` : ""}
+          <div class="price-wrap">
+            ${hasOriPrice ? `<span class="item-price-ori">${formatRupiah(oriPriceNum)}</span>` : ""}
+            <span class="item-price">${isUnavailable ? "Gangguan" : formatRupiah(item.price)}</span>
+          </div>
         `;
 
         if (!isUnavailable) {
@@ -575,7 +660,7 @@
         productsGridEl.innerHTML = `
           <div class="empty-state">
             <strong>Parameter game kosong</strong>
-            <p style="margin-top:8px;"><a href="/produk-detail" class="btn">Kembali ke Daftar Game</a></p>
+            <p style="margin-top:8px;"><a href="/produk" class="btn">Kembali ke Daftar Game</a></p>
           </div>
         `;
         return;
@@ -584,6 +669,7 @@
       gameTitleEl.textContent = selectedGame;
       summaryGameEl.textContent = selectedGame;
       updateZoneRequirement(needZone);
+      updateCheckNameBadge(false);
 
       productsGridEl.innerHTML = `
         <div class="empty-state">
@@ -591,7 +677,7 @@
         </div>
       `;
 
-      // Coba endpoint POST /layanan/price-list terlebih dahulu, lalu fallback ke GET /produk-provider
+      // Utamakan endpoint POST /layanan/price-list yang terhubung ke Ditznesia
       const postEndpoints = ["/layanan/price-list", "/api/webtrx/layanan/price-list"];
       for (const endpoint of postEndpoints) {
         try {
@@ -606,10 +692,14 @@
           });
           if (!res.ok) continue;
           const json = await res.json();
-          if (json && json.success && Array.isArray(json.data)) {
-            allProducts = json.data;
-            if (allProducts.length > 0 && typeof allProducts[0].need_zone === "boolean" && paramNeedZone === null) {
-              updateZoneRequirement(allProducts[0].need_zone);
+          const list = normalizeProducts(json);
+          if (list.length > 0 || json?.success) {
+            allProducts = list;
+            if (allProducts.length > 0) {
+              if (typeof allProducts[0].need_zone === "boolean" && paramNeedZone === null) {
+                updateZoneRequirement(allProducts[0].need_zone);
+              }
+              updateCheckNameBadge(Boolean(allProducts[0].check_name));
             }
             renderProducts(allProducts);
             return;
@@ -617,6 +707,7 @@
         } catch (_) {}
       }
 
+      // Fallback ke GET /produk-provider
       const getEndpoints = [
         `/produk-provider?game=${encodeURIComponent(selectedGame)}&provider=${encodeURIComponent(selectedGame)}`,
         `/api/webtrx/produk-provider?game=${encodeURIComponent(selectedGame)}&provider=${encodeURIComponent(selectedGame)}`
@@ -627,10 +718,13 @@
           const res = await fetch(endpoint, { credentials: "include" });
           if (!res.ok) continue;
           const json = await res.json();
-          const list = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+          const list = normalizeProducts(json);
           allProducts = list;
-          if (allProducts.length > 0 && typeof allProducts[0].need_zone === "boolean" && paramNeedZone === null) {
-            updateZoneRequirement(allProducts[0].need_zone);
+          if (allProducts.length > 0) {
+            if (typeof allProducts[0].need_zone === "boolean" && paramNeedZone === null) {
+              updateZoneRequirement(allProducts[0].need_zone);
+            }
+            updateCheckNameBadge(Boolean(allProducts[0].check_name));
           }
           renderProducts(allProducts);
           return;
@@ -641,7 +735,7 @@
       productsGridEl.innerHTML = `
         <div class="empty-state">
           <strong>Gagal memuat price list</strong>
-          <p style="margin-top:6px;color:#4c6357;">Pastikan endpoint <code>/layanan/price-list</code> atau <code>/produk-provider</code> merespons dengan benar.</p>
+          <p style="margin-top:6px;color:#4c6357;">Pastikan endpoint <code>/layanan/price-list</code> atau <code>/produk-provider</code> aktif di server.</p>
         </div>
       `;
     }
@@ -655,7 +749,8 @@
       const filtered = allProducts.filter(
         (item) =>
           String(item.name || "").toLowerCase().includes(q) ||
-          String(item.code || "").toLowerCase().includes(q)
+          String(item.code || "").toLowerCase().includes(q) ||
+          String(item.game || "").toLowerCase().includes(q)
       );
       renderProducts(filtered);
     });
