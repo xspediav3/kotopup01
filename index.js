@@ -13,6 +13,7 @@ const axios = require("axios");
 const qs = require("qs");
 const path = require("path");
 const app = express();
+app.set("trust proxy", 1);
 const footer = 'FelixTopUp'
 const ATLAN_API_KEY = process.env.ATLAN_API_KEY;
 const BASE_URL = "https://atlantich2h.com";
@@ -42,6 +43,10 @@ const userSchema = new mongoose.Schema({
   otpCodeExpired: Date,
   aktifitas: String,
   isLocked: { type: Boolean, default: false },
+  authVersion: { type: Number, default: 0 },
+  passwordOtp: String,
+  passwordOtpExpired: Date,
+  loginLogs: [{ ip: String, time: Date }],
   whitelistIp: {
     type: [String],
     default: ["0.0.0.0"],
@@ -110,22 +115,39 @@ app.use(
   })
 );
 
-function requireLogin(req, res, next) {
+function getClientIp(req) {
+  const raw = req.ip || (req.socket && req.socket.remoteAddress) || "-";
+  return raw.replace(/^::ffff:/, "");
+}
+
+async function requireLogin(req, res, next) {
   if (!req.session.userId) {
     return res.redirect("/auth/login");
   }
-  
+
   // Handle custom admin session
   if (req.session.userId === "custom-admin") {
     return next();
   }
-  
+
   // Validate MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(req.session.userId)) {
-    req.session.destroy();
+    req.session.destroy(() => {});
     return res.redirect("/auth/login");
   }
-  
+
+  try {
+    const u = await User.findById(req.session.userId).select("authVersion").lean();
+    // Sesi lama (dari "keluarkan semua perangkat" / ganti password) dianggap tidak valid
+    if (!u || (u.authVersion || 0) !== (req.session.authVersion || 0)) {
+      req.session.destroy(() => {});
+      return res.redirect("/auth/login");
+    }
+  } catch (err) {
+    console.error("requireLogin error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+
   next();
 }
 
@@ -416,7 +438,10 @@ app.post("/auth/login", async (req, res) => {
     }
     req.session.userId = user._id;
     req.session.role = user.role;
+    req.session.authVersion = user.authVersion || 0;
     user.lastLogin = new Date();
+    user.loginLogs.unshift({ ip: getClientIp(req), time: new Date() });
+    user.loginLogs = user.loginLogs.slice(0, 20);
     await user.save();
     return res.status(200).json({
       success: true,
@@ -541,6 +566,7 @@ app.get("/profile/users", requireLogin, async (req, res) => {
         whitelistIp: user.whitelistIp,
         historyOrder: user.historyOrder,
         historyDeposit: user.historyDeposit,
+        loginLogs: (user.loginLogs || []).slice(0, 10),
       },
     });
   } catch (error) {
@@ -1015,6 +1041,82 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
+// ===== OTP ganti password (Gmail) =====
+async function sendPasswordOtpEmail(toEmail, otpCode, username) {
+  const safeName = String(username || "").replace(/[<>&"]/g, "");
+  const html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
+      <h2 style="color:#166534;margin:0 0 8px;">Ganti Password</h2>
+      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:</p>
+      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
+      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.</p>
+    </div>`;
+
+  await mailer.sendMail({
+    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+    to: toEmail,
+    subject: "Kode Ganti Password - Felix TopUp",
+    html,
+  });
+}
+
+app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
+  if (req.session.userId === "custom-admin") {
+    return res.status(400).json({ success: false, message: "Admin tidak dapat mengubah password" });
+  }
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+    }
+    if (!user.email) {
+      return res.status(400).json({ success: false, message: "Email akun belum diatur" });
+    }
+    const now = Date.now();
+    // Cooldown 60 detik supaya email tidak terkirim berulang-ulang
+    if (user.passwordOtpExpired && user.passwordOtpExpired.getTime() - now > 4 * 60 * 1000) {
+      return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta kode baru" });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { passwordOtp: otpCode, passwordOtpExpired: new Date(now + 5 * 60 * 1000) } }
+    );
+
+    try {
+      await sendPasswordOtpEmail(user.email, otpCode, user.username);
+    } catch (mailErr) {
+      console.error("Gagal kirim email OTP password:", mailErr);
+      await User.updateOne(
+        { _id: user._id },
+        { $unset: { passwordOtp: "", passwordOtpExpired: "" } }
+      );
+      return res.status(500).json({ success: false, message: "Gagal mengirim email, coba lagi nanti" });
+    }
+
+    return res.json({ success: true, message: "Kode OTP sudah dikirim ke email Anda" });
+  } catch (err) {
+    console.error("Error request password OTP:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.post("/profile/logout-all", requireLogin, async (req, res) => {
+  if (req.session.userId === "custom-admin") {
+    return res.status(400).json({ success: false, message: "Admin tidak memiliki sesi perangkat" });
+  }
+  try {
+    await User.updateOne({ _id: req.session.userId }, { $inc: { authVersion: 1 } });
+    req.session.destroy(() => {
+      return res.json({ success: true, message: "Semua perangkat sudah dikeluarkan" });
+    });
+  } catch (err) {
+    console.error("Error logout-all:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 app.post("/profile/change-password", requireLogin, async (req, res) => {
   // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
@@ -1024,11 +1126,11 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
     });
   }
   
-  const { oldPassword, newPassword } = req.body;
-  if (!oldPassword || !newPassword) {
+  const { oldPassword, newPassword, otp } = req.body;
+  if (!oldPassword || !newPassword || !otp) {
     return res.status(400).json({
       success: false,
-      message: "Old password and new password are required",
+      message: "Password lama, password baru, dan kode OTP wajib diisi",
     });
   }
   try {
@@ -1038,6 +1140,21 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+    if (!user.passwordOtp || !user.passwordOtpExpired) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Minta kode OTP terlebih dahulu" });
+    }
+    if (String(otp) !== user.passwordOtp) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Kode OTP tidak cocok" });
+    }
+    if (user.passwordOtpExpired < new Date()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Kode OTP sudah kadaluarsa" });
+    }
     const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isOldPasswordValid) {
       return res
@@ -1046,7 +1163,12 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
     }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedNewPassword;
+    user.passwordOtp = undefined;
+    user.passwordOtpExpired = undefined;
+    // Keluarkan perangkat lain, sesi sekarang tetap aktif
+    user.authVersion = (user.authVersion || 0) + 1;
     await user.save();
+    req.session.authVersion = user.authVersion;
     return res.status(200).json({
       success: true,
       message: "Password has been successfully changed",
