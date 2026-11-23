@@ -5,18 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Riky Shop Dashboard - Platform topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya di Indonesia">
+    <meta name="description" content="Dashboard - Platform topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya di Indonesia">
     <meta name="keywords" content="topup, pulsa, data internet, voucher game, e-money, PLN, aplikasi premium, H2H">
-    <meta name="author" content="Riky Shop">
+    <meta name="author" content="Dashboard">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#16A34A">
-    <meta property="og:title" content="Riky Shop Dashboard">
+    <meta property="og:title" content="Dashboard">
     <meta property="og:description" content="Platform topup terpercaya dengan berbagai layanan digital">
     <meta property="og:type" content="website">
     <meta property="og:url" content="#">
     <meta property="og:image" content="/media/logo.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Riky Shop Dashboard">
+    <meta name="twitter:title" content="Dashboard">
     <meta name="twitter:description" content="Platform topup terpercaya dengan berbagai layanan digital">
     <meta name="twitter:image" content="/media/logo.png">
     <link rel="canonical" href="#">
@@ -24,7 +24,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/media/banner.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/media/banner.png">
     <link rel="manifest" href="/manifest.json">
-    <title>Dashboard - Riky Shop | Platform Topup Terpercaya</title>
+    <title>Dashboard - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1556,110 +1556,49 @@
         .mobile-bottom-nav { display: none; }
 
         @media (max-width: 991.98px) {
-            .vp-main-container { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
-
+            .vp-main-container { padding-bottom: calc(108px + env(safe-area-inset-bottom)); }
             .mobile-bottom-nav {
-                position: fixed;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 1040;
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-around;
-                min-height: 78px;
-                padding: 7px 5px calc(7px + env(safe-area-inset-bottom));
-                border-top: 1px solid rgba(34, 197, 94, .14);
-                background: rgba(255, 255, 255, .96);
-                box-shadow: 0 -8px 28px rgba(22, 101, 52, .10);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
+                position: fixed; left: 14px; right: 14px;
+                bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 1040;
+                display: flex; align-items: center; justify-content: space-around;
+                min-height: 72px; padding: 8px 7px 7px;
+                border: 1px solid rgba(255,255,255,.75); border-radius: 28px;
+                background: rgba(250, 255, 251, .88);
+                box-shadow: 0 12px 34px rgba(20, 83, 45, .18), 0 2px 8px rgba(20, 83, 45, .08);
+                backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
             }
-
+            [data-theme="dark"] .mobile-bottom-nav { background: rgba(29, 43, 33, .88); border-color: rgba(255,255,255,.12); box-shadow: 0 12px 34px rgba(0,0,0,.3); }
             .mobile-bottom-nav__item {
-                position: relative;
-                display: flex;
-                flex: 1 1 20%;
-                min-width: 0;
-                min-height: 60px;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                gap: 3px;
-                padding: 5px 1px 0;
-                border-radius: 12px;
-                color: #758277;
-                font-size: .69rem;
-                font-weight: 600;
-                line-height: 1.2;
-                text-decoration: none;
-                transition: color .2s ease, background .2s ease;
+                position: relative; display: flex; flex: 1 1 20%; min-width: 0; min-height: 53px;
+                flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+                padding: 3px 1px; border-radius: 16px; color: #758277; font-size: .66rem;
+                font-weight: 600; line-height: 1.2; text-decoration: none; transition: color .2s ease, transform .2s ease;
             }
-
-            .mobile-bottom-nav__item > i {
-                font-size: 1.45rem;
-                line-height: 1.25;
-            }
-
-            .mobile-bottom-nav__item.active,
-            .mobile-bottom-nav__item:hover {
-                color: #16803d;
-            }
-
-            .mobile-bottom-nav__item.active:not(.mobile-bottom-nav__item--primary) {
-                background: linear-gradient(180deg, rgba(220, 252, 231, .65), rgba(240, 253, 244, .1));
-            }
-
-            .mobile-bottom-nav__item--primary {
-                overflow: visible;
-                justify-content: flex-start;
-                gap: 0;
-                padding-top: 0;
-                color: #166534;
-            }
-
+            .mobile-bottom-nav__item > i { font-size: 1.35rem; line-height: 1.2; }
+            .mobile-bottom-nav__item.active, .mobile-bottom-nav__item:hover { color: #16803d; }
+            .mobile-bottom-nav__item.active:not(.mobile-bottom-nav__item--primary) { background: rgba(220, 252, 231, .72); }
+            .mobile-bottom-nav__item--primary { overflow: visible; justify-content: center; gap: 0; padding-top: 0; color: #166534; }
             .mobile-bottom-nav__main-icon {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 67px;
-                height: 67px;
-                margin-top: -35px;
-                margin-bottom: 2px;
-                border: 5px solid #ffffff;
-                border-radius: 50%;
-                background: linear-gradient(145deg, #4ade80 0%, #16a34a 72%, #15803d 100%);
-                color: #ffffff;
-                box-shadow: 0 8px 22px rgba(22, 163, 74, .30);
+                display: flex; align-items: center; justify-content: center; width: 62px; height: 62px;
+                margin-top: -37px; margin-bottom: 2px; border: 5px solid #fafffb; border-radius: 50%;
+                background: linear-gradient(145deg, #86efac 0%, #22c55e 65%, #15803d 100%); color: #fff;
+                box-shadow: 0 7px 20px rgba(22, 163, 74, .32);
             }
-
-            .mobile-bottom-nav__main-icon i { font-size: 1.75rem; }
-
-            .mobile-bottom-nav__main-label {
-                margin-top: 0;
-                font-size: .69rem;
-                font-weight: 800;
-                white-space: nowrap;
-            }
-
+            .mobile-bottom-nav__main-icon i { font-size: 1.65rem; }
+            .mobile-bottom-nav__main-label { font-size: .65rem; font-weight: 800; white-space: nowrap; }
             .vp-topbar-actions { gap: .2rem; }
             .vp-balance-pill { padding: .55rem .65rem; gap: .35rem; }
             .vp-theme-toggle { width: 38px; height: 38px; padding: .45rem; }
-            .vp-notification-wrapper { display: none; }
-
+            .vp-notification-wrapper { display: inline-block; }
             .vp-content-wrapper { padding-bottom: .8rem; }
             footer { margin-bottom: 0; }
         }
-
         @media (max-width: 390px) {
-            .vp-topbar { gap: .25rem; }
-            .vp-topbar-brand-toggler { gap: .35rem; }
-            .vp-topbar-brand-text { font-size: 1rem; }
-            .vp-topbar-logo { height: 22px; }
-            .vp-topbar-actions { gap: .05rem; }
-            .vp-balance-pill { padding: .5rem .55rem; font-size: .8rem; }
-            .mobile-bottom-nav__item { font-size: .64rem; }
-            .mobile-bottom-nav__main-label { font-size: .64rem; }
+            .vp-topbar { gap: .25rem; } .vp-topbar-brand-toggler { gap: .35rem; }
+            .vp-topbar-brand-text { font-size: 1rem; } .vp-topbar-logo { height: 22px; }
+            .vp-topbar-actions { gap: .05rem; } .vp-balance-pill { padding: .5rem .55rem; font-size: .8rem; }
+            .mobile-bottom-nav { left: 9px; right: 9px; border-radius: 25px; }
+            .mobile-bottom-nav__item { font-size: .62rem; } .mobile-bottom-nav__main-label { font-size: .62rem; }
         }
 
         @media (min-width: 992px) {
@@ -1672,8 +1611,7 @@
     <div class="vp-wrapper">
         <nav class="vp-sidebar" id="vpSidebar">
             <div class="vp-sidebar-header">
-                <img src="/media/logo.png" alt="Riky Shop Logo" class="vp-sidebar-header-logo">
-                <a class="vp-sidebar-brand-text" href="/dashboard">Riky Shop</a>
+                <a class="vp-sidebar-brand-text" href="/dashboard">Dashboard</a>
             </div>
             <div class="vp-sidebar-menu">
                 <ul class="nav flex-column">
@@ -1757,8 +1695,7 @@
                         <i class="bi bi-arrows-fullscreen fs-5"></i>
                     </a>
                     <a href="/dashboard" class="vp-topbar-brand-link" id="topbarBrand">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="vp-topbar-logo">
-                        <span class="vp-topbar-brand-text">Riky Shop</span>
+                        <span class="vp-topbar-brand-text">Dashboard</span>
                     </a>
                 </div>
                 
@@ -1816,30 +1753,7 @@
                             </button>
                         </div>
                     </section>
-
-                    <section class="vp-section vp-user-summary-card content-loaded" style="animation-delay: 0.1s;">
-                        <div class="vp-user-summary-item saldo-item">
-                            <div class="label">
-                                <i class="bi bi-wallet2"></i>
-                                <span>Saldo</span>
-                            </div>
-                            <div class="value" id="userSaldo">
-                                <div class="vp-loading-shimmer" style="width:100px; height:20px;"></div>
-                            </div>
-                        </div>
-                        <div class="vp-user-summary-divider"></div>
-                        <div class="vp-user-summary-item level-item">
-                            <div class="label">
-                                <i class="bi bi-award-fill"></i>
-                                <span>Level</span>
-                            </div>
-                            <div class="value text-primary" id="userRole">
-                                <div class="vp-loading-shimmer" style="width:70px; height:20px;"></div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section class="vp-section content-loaded" style="animation-delay: 0.2s;">
+<section class="vp-section content-loaded" style="animation-delay: 0.2s;">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h4 class="mb-0 fw-bold" style="font-family: var(--vp-font-heading); color: var(--vp-dark); font-size: 1.15rem;">
                                 Category Produk
@@ -2031,15 +1945,14 @@
             <footer>
                 <div class="footer-left">
                     <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">Riky Shop</span>
+                        <span class="footer-logo-name-text">Dashboard</span>
                     </a>
                     <div class="footer-description">
                         <i class="bi bi-info-circle-fill"></i>
-                        Riky Shop adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        Layanan digital dalam satu tempat, cepat dan mudah digunakan.
                     </div>
                     <div class="footer-copyright">
-                        Riky Shop © <span id="currentYear"></span>. All Rights Reserved.
+                        © <span id="currentYear"></span>. Semua hak dilindungi.
                     </div>
                 </div>
                 
