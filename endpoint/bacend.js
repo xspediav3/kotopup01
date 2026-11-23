@@ -494,259 +494,266 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
   }
 });
 
+const axios = require("axios"); // atau gunakan fetch / cloudscraper sesuai kebutuhan
+
+const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
+const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+// 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
-  const {
-    category
-  } = req.query;
+  const { search } = req.query;
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: "User tidak ditemukan."
+      message: "User tidak ditemukan.",
     });
   }
+
   try {
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: "prabayar",
-      code: "",
-    };
-    const response = await cloudscraper.post(`${BASE_URL}/layanan/price_list`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders,
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-games`, {
+      params: { apikey: DITZ_API_KEY },
     });
-    const result = JSON.parse(response);
-    const allProduk = result.data || [];
-    const filtered = category ?
-      allProduk.filter((item) => item.category?.toLowerCase() === category.toLowerCase()) :
-      allProduk;
-    const providerMap = {};
-    filtered.forEach(item => {
-      if (!providerMap[item.provider]) {
-        providerMap[item.provider] = {
-          provider: item.provider,
-          img_url: item.img_url,
-        };
-      }
-    });
-    const listProvider = Object.values(providerMap);
+
+    const rawData = response.data?.data || response.data || [];
+    const listGames = Array.isArray(rawData) ? rawData : [];
+
+    const filtered = search
+      ? listGames.filter((item) =>
+          item.game?.toLowerCase().includes(search.toLowerCase())
+        )
+      : listGames;
+
+    // Mapping field sesuai respons /tp-games: { game, products, need_zone }
+    const formatted = filtered.map((item) => ({
+      game: item.game,
+      products: item.products,
+      need_zone: Boolean(item.need_zone),
+    }));
+
     return res.json({
       success: true,
-      data: listProvider
+      data: formatted,
     });
   } catch (error) {
     const errData = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: errData?.message || "Gagal memproses data provider.",
+      message: errData?.message || "Gagal memproses data game.",
       error: errData || error.message,
     });
   }
 });
 
+// 2. Nominal & harga per game (pengganti /produk-provider)
 router.get("/produk-provider", requireLogin, async (req, res) => {
-  const {
-    provider
-  } = req.query;
+  const { provider, game } = req.query;
+  const selectedGame = game || provider;
+
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: "User tidak ditemukan."
+      message: "User tidak ditemukan.",
     });
   }
+
   try {
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: "prabayar",
-      code: "",
-    };
-    const response = await cloudscraper.post(`${BASE_URL}/layanan/price_list`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders,
-    });
-    const result = JSON.parse(response);
-    const allProduk = result.data || [];
-    if (provider) {
-      const produkByProvider = allProduk.filter(item =>
-        item.provider?.toLowerCase() === provider.toLowerCase()
-      );
-      return res.json({
-        success: true,
-        data: produkByProvider
-      });
+    const params = { apikey: DITZ_API_KEY };
+    if (selectedGame) {
+      params.game = selectedGame;
     }
-    const providerMap = {};
-    allProduk.forEach(item => {
-      if (!providerMap[item.provider]) {
-        providerMap[item.provider] = {
-          provider: item.provider,
-          img_url: item.img_url,
-        };
-      }
+
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
+      params,
     });
-    const listProvider = Object.values(providerMap);
+
+    const rawData = response.data?.data || response.data || [];
+    const products = Array.isArray(rawData) ? rawData : [];
+
+    const filtered = selectedGame
+      ? products.filter(
+          (item) => item.game?.toLowerCase() === selectedGame.toLowerCase()
+        )
+      : products;
+
     return res.json({
       success: true,
-      data: listProvider
+      data: filtered,
     });
   } catch (error) {
     const errData = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: errData?.message || "Gagal memproses data produk/provider.",
+      message: errData?.message || "Gagal memproses data produk game.",
       error: errData || error.message,
     });
   }
 });
 
+// 3. Buat order topup game (/tp-order) & pantau status (/tp-orders)
 router.post("/order/create", requireLogin, async (req, res) => {
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
+      message: "User tidak ditemukan atau sesi tidak valid.",
     });
   }
-  const {
-    code,
-    tujuan: target
-  } = req.body;
+
+  const { code, tujuan: target, zone } = req.body;
   if (!code || !target) {
     return res.status(400).json({
       success: false,
       message: "Kode layanan dan tujuan harus diisi.",
     });
   }
+
   try {
-    const formDataToAtlanticPriceList = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: "prabayar",
-      code: code,
-    };
-    const priceResponse = await cloudscraper.post(`${BASE_URL}/layanan/price_list`, {
-      body: qs.stringify(formDataToAtlanticPriceList),
-      headers: cloudscraperHeaders,
+    // Ambil daftar produk untuk validasi code, harga, dan need_zone
+    const productsResponse = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
+      params: { apikey: DITZ_API_KEY },
     });
-    const priceListResult = JSON.parse(priceResponse);
-    if (!priceListResult || !priceListResult.status || !priceListResult.data) {
-      return res.status(502).json({
-        success: false,
-        message: priceListResult?.message || "Gagal mendapatkan daftar harga dari provider.",
-        error: priceListResult?.data || priceListResult,
-      });
-    }
-    const productList = Array.isArray(priceListResult.data) ? priceListResult.data : [priceListResult.data];
-    const product = productList.find((item) => item.code === code && item.status === "available");
+
+    const rawProducts = productsResponse.data?.data || productsResponse.data || [];
+    const productList = Array.isArray(rawProducts) ? rawProducts : [];
+    const product = productList.find(
+      (item) => String(item.code) === String(code)
+    );
+
     if (!product) {
       return res.status(400).json({
         success: false,
         message: "Kode layanan tidak ditemukan atau tidak tersedia.",
       });
     }
-    let originalPrice = parseInt(product.price) || 0;
+
+    if (product.need_zone && !zone) {
+      return res.status(400).json({
+        success: false,
+        message: "Game ini membutuhkan parameter zone.",
+      });
+    }
+
+    let originalPrice = parseInt(product.price, 10) || 0;
     let modifiedPrice = originalPrice;
     if (user.role === "user") {
       modifiedPrice = originalPrice + 600;
     } else if (user.role === "reseller") {
       modifiedPrice = originalPrice + 260;
     }
+
     if (user.saldo < modifiedPrice) {
       return res.status(400).json({
         success: false,
         message: "Saldo Anda tidak mencukupi untuk melakukan transaksi ini.",
       });
     }
+
     const reff_id = generateReffId();
-    const formDataToAtlanticCreate = {
-      api_key: process.env.ATLAN_API_KEY,
-      code: code,
-      reff_id: reff_id,
-      target: target,
-      type: "prabayar",
-    };
-    const createResponse = await cloudscraper.post(`${BASE_URL}/transaksi/create`, {
-      body: qs.stringify(formDataToAtlanticCreate),
-      headers: cloudscraperHeaders,
+
+    // Sesuaikan nama field berikut dengan dokumentasi /tp-order di Ditznesia
+    const orderResponse = await axios.get(`${DITZ_BASE_URL}/tp-order`, {
+      params: {
+        apikey: DITZ_API_KEY,
+        code: code,
+        target: target,
+        ...(zone ? { zone } : {}),
+        reff_id: reff_id,
+      },
     });
-    const createResult = JSON.parse(createResponse);
-    if (!createResult || !createResult.status || !createResult.data) {
+
+    const createResult = orderResponse.data;
+    const transactionDetails = createResult?.data || createResult;
+
+    if (!transactionDetails || createResult?.status === false || createResult?.success === false) {
       return res.status(502).json({
         success: false,
         message: createResult?.message || "Gagal membuat transaksi ke provider.",
-        error: createResult?.data || createResult,
+        error: transactionDetails || createResult,
       });
     }
-    const transactionDetails = createResult.data;
+
     await User.findByIdAndUpdate(user._id, {
-      $inc: {
-        saldo: -modifiedPrice
-      },
+      $inc: { saldo: -modifiedPrice },
     });
+
+    const txId = transactionDetails.id || transactionDetails.trx_id || reff_id;
+
     const historyDataForDb = {
-      id: transactionDetails.id,
-      reff_id: transactionDetails.reff_id,
-      layanan: transactionDetails.layanan,
-      code: transactionDetails.code,
-      target: transactionDetails.target,
+      id: txId,
+      reff_id: transactionDetails.reff_id || reff_id,
+      layanan: transactionDetails.layanan || product.name,
+      code: transactionDetails.code || code,
+      target: zone ? `${target} (${zone})` : target,
       price: modifiedPrice.toString(),
       sn: transactionDetails.sn || null,
-      status: transactionDetails.status,
-      created_at: transactionDetails.created_at ?
-        new Date(transactionDetails.created_at) :
-        new Date(),
+      status: transactionDetails.status || "pending",
+      created_at: transactionDetails.created_at
+        ? new Date(transactionDetails.created_at)
+        : new Date(),
     };
+
     await tambahHistoryOrder(user._id, historyDataForDb);
+
+    // Polling status menggunakan /tp-orders
     const maxPollingTime = 5 * 60 * 1000;
     const startTime = Date.now();
     const intervalId = setInterval(async () => {
       try {
-        const statusResponse = await cloudscraper.post(`${BASE_URL}/transaksi/status`, {
-          body: qs.stringify({
-            api_key: process.env.ATLAN_API_KEY,
-            id: transactionDetails.id,
-            type: "prabayar",
-          }),
-          headers: cloudscraperHeaders,
+        const statusResponse = await axios.get(`${DITZ_BASE_URL}/tp-orders`, {
+          params: {
+            apikey: DITZ_API_KEY,
+            id: txId,
+          },
         });
-        const statusUpdateData = JSON.parse(statusResponse);
-        if (statusUpdateData && statusUpdateData.status && statusUpdateData.data) {
-          const currentTxStatus = statusUpdateData.data.status;
-          const currentSn = statusUpdateData.data.sn || null;
-          await editHistoryOrder(user._id, transactionDetails.id, {
+
+        const rawStatus = statusResponse.data?.data || statusResponse.data;
+        const statusData = Array.isArray(rawStatus)
+          ? rawStatus.find((item) => String(item.id) === String(txId)) || rawStatus[0]
+          : rawStatus;
+
+        if (statusData && statusData.status) {
+          const currentTxStatus = String(statusData.status).toLowerCase();
+          const currentSn = statusData.sn || null;
+
+          await editHistoryOrder(user._id, txId, {
             status: currentTxStatus,
             sn: currentSn,
           });
-          if (currentTxStatus === "success") {
+
+          if (["success", "sukses"].includes(currentTxStatus)) {
             clearInterval(intervalId);
           }
-          if (["failed", "cancel"].includes(currentTxStatus)) {
-            const orderInDb = await User.findOne({
-              _id: user._id,
-              "historyOrder.id": transactionDetails.id,
-              "historyOrder.status": {
-                $ne: "failed_refunded"
-              }
-            }, {
-              "historyOrder.$": 1
-            });
-            if (orderInDb && orderInDb.historyOrder.length > 0 && orderInDb.historyOrder[0].status !== "failed_refunded") {
-              await User.updateOne({
+
+          if (["failed", "gagal", "cancel", "batal"].includes(currentTxStatus)) {
+            const orderInDb = await User.findOne(
+              {
                 _id: user._id,
-                "historyOrder.id": transactionDetails.id
-              }, {
-                $inc: {
-                  saldo: modifiedPrice
-                },
-                $set: {
-                  "historyOrder.$.status": "failed_refunded"
+                "historyOrder.id": txId,
+                "historyOrder.status": { $ne: "failed_refunded" },
+              },
+              { "historyOrder.$": 1 }
+            );
+
+            if (
+              orderInDb &&
+              orderInDb.historyOrder.length > 0 &&
+              orderInDb.historyOrder[0].status !== "failed_refunded"
+            ) {
+              await User.updateOne(
+                { _id: user._id, "historyOrder.id": txId },
+                {
+                  $inc: { saldo: modifiedPrice },
+                  $set: { "historyOrder.$.status": "failed_refunded" },
                 }
-              });
+              );
             }
             clearInterval(intervalId);
           }
+
           if (
-            ["success", "failed", "cancel"].includes(currentTxStatus) ||
+            ["success", "sukses", "failed", "gagal", "cancel", "batal"].includes(currentTxStatus) ||
             Date.now() - startTime > maxPollingTime
           ) {
             clearInterval(intervalId);
@@ -756,10 +763,12 @@ router.post("/order/create", requireLogin, async (req, res) => {
         console.error(pollError?.response?.data || pollError.message);
       }
     }, 1000);
+
     return res.status(200).json({
       success: true,
       data: {
         ...transactionDetails,
+        id: txId,
         price: modifiedPrice.toString(),
       },
     });
