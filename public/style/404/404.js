@@ -1,96 +1,84 @@
 /* 404 page - Xiao / Anemo theme */
 (() => {
-  "use strict";
+  'use strict';
 
-  function drawAnemo() {
-    const canvas = document.getElementById("anemo");
-    if (!canvas || !canvas.getContext) return;
+  const canvas = document.getElementById('anemo');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let w = 0, h = 0, frame = 0, raf = 0;
+  let motes = [];
 
-    const ctx = canvas.getContext("2d");
-    let width = 0;
-    let height = 0;
-    let frame = 0;
-    let animationId = 0;
-    const reduceMotion = window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      canvas.style.width = width + "px";
-      canvas.style.height = height + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw();
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, width, height);
-      const t = reduceMotion ? 0 : frame * 0.012;
-      const centerX = width * 0.5;
-      const centerY = height * 0.76;
-      const maxRadius = Math.min(width, height) * 0.34;
-
-      // Soft Anemo rings around Xiao
-      for (let ring = 0; ring < 3; ring++) {
-        ctx.beginPath();
-        const radius = maxRadius * (0.48 + ring * 0.19);
-        for (let step = 0; step <= 100; step++) {
-          const angle = (step / 100) * Math.PI * 2;
-          const wave = Math.sin(angle * 3 + t + ring) * 9;
-          const x = centerX + Math.cos(angle + t * (ring % 2 ? -1 : 1)) * (radius + wave);
-          const y = centerY + Math.sin(angle + t * (ring % 2 ? -1 : 1)) * (radius * 0.34 + wave * 0.4);
-          if (step === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = `rgba(99, 255, 226, ${0.10 - ring * 0.02})`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      // Floating Anemo motes
-      for (let i = 0; i < 16; i++) {
-        const angle = i * 2.399 + t * (i % 2 ? 1 : -1);
-        const distance = maxRadius * (0.55 + (i % 4) * 0.12);
-        const x = centerX + Math.cos(angle) * distance;
-        const y = centerY + Math.sin(angle) * distance * 0.42;
-        const size = 1.8 + (i % 3);
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(174, 255, 242, 0.72)";
-        ctx.shadowColor = "#45f4d6";
-        ctx.shadowBlur = 12;
-        ctx.fill();
-      }
-      ctx.shadowBlur = 0;
-    }
-
-    function animate() {
-      draw();
-      frame++;
-      animationId = window.requestAnimationFrame(animate);
-    }
-
-    resize();
-    if (!reduceMotion) animationId = window.requestAnimationFrame(animate);
-    window.addEventListener("resize", resize, { passive: true });
-
-    window.addEventListener("pagehide", () => {
-      if (animationId) window.cancelAnimationFrame(animationId);
-    }, { once: true });
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    motes = Array.from({ length: Math.max(18, Math.min(42, Math.round(w / 18))) }, (_, i) => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: 1 + Math.random() * 2.2,
+      speed: .18 + Math.random() * .48,
+      drift: (Math.random() - .5) * .34,
+      phase: i * .8
+    }));
+    draw();
   }
 
-  document.addEventListener("DOMContentLoaded", drawAnemo);
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    const t = reduced ? 0 : frame * .012;
+    const cx = w * .5;
+    const cy = h * .79;
+    const rx = Math.min(w * .48, 340);
+    const ry = Math.min(h * .14, 145);
 
-  // Keep existing navigation behavior and routes.
-  window.goHome = function goHome() {
-    window.location.href = "/";
-  };
+    // Soft swirling Anemo rings beneath Xiao.
+    for (let ring = 0; ring < 3; ring++) {
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i++) {
+        const a = i / 120 * Math.PI * 2;
+        const wave = Math.sin(a * 4 + t + ring) * 7;
+        const x = cx + Math.cos(a + t * (ring % 2 ? -.22 : .22)) * (rx * (.58 + ring * .16) + wave);
+        const y = cy + Math.sin(a + t * (ring % 2 ? -.22 : .22)) * (ry * (.58 + ring * .16) + wave * .25);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(116,255,232,${.15 - ring * .035})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
-  window.reportIssue = function reportIssue() {
-    window.location.href = "/dashboard";
-  };
+    // Tiny floating wind particles.
+    for (const p of motes) {
+      const pulse = .55 + Math.sin(t * 2 + p.phase) * .28;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(191,255,246,${.35 + pulse * .45})`;
+      ctx.shadowColor = '#69ffe8';
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      if (!reduced) {
+        p.y -= p.speed;
+        p.x += p.drift + Math.sin(t + p.phase) * .12;
+        if (p.y < -8) { p.y = h + 8; p.x = Math.random() * w; }
+        if (p.x < -8) p.x = w + 8;
+        if (p.x > w + 8) p.x = -8;
+      }
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function animate() {
+    draw();
+    frame++;
+    raf = requestAnimationFrame(animate);
+  }
+
+  resize();
+  if (!reduced) raf = requestAnimationFrame(animate);
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('pagehide', () => { if (raf) cancelAnimationFrame(raf); }, { once: true });
 })();
