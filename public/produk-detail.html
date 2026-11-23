@@ -3,214 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Game & Layanan</title>
+    <title>Daftar Game & Layanan - Comic Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:wght@600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --vp-primary: #22c55e;
-            --vp-primary-rgb: 34, 197, 94;
-            --vp-primary-light: #ecfdf3;
-            --vp-primary-dark: #15803d;
-            --vp-body-bg: #f2fbf4;
-            --vp-card-bg: #ffffff;
-            --vp-dark: #212529;
-            --vp-text-muted: #66776b;
-            --vp-border-color: #dcefe1;
-            --vp-font-main: 'Manrope', sans-serif;
-            --vp-font-heading: 'Poppins', sans-serif;
-            --vp-radius-md: 0.5rem;
-            --vp-radius-lg: 0.75rem;
-            --vp-shadow-sm: 0 .125rem .25rem rgba(22, 101, 52, .06);
-            --vp-shadow-md: 0 .5rem 1rem rgba(22, 101, 52, .12);
+            --comic-ink: #111827;
+            --comic-green: #22c55e;
+            --comic-green-dark: #15803d;
+            --comic-yellow: #fde047;
+            --comic-cyan: #38bdf8;
+            --comic-bg: #f0fdf4;
+            --comic-card: #ffffff;
+            --comic-text: #111827;
+            --comic-muted: #374151;
+            --comic-dot: rgba(21, 128, 61, 0.14);
+            --comic-shadow: 5px 5px 0px #111827;
+            --comic-shadow-lg: 7px 7px 0px #111827;
         }
 
         [data-theme="dark"] {
-            --vp-primary: #4ade80;
-            --vp-primary-light: rgba(74, 222, 128, 0.15);
-            --vp-primary-dark: #22c55e;
-            --vp-body-bg: #101b14;
-            --vp-card-bg: #17251b;
-            --vp-dark: #eaf5ec;
-            --vp-text-muted: #a4b8a8;
-            --vp-border-color: #2b4432;
+            --comic-bg: #0f1c14;
+            --comic-card: #18291e;
+            --comic-text: #f3f4f6;
+            --comic-muted: #cbd5e1;
+            --comic-dot: rgba(74, 222, 128, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: var(--vp-font-main);
-            background: linear-gradient(180deg, #effcf2 0%, #f8fff9 42%, #ffffff 100%);
-            color: var(--vp-dark);
+            font-family: 'Manrope', sans-serif;
+            color: var(--comic-text);
+            background-color: var(--comic-bg);
+            background-image: radial-gradient(var(--comic-dot) 1.5px, transparent 1.5px);
+            background-size: 16px 16px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        [data-theme="dark"] body {
-            background: linear-gradient(180deg, #101b14 0%, #14251a 48%, #101b14 100%);
+        .comic-display {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1.2px;
         }
 
-        .page-topbar {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--vp-border-color);
-            padding: 0.85rem 1rem;
+        .comic-heading {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Topbar Komik */
+        .comic-topbar {
+            background: var(--comic-card);
+            border-bottom: 3px solid var(--comic-ink);
+            padding: 0.8rem 0;
             position: sticky;
             top: 0;
-            z-index: 1020;
+            z-index: 1030;
+            box-shadow: 0 4px 0 var(--comic-ink);
         }
 
-        [data-theme="dark"] .page-topbar {
-            background: rgba(23, 37, 27, 0.9);
-        }
-
-        .btn-back {
+        .comic-btn-nav {
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            color: var(--vp-dark);
+            padding: 0.45rem 0.9rem;
+            border: 2.5px solid var(--comic-ink);
+            border-radius: 10px;
+            background: var(--comic-yellow);
+            color: #111827;
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
             text-decoration: none;
-            font-weight: 600;
-            padding: 0.45rem 0.85rem;
-            border-radius: var(--vp-radius-md);
-            background-color: var(--vp-primary-light);
-            color: var(--vp-primary-dark);
-            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0 var(--comic-ink);
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
         }
 
-        .btn-back:hover {
-            background-color: var(--vp-primary);
-            color: #fff;
+        .comic-btn-nav:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 var(--comic-ink);
+            color: #111827;
+            background: #facc15;
         }
 
-        .search-box {
-            background-color: var(--vp-card-bg);
-            border: 1px solid var(--vp-border-color);
-            border-radius: var(--vp-radius-lg);
-            padding: 0.65rem 1rem;
-            color: var(--vp-dark);
-            box-shadow: var(--vp-shadow-sm);
+        .comic-btn-nav:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--comic-ink);
         }
 
-        .search-box:focus {
-            border-color: var(--vp-primary);
-            box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
+        .comic-title-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--comic-green);
+            color: #ffffff;
+            border: 2.5px solid var(--comic-ink);
+            border-radius: 999px;
+            padding: 0.2rem 0.85rem;
+            box-shadow: 3px 3px 0 var(--comic-ink);
+            text-shadow: 1.5px 1.5px 0 var(--comic-ink);
+        }
+
+        /* Hero / Search Panel */
+        .comic-hero-panel {
+            background: var(--comic-card);
+            border: 3px solid var(--comic-ink);
+            border-radius: 16px;
+            padding: 1.15rem 1.25rem;
+            box-shadow: var(--comic-shadow);
+            position: relative;
+        }
+
+        .comic-sfx-tag {
+            position: absolute;
+            top: -13px;
+            right: 16px;
+            background: #fb7185;
+            color: #ffffff;
+            border: 2.5px solid var(--comic-ink);
+            border-radius: 8px;
+            padding: 0.1rem 0.6rem;
+            font-family: 'Bangers', cursive;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            transform: rotate(3deg);
+            box-shadow: 2px 2px 0 var(--comic-ink);
+        }
+
+        .comic-search-wrap {
+            display: flex;
+            align-items: center;
+            background: var(--comic-card);
+            border: 3px solid var(--comic-ink);
+            border-radius: 12px;
+            box-shadow: 4px 4px 0 var(--comic-ink);
+            overflow: hidden;
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .comic-search-wrap:focus-within {
+            transform: translate(-1px, -1px);
+            box-shadow: 5px 5px 0 var(--comic-ink);
+            background: #fefce8;
+        }
+
+        [data-theme="dark"] .comic-search-wrap:focus-within {
+            background: #1e3326;
+        }
+
+        .comic-search-icon {
+            padding: 0 0.9rem;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--comic-green-dark);
+        }
+
+        [data-theme="dark"] .comic-search-icon {
+            color: #4ade80;
+        }
+
+        .comic-search-input {
+            width: 100%;
+            border: none;
             outline: none;
+            background: transparent;
+            color: var(--comic-text);
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.72rem 0.85rem 0.72rem 0;
         }
 
-        .game-grid {
+        .comic-search-clear {
+            border: none;
+            background: transparent;
+            color: var(--comic-muted);
+            padding: 0 0.75rem;
+            font-size: 1.05rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Grid & Comic Game Cards */
+        .comic-game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-            gap: 1rem;
+            gap: 1.15rem;
         }
 
-        .produk-card {
-            background-color: var(--vp-card-bg);
-            border: 1px solid var(--vp-border-color);
-            border-radius: var(--vp-radius-lg);
-            padding: 1.15rem 1rem;
-            text-align: center;
+        .comic-game-card {
+            background: var(--comic-card);
+            border: 3px solid var(--comic-ink);
+            border-radius: 16px;
+            padding: 1.1rem 0.95rem;
             text-decoration: none;
-            color: var(--vp-dark);
-            box-shadow: var(--vp-shadow-sm);
-            transition: all 0.2s ease;
+            color: var(--comic-text);
+            box-shadow: var(--comic-shadow);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            cursor: pointer;
+            text-align: center;
             position: relative;
+            transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
         }
 
-        .produk-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--vp-primary);
-            box-shadow: var(--vp-shadow-md);
-            background-color: var(--vp-primary-light);
+        .comic-game-card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: var(--comic-shadow-lg);
+            color: var(--comic-text);
+            background: #f0fdf4;
         }
 
-        .game-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 14px;
+        [data-theme="dark"] .comic-game-card:hover {
+            background: #1f3627;
+        }
+
+        .comic-game-card:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0 var(--comic-ink);
+        }
+
+        .comic-avatar-box {
+            width: 66px;
+            height: 66px;
+            border-radius: 16px;
+            border: 2.5px solid var(--comic-ink);
             background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
-            color: #ffffff;
+            box-shadow: 3px 3px 0 var(--comic-ink);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 0.75rem;
-            box-shadow: 0 6px 14px rgba(22, 163, 74, 0.22);
+            font-size: 1.85rem;
+            color: #ffffff;
+            margin-bottom: 0.8rem;
+            overflow: hidden;
         }
 
-        .game-title {
-            font-family: var(--vp-font-heading);
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 0.35rem;
-            line-height: 1.3;
+        .comic-avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .game-meta {
-            font-size: 0.75rem;
-            color: var(--vp-text-muted);
+        .comic-game-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 0.98rem;
+            line-height: 1.25;
+            margin-bottom: 0.55rem;
+            word-break: break-word;
+        }
+
+        .comic-badges {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.35rem;
             justify-content: center;
-            margin-top: 0.35rem;
+            gap: 0.35rem;
         }
 
-        .badge-soft {
-            background-color: var(--vp-primary-light);
-            color: var(--vp-primary-dark);
-            padding: 0.2rem 0.55rem;
-            border-radius: 999px;
-            font-weight: 600;
+        .comic-pill {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
             font-size: 0.7rem;
+            padding: 0.18rem 0.55rem;
+            border-radius: 7px;
+            border: 2px solid var(--comic-ink);
+            box-shadow: 2px 2px 0 var(--comic-ink);
         }
 
-        .badge-zone {
-            background-color: rgba(13, 202, 240, 0.14);
-            color: #0891b2;
-            padding: 0.2rem 0.55rem;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 0.7rem;
+        .comic-pill-green {
+            background: #bbf7d0;
+            color: #14532d;
+        }
+
+        .comic-pill-cyan {
+            background: #bae6fd;
+            color: #0c4a6e;
+        }
+
+        .comic-empty-box {
+            grid-column: 1 / -1;
+            background: var(--comic-card);
+            border: 3px solid var(--comic-ink);
+            border-radius: 16px;
+            padding: 2.5rem 1.25rem;
+            text-align: center;
+            box-shadow: var(--comic-shadow);
+        }
+
+        @media (max-width: 575.98px) {
+            .comic-game-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.85rem;
+            }
+            .comic-game-card {
+                padding: 0.95rem 0.75rem;
+            }
+            .comic-avatar-box {
+                width: 56px;
+                height: 56px;
+                font-size: 1.55rem;
+            }
         }
     </style>
 </head>
 <body data-theme="light">
-    <header class="page-topbar">
+    <header class="comic-topbar">
         <div class="container d-flex align-items-center justify-content-between gap-2">
-            <a href="/dashboard" class="btn-back">
-                <i class="bi bi-arrow-left"></i>
+            <a href="/dashboard" class="comic-btn-nav">
+                <i class="bi bi-arrow-left-circle-fill"></i>
                 <span>Dashboard</span>
             </a>
-            <h5 id="judul" class="mb-0 fw-bold text-truncate" style="font-family: var(--vp-font-heading);">Memuat...</h5>
-            <div style="width: 90px;" class="d-none d-sm-block"></div>
+            <div class="comic-title-badge text-truncate">
+                <i class="bi bi-controller"></i>
+                <span id="judul" class="comic-display fs-5 text-truncate">DAFTAR GAME</span>
+            </div>
+            <div style="width: 96px;" class="d-none d-sm-block"></div>
         </div>
     </header>
 
     <main class="container py-4">
-        <div class="row justify-content-between align-items-center g-3 mb-4">
-            <div class="col-md-6">
-                <p class="mb-0 text-muted small">Pilih game atau layanan di bawah untuk melihat daftar nominal dan harga.</p>
-            </div>
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--vp-border-color); color: var(--vp-text-muted);">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control search-box border-start-0" placeholder="Cari nama game (contoh: Mobile Legends)...">
+        <div class="comic-hero-panel mb-4">
+            <span class="comic-sfx-tag">POW! TOPUP</span>
+            <div class="row align-items-center g-3">
+                <div class="col-lg-6">
+                    <div class="comic-heading fs-6 text-uppercase mb-1">
+                        <i class="bi bi-lightning-charge-fill text-warning"></i> Pilih Game Favoritmu
+                    </div>
+                    <p class="mb-0 small" style="color: var(--comic-muted); font-weight: 600;">
+                        Klik kotak game untuk melihat daftar nominal, cek harga, dan langsung order instan.
+                    </p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="comic-search-wrap">
+                        <span class="comic-search-icon"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="comic-search-input" placeholder="Cari game (contoh: Mobile Legends, Free Fire)...">
+                        <button type="button" id="clearSearchBtn" class="comic-search-clear" title="Hapus pencarian">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="produk-container" class="game-grid">
-            <div class="text-center py-5 w-100" style="grid-column: 1 / -1;">
+        <div id="produk-container" class="comic-game-grid">
+            <div class="comic-empty-box">
                 <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2 text-muted">Memuat daftar game...</p>
+                <p class="mt-2 mb-0 fw-bold">Memuat panel daftar game...</p>
             </div>
         </div>
     </main>
@@ -220,23 +365,20 @@
         document.body.setAttribute('data-theme', savedTheme);
 
         const params = new URLSearchParams(window.location.search);
-        const category = params.get("category");
+        const category = params.get("category") || "Games";
         const initialSearch = params.get("search") || "";
 
         const judul = document.getElementById("judul");
         const searchInput = document.getElementById("searchInput");
+        const clearSearchBtn = document.getElementById("clearSearchBtn");
         const container = document.getElementById("produk-container");
 
         let allGamesData = [];
 
-        if (category) {
-            judul.innerText = `Kategori: ${category}`;
-        } else {
-            judul.innerText = "Daftar Game & Topup";
-        }
-
+        judul.innerText = category ? `KATEGORI: ${category.toUpperCase()}` : "DAFTAR GAME";
         if (initialSearch) {
             searchInput.value = initialSearch;
+            clearSearchBtn.style.display = "inline-flex";
         }
 
         function renderGames(list) {
@@ -244,9 +386,10 @@
 
             if (!list || list.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-5" style="grid-column: 1 / -1;">
-                        <i class="bi bi-controller fs-1 text-muted"></i>
-                        <p class="mt-2 text-muted mb-0">Tidak ada game atau produk tersedia.</p>
+                    <div class="comic-empty-box">
+                        <i class="bi bi-emoji-dizzy fs-1 text-danger"></i>
+                        <div class="comic-heading fs-5 mt-2">Game Tidak Ditemukan!</div>
+                        <p class="mt-1 mb-0 small" style="color: var(--comic-muted);">Coba kata kunci game lain atau kosongkan kolom pencarian.</p>
                     </div>
                 `;
                 return;
@@ -256,62 +399,33 @@
                 const gameName = item.game || item.provider || "Unknown";
                 const productCount = item.products ?? 0;
                 const needZone = Boolean(item.need_zone);
-
                 const targetUrl = `/produk-harga?game=${encodeURIComponent(gameName)}&need_zone=${needZone ? "1" : "0"}`;
 
                 const card = document.createElement("a");
                 card.href = targetUrl;
-                card.className = "produk-card";
+                card.className = "comic-game-card";
                 card.innerHTML = `
                     <div class="w-100 d-flex flex-column align-items-center">
-                        <div class="game-icon">
+                        <div class="comic-avatar-box">
                             ${item.img_url
-                                ? `<img src="${item.img_url}" alt="${gameName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`
+                                ? `<img src="${item.img_url}" alt="${gameName}">`
                                 : `<i class="bi bi-controller"></i>`
                             }
                         </div>
-                        <div class="game-title">${gameName}</div>
+                        <div class="comic-game-title">${gameName}</div>
                     </div>
-                    <div class="game-meta">
-                        ${productCount ? `<span class="badge-soft">${productCount} Produk</span>` : `<span class="badge-soft">Lihat Harga</span>`}
-                        ${needZone ? `<span class="badge-zone">Butuh Zone</span>` : ""}
+                    <div class="comic-badges">
+                        <span class="comic-pill comic-pill-green">${productCount > 0 ? `${productCount} Item` : "Cek Harga"}</span>
+                        ${needZone ? `<span class="comic-pill comic-pill-cyan">Zone ID</span>` : ""}
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        async function loadProduk() {
-            // Sesuaikan dengan backend baru: GET /api/webtrx/produk
-            let url = "/api/webtrx/produk";
-            const queryParams = new URLSearchParams();
-            if (initialSearch) queryParams.set("search", initialSearch);
-            if (queryParams.toString()) url += `?${queryParams.toString()}`;
-
-            try {
-                const res = await fetch(url);
-                const json = await res.json();
-
-                if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
-                    allGamesData = [];
-                    renderGames([]);
-                    return;
-                }
-
-                allGamesData = json.data;
-                renderGames(allGamesData);
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `
-                    <div class="text-center py-5 text-danger" style="grid-column: 1 / -1;">
-                        <p class="mb-0">Gagal memuat daftar game. Silakan coba lagi.</p>
-                    </div>
-                `;
-            }
-        }
-
-        searchInput.addEventListener("input", (e) => {
-            const keyword = e.target.value.trim().toLowerCase();
+        function applySearchFilter() {
+            const keyword = searchInput.value.trim().toLowerCase();
+            clearSearchBtn.style.display = keyword ? "inline-flex" : "none";
             if (!keyword) {
                 renderGames(allGamesData);
                 return;
@@ -320,6 +434,47 @@
                 (item.game || item.provider || "").toLowerCase().includes(keyword)
             );
             renderGames(filtered);
+        }
+
+        async function loadProduk() {
+            let url = "/api/webtrx/produk";
+            const queryParams = new URLSearchParams();
+            if (category) queryParams.set("category", category);
+            if (initialSearch) queryParams.set("search", initialSearch);
+            if (queryParams.toString()) url += `?${queryParams.toString()}`;
+
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+                const listData = Array.isArray(json.data)
+                    ? json.data
+                    : (Array.isArray(json.products) ? json.products : []);
+
+                if (!listData.length) {
+                    allGamesData = [];
+                    renderGames([]);
+                    return;
+                }
+
+                allGamesData = listData;
+                applySearchFilter();
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `
+                    <div class="comic-empty-box">
+                        <i class="bi bi-exclamation-triangle-fill fs-1 text-danger"></i>
+                        <div class="comic-heading fs-5 mt-2 text-danger">Gagal Memuat Daftar Game</div>
+                        <p class="mt-1 mb-0 small" style="color: var(--comic-muted);">Periksa koneksi atau endpoint /api/webtrx/produk lalu muat ulang.</p>
+                    </div>
+                `;
+            }
+        }
+
+        searchInput.addEventListener("input", applySearchFilter);
+        clearSearchBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            applySearchFilter();
+            searchInput.focus();
         });
 
         loadProduk();
