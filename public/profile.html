@@ -427,7 +427,7 @@
           <div class="head-text">
             <div class="display-name" id="nameDisplay">Memuat...</div>
             <div class="display-email" id="emailDisplay">Memuat...</div>
-            <span class="tier-tag" id="tierChip">Bronze</span>
+            <span class="tier-tag" id="tierChip">User</span>
           </div>
         </div>
 
@@ -444,13 +444,13 @@
 
         <div class="tier-section">
           <div class="tier-head">
-            <div class="tier-name" id="tierName">BRONZE</div>
+            <div class="tier-name" id="tierName">USER</div>
             <div class="tier-dep">Total Deposit: <b id="totalDep">Rp 0</b></div>
           </div>
           <div class="track"><div class="fill" id="progFill"></div></div>
           <div class="prog-top">
-            <b id="progLabel">Menuju SILVER</b>
-            <span id="progVals">Rp 0 / Rp 2.000.000</span>
+            <b id="progLabel">Menuju RESELLER</b>
+            <span id="progVals">Rp 0 / Rp 100.000</span>
           </div>
           <p class="prog-note" id="progNote"></p>
           <div class="steps" id="steps"></div>
@@ -459,13 +459,6 @@
         <p class="note"><i class="fas fa-lock"></i> Nama sudah tidak dapat diubah (batas 1x terpakai).</p>
       </div>
 
-      <div class="card hidden" id="upgradeCard">
-        <h3 class="card-title"><i class="fas fa-crown"></i> Upgrade ke Reseller</h3>
-        <p class="muted">Dapatkan harga khusus reseller. Biaya upgrade bervariasi tergantung jumlah reseller saat ini (Rp 25.000, Rp 50.000, atau Rp 70.000).</p>
-        <button class="btn btn-primary btn-block" id="upgradeBtn" type="button">
-          <i class="fas fa-arrow-up"></i> Upgrade Sekarang
-        </button>
-      </div>
 
       <div class="card">
         <h3 class="card-title"><i class="fas fa-pen"></i> Edit Profil</h3>
@@ -606,9 +599,9 @@
     const DEFAULT_IP = "0.0.0.0";
 
     const TIERS = [
-      { label: "Bronze", name: "BRONZE", min: 0,       disc: 0, medal: "🥉" },
-      { label: "Silver", name: "SILVER", min: 2000000, disc: 2, medal: "🥈" },
-      { label: "Gold",   name: "GOLD",   min: 5000000, disc: 5, medal: "🥇" },
+      { label: "User",     name: "USER",     min: 0,       disc: 0, icon: "fa-user" },
+      { label: "Reseller", name: "RESELLER", min: 100000,  disc: 2, icon: "fa-store" },
+      { label: "Admin",    name: "ADMIN",    min: 1000000, disc: 5, icon: "fa-user-shield" },
     ];
 
     let user = null;
@@ -728,7 +721,7 @@
       const cur = TIERS[idx];
       const next = TIERS[idx + 1];
 
-      $("tierChip").textContent = `${cur.medal} ${cur.label}`;
+      $("tierChip").textContent = cur.label;
       $("tierName").textContent = cur.name;
       $("totalDep").textContent = formatRp(dep);
 
@@ -741,7 +734,7 @@
         const step = document.createElement("div");
         step.className = "step" + (i <= idx ? " active" : "");
         step.innerHTML =
-          `<div class="dot">${i <= idx ? t.medal : '<i class="fas fa-lock"></i>'}</div>` +
+          `<div class="dot"><i class="fas ${i <= idx ? t.icon : "fa-lock"}"></i></div>` +
           `<div class="step-name">${t.name}</div>` +
           `<div class="step-sub">${t.disc === 0 ? "Tanpa diskon" : "Diskon " + t.disc + "%"}<br>${t.min === 0 ? "Awal" : "≥ " + formatRp(t.min)}</div>`;
         steps.appendChild(step);
@@ -758,7 +751,7 @@
         $("progLabel").textContent = "Tier tertinggi";
         $("progVals").textContent = formatRp(dep);
         $("progFill").style.width = "100%";
-        $("progNote").textContent = "Anda sudah mencapai tier GOLD.";
+        $("progNote").textContent = "Anda sudah mencapai tier ADMIN.";
       }
     }
 
@@ -801,7 +794,7 @@
       const payload = nextList.length ? nextList : [DEFAULT_IP];
       const d = await postJson("/profile/whitelist-ip/set", { ips: payload });
       if (d.success) {
-        ipList = Array.isArray(d.whitelistIp) && d.whitelistIp.length ? d.whitelistIp : payload;
+        ipList = [...payload];
         renderIps();
         toast("IP whitelist berhasil disimpan", "success");
         return true;
@@ -878,10 +871,9 @@
         $("avatarInitials").classList.remove("hidden");
       }
 
-      const isReseller = u.role === "reseller";
-      $("roleBadge").textContent = isReseller ? "Reseller" : "User";
-      $("roleBadge").classList.toggle("reseller", isReseller);
-      $("upgradeCard").classList.toggle("hidden", isReseller);
+      const roleName = { admin: "Admin", reseller: "Reseller" }[u.role] || "User";
+      $("roleBadge").textContent = roleName;
+      $("roleBadge").classList.toggle("reseller", u.role === "reseller" || u.role === "admin");
 
       const saldo = Number(u.saldo) || 0;
       const dep = Number(u.totalDeposit) || 0;
@@ -1051,23 +1043,6 @@
         toast("OTP baru dikirim ke nomor lama Anda", "success");
       } else {
         toast(d.message || "Gagal mengirim ulang OTP", "error");
-      }
-    });
-
-    /* ---------- Upgrade reseller ---------- */
-    $("upgradeBtn").addEventListener("click", async () => {
-      const btn = $("upgradeBtn");
-      setLoading(btn, true);
-      try {
-        const d = await api("/upgrade/reseller", { method: "POST" });
-        if (d.success) {
-          toast(d.message || "Berhasil upgrade ke reseller", "success");
-          await loadUser();
-        } else {
-          toast(d.message || "Gagal upgrade ke reseller", "error");
-        }
-      } finally {
-        setLoading(btn, false);
       }
     });
 
