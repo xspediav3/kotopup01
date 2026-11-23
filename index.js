@@ -1047,6 +1047,21 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
 });
 
 // ===== OTP ganti password (Gmail) =====
+function mailErrorMessage(err) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    return "Email server belum diatur: GMAIL_USER / GMAIL_APP_PASSWORD kosong di Railway";
+  }
+  const code = err && err.code;
+  const text = (err && err.message) || "";
+  if (code === "EAUTH" || /Invalid login|Username and Password|535/i.test(text)) {
+    return "Login Gmail ditolak, cek GMAIL_USER dan App Password di Railway";
+  }
+  if (["ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNREFUSED", "EDNS", "ENOTFOUND"].includes(code)) {
+    return "Server tidak bisa terhubung ke Gmail (kemungkinan koneksi SMTP diblokir)";
+  }
+  return "Gagal mengirim email: " + (code || text || "error tidak diketahui");
+}
+
 async function sendPasswordOtpEmail(toEmail, otpCode, username) {
   const safeName = String(username || "").replace(/[<>&"]/g, "");
   const html = `
@@ -1097,7 +1112,7 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
         { _id: user._id },
         { $unset: { passwordOtp: "", passwordOtpExpired: "" } }
       );
-      return res.status(500).json({ success: false, message: "Gagal mengirim email, coba lagi nanti" });
+      return res.status(500).json({ success: false, message: mailErrorMessage(mailErr) });
     }
 
     return res.json({ success: true, message: "Kode OTP sudah dikirim ke email Anda" });
@@ -1214,7 +1229,10 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
 
 // ===== Email OTP (Gmail) =====
 const mailer = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
   connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 15000,
