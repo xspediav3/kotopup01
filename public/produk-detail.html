@@ -1,483 +1,503 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Game & Layanan - Comic Edition</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:wght@600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --comic-ink: #111827;
-            --comic-green: #22c55e;
-            --comic-green-dark: #15803d;
-            --comic-yellow: #fde047;
-            --comic-cyan: #38bdf8;
-            --comic-bg: #f0fdf4;
-            --comic-card: #ffffff;
-            --comic-text: #111827;
-            --comic-muted: #374151;
-            --comic-dot: rgba(21, 128, 61, 0.14);
-            --comic-shadow: 5px 5px 0px #111827;
-            --comic-shadow-lg: 7px 7px 0px #111827;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pilih Game Topup - POW! TOPUP</title>
+  <style>
+    :root {
+      --bg: #eef7f0;
+      --card: #ffffff;
+      --card-alt: #e3f5e8;
+      --ink: #13211a;
+      --muted: #496054;
+      --primary: #18a957;
+      --primary-dark: #107d3f;
+      --accent: #ff5d8f;
+      --warn: #ffd447;
+      --zone-bg: #d9eeff;
+      --zone-ink: #0f4c81;
+      --border: #13211a;
+      --shadow: 4px 4px 0px #13211a;
+    }
 
-        [data-theme="dark"] {
-            --comic-bg: #0f1c14;
-            --comic-card: #18291e;
-            --comic-text: #f3f4f6;
-            --comic-muted: #cbd5e1;
-            --comic-dot: rgba(74, 222, 128, 0.12);
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 16px;
+    }
 
-        body {
-            font-family: 'Manrope', sans-serif;
-            color: var(--comic-text);
-            background-color: var(--comic-bg);
-            background-image: radial-gradient(var(--comic-dot) 1.5px, transparent 1.5px);
-            background-size: 16px 16px;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
 
-        .comic-display {
-            font-family: 'Bangers', cursive;
-            letter-spacing: 1.2px;
-        }
+    .top-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
 
-        .comic-heading {
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: 700;
-        }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 2.5px solid var(--border);
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--warn);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
 
-        /* Topbar Komik */
-        .comic-topbar {
-            background: var(--comic-card);
-            border-bottom: 3px solid var(--comic-ink);
-            padding: 0.8rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1030;
-            box-shadow: 0 4px 0 var(--comic-ink);
-        }
+    .btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--border);
+    }
 
-        .comic-btn-nav {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.45rem 0.9rem;
-            border: 2.5px solid var(--comic-ink);
-            border-radius: 10px;
-            background: var(--comic-yellow);
-            color: #111827;
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: 700;
-            font-size: 0.88rem;
-            text-decoration: none;
-            box-shadow: 3px 3px 0 var(--comic-ink);
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
-        }
+    .btn-green {
+      background: var(--primary);
+      color: #ffffff;
+    }
 
-        .comic-btn-nav:hover {
-            transform: translate(-1px, -1px);
-            box-shadow: 4px 4px 0 var(--comic-ink);
-            color: #111827;
-            background: #facc15;
-        }
+    .hero-box {
+      position: relative;
+      background: var(--card);
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 6px 6px 0px var(--border);
+      margin-bottom: 20px;
+    }
 
-        .comic-btn-nav:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0 var(--comic-ink);
-        }
+    .badge-tag {
+      position: absolute;
+      top: -14px;
+      right: 18px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border: 2.5px solid var(--border);
+      border-radius: 999px;
+      box-shadow: 3px 3px 0px var(--border);
+      transform: rotate(2deg);
+    }
 
-        .comic-title-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: var(--comic-green);
-            color: #ffffff;
-            border: 2.5px solid var(--comic-ink);
-            border-radius: 999px;
-            padding: 0.2rem 0.85rem;
-            box-shadow: 3px 3px 0 var(--comic-ink);
-            text-shadow: 1.5px 1.5px 0 var(--comic-ink);
-        }
+    .hero-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
 
-        /* Hero / Search Panel */
-        .comic-hero-panel {
-            background: var(--comic-card);
-            border: 3px solid var(--comic-ink);
-            border-radius: 16px;
-            padding: 1.15rem 1.25rem;
-            box-shadow: var(--comic-shadow);
-            position: relative;
-        }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-bottom: 14px;
+    }
 
-        .comic-sfx-tag {
-            position: absolute;
-            top: -13px;
-            right: 16px;
-            background: #fb7185;
-            color: #ffffff;
-            border: 2.5px solid var(--comic-ink);
-            border-radius: 8px;
-            padding: 0.1rem 0.6rem;
-            font-family: 'Bangers', cursive;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            transform: rotate(3deg);
-            box-shadow: 2px 2px 0 var(--comic-ink);
-        }
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
 
-        .comic-search-wrap {
-            display: flex;
-            align-items: center;
-            background: var(--comic-card);
-            border: 3px solid var(--comic-ink);
-            border-radius: 12px;
-            box-shadow: 4px 4px 0 var(--comic-ink);
-            overflow: hidden;
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
-        }
+    .search-input {
+      width: 100%;
+      padding: 12px 42px 12px 16px;
+      border: 2.5px solid var(--border);
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #f9fffb;
+      color: var(--ink);
+      outline: none;
+    }
 
-        .comic-search-wrap:focus-within {
-            transform: translate(-1px, -1px);
-            box-shadow: 5px 5px 0 var(--comic-ink);
-            background: #fefce8;
-        }
+    .search-input:focus {
+      background: #ffffff;
+      box-shadow: 3px 3px 0px var(--border);
+    }
 
-        [data-theme="dark"] .comic-search-wrap:focus-within {
-            background: #1e3326;
-        }
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #e5e9e7;
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .comic-search-icon {
-            padding: 0 0.9rem;
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--comic-green-dark);
-        }
+    .clear-btn.show {
+      display: inline-flex;
+    }
 
-        [data-theme="dark"] .comic-search-icon {
-            color: #4ade80;
-        }
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
 
-        .comic-search-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: var(--comic-text);
-            font-weight: 700;
-            font-size: 0.95rem;
-            padding: 0.72rem 0.85rem 0.72rem 0;
-        }
+    .grid-games {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 16px;
+    }
 
-        .comic-search-clear {
-            border: none;
-            background: transparent;
-            color: var(--comic-muted);
-            padding: 0 0.75rem;
-            font-size: 1.05rem;
-            cursor: pointer;
-            display: none;
-        }
+    .game-card {
+      background: var(--card);
+      border: 2.5px solid var(--border);
+      border-radius: 20px;
+      padding: 16px 14px;
+      box-shadow: 5px 5px 0px var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
 
-        /* Grid & Comic Game Cards */
-        .comic-game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-            gap: 1.15rem;
-        }
+    .game-card:nth-child(odd) {
+      background: var(--card-alt);
+    }
 
-        .comic-game-card {
-            background: var(--comic-card);
-            border: 3px solid var(--comic-ink);
-            border-radius: 16px;
-            padding: 1.1rem 0.95rem;
-            text-decoration: none;
-            color: var(--comic-text);
-            box-shadow: var(--comic-shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-            position: relative;
-            transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
-        }
+    .game-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0px var(--border);
+    }
 
-        .comic-game-card:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: var(--comic-shadow-lg);
-            color: var(--comic-text);
-            background: #f0fdf4;
-        }
+    .game-card:active {
+      transform: translate(2px, 2px);
+      box-shadow: 3px 3px 0px var(--border);
+    }
 
-        [data-theme="dark"] .comic-game-card:hover {
-            background: #1f3627;
-        }
+    .icon-box {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: var(--primary);
+      border: 2.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 3px 3px 0px var(--border);
+    }
 
-        .comic-game-card:active {
-            transform: translate(3px, 3px);
-            box-shadow: 2px 2px 0 var(--comic-ink);
-        }
+    .icon-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        .comic-avatar-box {
-            width: 66px;
-            height: 66px;
-            border-radius: 16px;
-            border: 2.5px solid var(--comic-ink);
-            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
-            box-shadow: 3px 3px 0 var(--comic-ink);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.85rem;
-            color: #ffffff;
-            margin-bottom: 0.8rem;
-            overflow: hidden;
-        }
+    .icon-fallback {
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 1.35rem;
+      letter-spacing: 0.5px;
+    }
 
-        .comic-avatar-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .game-name {
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
 
-        .comic-game-title {
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: 700;
-            font-size: 0.98rem;
-            line-height: 1.25;
-            margin-bottom: 0.55rem;
-            word-break: break-word;
-        }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: auto;
+    }
 
-        .comic-badges {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.35rem;
-        }
+    .chip {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 9px;
+      border: 2px solid var(--border);
+    }
 
-        .comic-pill {
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: 700;
-            font-size: 0.7rem;
-            padding: 0.18rem 0.55rem;
-            border-radius: 7px;
-            border: 2px solid var(--comic-ink);
-            box-shadow: 2px 2px 0 var(--comic-ink);
-        }
+    .chip-item {
+      background: #c8f5d6;
+      color: #0d4a26;
+    }
 
-        .comic-pill-green {
-            background: #bbf7d0;
-            color: #14532d;
-        }
+    .chip-zone {
+      background: var(--zone-bg);
+      color: var(--zone-ink);
+    }
 
-        .comic-pill-cyan {
-            background: #bae6fd;
-            color: #0c4a6e;
-        }
+    .chip-nozone {
+      background: #f3f4f6;
+      color: #374151;
+    }
 
-        .comic-empty-box {
-            grid-column: 1 / -1;
-            background: var(--comic-card);
-            border: 3px solid var(--comic-ink);
-            border-radius: 16px;
-            padding: 2.5rem 1.25rem;
-            text-align: center;
-            box-shadow: var(--comic-shadow);
-        }
+    .message-box {
+      grid-column: 1 / -1;
+      background: var(--card);
+      border: 2.5px solid var(--border);
+      border-radius: 18px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
 
-        @media (max-width: 575.98px) {
-            .comic-game-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.85rem;
-            }
-            .comic-game-card {
-                padding: 0.95rem 0.75rem;
-            }
-            .comic-avatar-box {
-                width: 56px;
-                height: 56px;
-                font-size: 1.55rem;
-            }
-        }
-    </style>
+    .message-box p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  </style>
 </head>
-<body data-theme="light">
-    <header class="comic-topbar">
-        <div class="container d-flex align-items-center justify-content-between gap-2">
-            <a href="/dashboard" class="comic-btn-nav">
-                <i class="bi bi-arrow-left-circle-fill"></i>
-                <span>Dashboard</span>
-            </a>
-            <div class="comic-title-badge text-truncate">
-                <i class="bi bi-controller"></i>
-                <span id="judul" class="comic-display fs-5 text-truncate">DAFTAR GAME</span>
-            </div>
-            <div style="width: 96px;" class="d-none d-sm-block"></div>
-        </div>
-    </header>
+<body>
+  <div class="container">
+    <div class="top-nav">
+      <a href="/dashboard" class="btn">&larr; Dashboard</a>
+      <span class="btn btn-green">KATEGORI: GAMES</span>
+    </div>
 
-    <main class="container py-4">
-        <div class="comic-hero-panel mb-4">
-            <span class="comic-sfx-tag">POW! TOPUP</span>
-            <div class="row align-items-center g-3">
-                <div class="col-lg-6">
-                    <div class="comic-heading fs-6 text-uppercase mb-1">
-                        <i class="bi bi-lightning-charge-fill text-warning"></i> Pilih Game Favoritmu
-                    </div>
-                    <p class="mb-0 small" style="color: var(--comic-muted); font-weight: 600;">
-                        Klik kotak game untuk melihat daftar nominal, cek harga, dan langsung order instan.
-                    </p>
-                </div>
-                <div class="col-lg-6">
-                    <div class="comic-search-wrap">
-                        <span class="comic-search-icon"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchInput" class="comic-search-input" placeholder="Cari game (contoh: Mobile Legends, Free Fire)...">
-                        <button type="button" id="clearSearchBtn" class="comic-search-clear" title="Hapus pencarian">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section class="hero-box">
+      <div class="badge-tag">POW! TOPUP</div>
+      <h1 class="hero-title">&#9889; PILIH GAME FAVORITMU</h1>
+      <p class="hero-sub">Klik kotak game untuk melihat daftar nominal, cek harga, dan langsung order instan.</p>
 
-        <div id="produk-container" class="comic-game-grid">
-            <div class="comic-empty-box">
-                <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2 mb-0 fw-bold">Memuat panel daftar game...</p>
-            </div>
-        </div>
-    </main>
+      <div class="search-wrap">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Cari nama game (contoh: Mobile Legends, Free Fire, Magic)..."
+          autocomplete="off"
+        />
+        <button type="button" id="clearSearchBtn" class="clear-btn" title="Hapus pencarian">&times;</button>
+      </div>
+    </section>
 
-    <script>
-        const savedTheme = localStorage.getItem('vp-theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
+    <div class="status-bar">
+      <span id="gameCountText">Memuat daftar game...</span>
+      <span id="providerBadge">Provider: Ditznesia</span>
+    </div>
 
-        const params = new URLSearchParams(window.location.search);
-        const category = params.get("category") || "Games";
-        const initialSearch = params.get("search") || "";
+    <div id="gamesGrid" class="grid-games">
+      <div class="message-box">
+        <strong>Memuat data game...</strong>
+        <p>Mengambil daftar game dari server.</p>
+      </div>
+    </div>
+  </div>
 
-        const judul = document.getElementById("judul");
-        const searchInput = document.getElementById("searchInput");
-        const clearSearchBtn = document.getElementById("clearSearchBtn");
-        const container = document.getElementById("produk-container");
+  <script>
+    const gamesGrid = document.getElementById("gamesGrid");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearchBtn = document.getElementById("clearSearchBtn");
+    const gameCountText = document.getElementById("gameCountText");
 
-        let allGamesData = [];
+    let allGames = [];
 
-        judul.innerText = category ? `KATEGORI: ${category.toUpperCase()}` : "DAFTAR GAME";
-        if (initialSearch) {
-            searchInput.value = initialSearch;
-            clearSearchBtn.style.display = "inline-flex";
+    function getInitials(name = "") {
+      const words = String(name).trim().split(/\s+/).filter(Boolean);
+      if (!words.length) return "GM";
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+
+    function bukaProdukHarga(item) {
+      const gameName = item.game || item.provider || "";
+      const categoryVal = item.category || gameName;
+      const params = new URLSearchParams();
+      params.set("game", gameName);
+      params.set("provider", gameName);
+      params.set("category", categoryVal);
+      params.set("need_zone", item.need_zone ? "1" : "0");
+
+      try {
+        sessionStorage.setItem("selectedGameData", JSON.stringify({
+          game: gameName,
+          provider: gameName,
+          category: categoryVal,
+          need_zone: Boolean(item.need_zone),
+          products: item.products ?? 0,
+          img_url: item.img_url || ""
+        }));
+      } catch (_) {}
+
+      window.location.href = `/produk-harga?${params.toString()}`;
+    }
+
+    function renderGames(list) {
+      gamesGrid.innerHTML = "";
+
+      if (!Array.isArray(list) || list.length === 0) {
+        gameCountText.textContent = "0 game ditemukan";
+        gamesGrid.innerHTML = `
+          <div class="message-box">
+            <strong>Game tidak ditemukan</strong>
+            <p>Coba kata kunci pencarian lain atau reset pencarian.</p>
+          </div>
+        `;
+        return;
+      }
+
+      gameCountText.textContent = `${list.length} game tersedia`;
+
+      list.forEach((item) => {
+        const gameName = item.game || item.provider || "Game Tanpa Nama";
+        const totalItems = item.products ?? item.total_products ?? 0;
+        const needZone = Boolean(item.need_zone);
+
+        const card = document.createElement("div");
+        card.className = "game-card";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+
+        const iconBox = document.createElement("div");
+        iconBox.className = "icon-box";
+
+        if (item.img_url) {
+          const img = document.createElement("img");
+          img.src = item.img_url;
+          img.alt = gameName;
+          img.loading = "lazy";
+          img.onerror = () => {
+            iconBox.innerHTML = `<span class="icon-fallback">${getInitials(gameName)}</span>`;
+          };
+          iconBox.appendChild(img);
+        } else {
+          iconBox.innerHTML = `<span class="icon-fallback">${getInitials(gameName)}</span>`;
         }
 
-        function renderGames(list) {
-            container.innerHTML = "";
+        const titleEl = document.createElement("div");
+        titleEl.className = "game-name";
+        titleEl.textContent = gameName;
 
-            if (!list || list.length === 0) {
-                container.innerHTML = `
-                    <div class="comic-empty-box">
-                        <i class="bi bi-emoji-dizzy fs-1 text-danger"></i>
-                        <div class="comic-heading fs-5 mt-2">Game Tidak Ditemukan!</div>
-                        <p class="mt-1 mb-0 small" style="color: var(--comic-muted);">Coba kata kunci game lain atau kosongkan kolom pencarian.</p>
-                    </div>
-                `;
-                return;
-            }
+        const chipsEl = document.createElement("div");
+        chipsEl.className = "chips";
+        chipsEl.innerHTML = `
+          <span class="chip chip-item">${totalItems} Item</span>
+          <span class="chip ${needZone ? "chip-zone" : "chip-nozone"}">
+            ${needZone ? "Zone ID" : "ID Only"}
+          </span>
+        `;
 
-            list.forEach(item => {
-                const gameName = item.game || item.provider || "Unknown";
-                const productCount = item.products ?? 0;
-                const needZone = Boolean(item.need_zone);
-                const targetUrl = `/produk-harga?game=${encodeURIComponent(gameName)}&need_zone=${needZone ? "1" : "0"}`;
+        card.appendChild(iconBox);
+        card.appendChild(titleEl);
+        card.appendChild(chipsEl);
 
-                const card = document.createElement("a");
-                card.href = targetUrl;
-                card.className = "comic-game-card";
-                card.innerHTML = `
-                    <div class="w-100 d-flex flex-column align-items-center">
-                        <div class="comic-avatar-box">
-                            ${item.img_url
-                                ? `<img src="${item.img_url}" alt="${gameName}">`
-                                : `<i class="bi bi-controller"></i>`
-                            }
-                        </div>
-                        <div class="comic-game-title">${gameName}</div>
-                    </div>
-                    <div class="comic-badges">
-                        <span class="comic-pill comic-pill-green">${productCount > 0 ? `${productCount} Item` : "Cek Harga"}</span>
-                        ${needZone ? `<span class="comic-pill comic-pill-cyan">Zone ID</span>` : ""}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function applySearchFilter() {
-            const keyword = searchInput.value.trim().toLowerCase();
-            clearSearchBtn.style.display = keyword ? "inline-flex" : "none";
-            if (!keyword) {
-                renderGames(allGamesData);
-                return;
-            }
-            const filtered = allGamesData.filter(item =>
-                (item.game || item.provider || "").toLowerCase().includes(keyword)
-            );
-            renderGames(filtered);
-        }
-
-        async function loadProduk() {
-            let url = "/api/webtrx/produk";
-            const queryParams = new URLSearchParams();
-            if (category) queryParams.set("category", category);
-            if (initialSearch) queryParams.set("search", initialSearch);
-            if (queryParams.toString()) url += `?${queryParams.toString()}`;
-
-            try {
-                const res = await fetch(url);
-                const json = await res.json();
-                const listData = Array.isArray(json.data)
-                    ? json.data
-                    : (Array.isArray(json.products) ? json.products : []);
-
-                if (!listData.length) {
-                    allGamesData = [];
-                    renderGames([]);
-                    return;
-                }
-
-                allGamesData = listData;
-                applySearchFilter();
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `
-                    <div class="comic-empty-box">
-                        <i class="bi bi-exclamation-triangle-fill fs-1 text-danger"></i>
-                        <div class="comic-heading fs-5 mt-2 text-danger">Gagal Memuat Daftar Game</div>
-                        <p class="mt-1 mb-0 small" style="color: var(--comic-muted);">Periksa koneksi atau endpoint /api/webtrx/produk lalu muat ulang.</p>
-                    </div>
-                `;
-            }
-        }
-
-        searchInput.addEventListener("input", applySearchFilter);
-        clearSearchBtn.addEventListener("click", () => {
-            searchInput.value = "";
-            applySearchFilter();
-            searchInput.focus();
+        card.addEventListener("click", () => bukaProdukHarga(item));
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            bukaProdukHarga(item);
+          }
         });
 
-        loadProduk();
-    </script>
+        gamesGrid.appendChild(card);
+      });
+    }
+
+    async function fetchGames(searchQuery = "") {
+      gamesGrid.innerHTML = `
+        <div class="message-box">
+          <strong>Memuat daftar game...</strong>
+          <p>Mohon tunggu sebentar.</p>
+        </div>
+      `;
+
+      const endpoints = [
+        `/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`,
+        `/api/webtrx/produk${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, { credentials: "include" });
+          if (!res.ok) continue;
+          const json = await res.json();
+          const data = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+          if (!searchQuery) {
+            allGames = data;
+          }
+          renderGames(data);
+          return;
+        } catch (_) {}
+      }
+
+      gameCountText.textContent = "Gagal memuat data";
+      gamesGrid.innerHTML = `
+        <div class="message-box">
+          <strong>Gagal memuat daftar game</strong>
+          <p>Periksa koneksi atau pastikan endpoint <code>/produk</code> aktif.</p>
+        </div>
+      `;
+    }
+
+    let searchTimer;
+    searchInput.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      clearSearchBtn.classList.toggle("show", val.length > 0);
+      clearTimeout(searchTimer);
+
+      searchTimer = setTimeout(() => {
+        if (allGames.length > 0) {
+          const filtered = val
+            ? allGames.filter((g) =>
+                String(g.game || g.provider || "").toLowerCase().includes(val.toLowerCase())
+              )
+            : allGames;
+          renderGames(filtered);
+        } else {
+          fetchGames(val);
+        }
+      }, 150);
+    });
+
+    clearSearchBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      clearSearchBtn.classList.remove("show");
+      if (allGames.length > 0) {
+        renderGames(allGames);
+      } else {
+        fetchGames("");
+      }
+      searchInput.focus();
+    });
+
+    fetchGames("");
+  </script>
 </body>
 </html>
