@@ -1048,8 +1048,23 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
 
 // ===== OTP ganti password (Gmail) =====
 function mailErrorMessage(err) {
+  const usingBrevo = !!process.env.BREVO_API_KEY;
+  if (usingBrevo) {
+    if (!process.env.BREVO_SENDER_EMAIL) {
+      return "Email server belum diatur: BREVO_SENDER_EMAIL kosong di Railway";
+    }
+    if (err && err.response) {
+      const status = err.response.status;
+      const detail = (err.response.data && err.response.data.message) || "";
+      if (status === 401) return "API key Brevo salah, cek BREVO_API_KEY di Railway";
+      if (status === 400) return "Brevo menolak email: " + detail;
+      return "Brevo error (" + status + "): " + detail;
+    }
+    return "Tidak bisa terhubung ke Brevo, coba lagi nanti";
+  }
+
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    return "Email server belum diatur: GMAIL_USER / GMAIL_APP_PASSWORD kosong di Railway";
+    return "Email server belum diatur: isi BREVO_API_KEY dan BREVO_SENDER_EMAIL di Railway";
   }
   const code = err && err.code;
   const text = (err && err.message) || "";
@@ -1064,6 +1079,7 @@ function mailErrorMessage(err) {
 
 async function sendPasswordOtpEmail(toEmail, otpCode, username) {
   const safeName = String(username || "").replace(/[<>&"]/g, "");
+  const subject = "Kode Ganti Password - Felix TopUp";
   const html = `
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
       <h2 style="color:#166534;margin:0 0 8px;">Ganti Password</h2>
@@ -1072,10 +1088,33 @@ async function sendPasswordOtpEmail(toEmail, otpCode, username) {
       <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.</p>
     </div>`;
 
+  // Utama: Brevo (HTTP API, tidak terkena blokir SMTP)
+  if (process.env.BREVO_API_KEY) {
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "Felix TopUp", email: process.env.BREVO_SENDER_EMAIL },
+        to: [{ email: toEmail }],
+        subject,
+        htmlContent: html,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+    return;
+  }
+
+  // Cadangan: Gmail SMTP
   await mailer.sendMail({
     from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
     to: toEmail,
-    subject: "Kode Ganti Password - Felix TopUp",
+    subject,
     html,
   });
 }
