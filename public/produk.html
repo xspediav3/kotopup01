@@ -338,15 +338,18 @@
 
     function bukaProdukHarga(item) {
       const gameName = item.game || item.provider || "";
+      const categoryVal = item.category || gameName;
       const params = new URLSearchParams();
       params.set("game", gameName);
       params.set("provider", gameName);
+      params.set("category", categoryVal);
       params.set("need_zone", item.need_zone ? "1" : "0");
 
       try {
         sessionStorage.setItem("selectedGameData", JSON.stringify({
           game: gameName,
           provider: gameName,
+          category: categoryVal,
           need_zone: Boolean(item.need_zone),
           products: item.products ?? 0,
           img_url: item.img_url || ""
