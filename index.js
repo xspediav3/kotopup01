@@ -469,14 +469,13 @@ app.get("/api-key-page", requireLogin, (req, res) => {
 app.get("/topup", requireLogin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "topup.html"));
 });
-app.get('/produk-detail',  requireLogin, (req, res) => 
-  res.sendFile(path.join(__dirname, "public", "produk-detail.html"));
-        );
-app.get('/produk-harga', requireLogin, (req, res) => 
-  res.sendFile(path.join(__dirname, "public", "produk-harga.html")));
 
 app.get("/produk-detail", requireLogin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "produk-detail.html"));
+});
+
+app.get("/produk-harga", requireLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "produk-harga.html"));
 });
 
 app.get("/buy-panel", requireLogin, (req, res) => {
@@ -500,6 +499,7 @@ app.get("/admin/users", requireAdmin, (req, res) => {
 app.get("/admin/deposit", requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "deposit.html"));
 });
+
 app.get("/admin/order", requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "order.html"));
 });
