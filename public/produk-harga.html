@@ -182,7 +182,7 @@
 
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 14px;
     }
 
@@ -377,15 +377,6 @@
       background: #ffe4e6;
       color: #881337;
     }
-      .profit-plus { color: #15803d; font-weight: 800; }
-    .profit-minus { color: #b91c1c; font-weight: 800; }
-    .profit-zero, .profit-na { color: #555; font-weight: 700; }
-    .profit-badge {
-      font-size: 0.72rem; font-weight: 900; padding: 2px 6px; white-space: nowrap;
-      border: 2px solid var(--border); border-radius: 8px; background: #f1f5f9;
-    }
-    .profit-badge.profit-plus { background: #dcfce7; }
-    .profit-badge.profit-minus { background: #fee2e2; }
   </style>
 </head>
 <body>
@@ -445,14 +436,6 @@
             <strong id="sumName">Belum dipilih</strong>
           </div>
           <div class="summary-row">
-            <span>price_original</span>
-            <span id="sumPriceOri">null</span>
-          </div>
-          <div class="summary-row">
-            <span>flash</span>
-            <span id="sumFlash">null</span>
-          </div>
-          <div class="summary-row">
             <span>need_zone</span>
             <span id="sumNeedZone">-</span>
           </div>
@@ -460,15 +443,7 @@
             <span>check_name</span>
             <span id="sumCheckName">-</span>
           </div>
-          <div class="summary-row">
-            <span>price</span>
-            <span id="sumPrice">Rp 0</span>
           </div>
-          <div class="summary-row">
-            <span>untung</span>
-            <strong id="sumProfit">-</strong>
-          </div>
-        </div>
 
         <form id="orderForm">
           <div class="form-group">
@@ -521,12 +496,8 @@
     const sumCodeEl = document.getElementById("sumCode");
     const sumGameEl = document.getElementById("sumGame");
     const sumNameEl = document.getElementById("sumName");
-    const sumPriceOriEl = document.getElementById("sumPriceOri");
-    const sumFlashEl = document.getElementById("sumFlash");
     const sumNeedZoneEl = document.getElementById("sumNeedZone");
     const sumCheckNameEl = document.getElementById("sumCheckName");
-    const sumPriceEl = document.getElementById("sumPrice");
-    const sumProfitEl = document.getElementById("sumProfit");
 
     const orderForm = document.getElementById("orderForm");
     const targetInput = document.getElementById("targetInput");
@@ -567,7 +538,7 @@
       return { cls, nominalText, pctText, full: `${nominalText} (${pctText})` };
     }
 
-    function selectItemCard(item, cardEl) {
+    function selectItemCard(item, cardEl, scrollToOrder = false) {
       selectedItem = item;
       document.querySelectorAll(".item-card").forEach((c) => c.classList.remove("selected"));
       if (cardEl) cardEl.classList.add("selected");
@@ -579,22 +550,15 @@
       sumCodeEl.textContent = item.code ?? "-";
       sumGameEl.textContent = item.game || item.provider || activeGame || "-";
       sumNameEl.textContent = item.name || "-";
-      sumPriceOriEl.textContent =
-        item.price_original !== null && item.price_original !== undefined
-          ? formatRupiah(item.price_original)
-          : "null";
-      sumFlashEl.textContent =
-        item.flash !== null && item.flash !== undefined ? String(item.flash) : "null";
       sumNeedZoneEl.textContent = String(Boolean(item.need_zone));
       sumCheckNameEl.textContent = String(Boolean(item.check_name));
-      sumPriceEl.textContent = formatRupiah(item.price);
-      const profitSel = profitView(profitInfo(item));
-      sumProfitEl.textContent = profitSel.full;
-      sumProfitEl.className = profitSel.cls;
 
       submitOrderBtn.disabled = false;
       submitOrderBtn.textContent = `Order (${formatRupiah(item.price)})`;
       orderAlert.className = "alert";
+      if (scrollToOrder) {
+        document.querySelector(".order-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
 
     function normalizeList(raw) {
@@ -627,34 +591,21 @@
         card.className = "item-card";
 
         const gameLabel = item.game || item.provider || activeGame || "-";
-        const priceOriText =
-          item.price_original !== null && item.price_original !== undefined
-            ? formatRupiah(item.price_original)
-            : "null";
-        const flashText =
-          item.flash !== null && item.flash !== undefined ? String(item.flash) : "null";
 
         const profit = profitView(profitInfo(item));
+
         card.innerHTML = `
           <div class="item-top">
-            <span class="chip chip-code">code: ${item.code ?? "-"}</span>
-            <span class="chip chip-game">${gameLabel}</span>
+            <span class="chip chip-code">KODE: ${item.code ?? "-"}</span>
           </div>
           <div class="item-name">${item.name || "-"}</div>
-          <div class="detail-list">
-            <div class="detail-line"><span>price_original</span><span>${priceOriText}</span></div>
-            <div class="detail-line"><span>untung</span><span class="${profit.cls}">${profit.full}</span></div>
-            <div class="detail-line"><span>flash</span><span>${flashText}</span></div>
-            <div class="detail-line"><span>need_zone</span><span>${Boolean(item.need_zone)}</span></div>
-            <div class="detail-line"><span>check_name</span><span>${Boolean(item.check_name)}</span></div>
-          </div>
           <div class="price-row">
             <span class="item-price">${formatRupiah(item.price)}</span>
             <span class="profit-badge ${profit.cls}">${profit.pctText}</span>
           </div>
         `;
 
-        card.addEventListener("click", () => selectItemCard(item, card));
+        card.addEventListener("click", () => selectItemCard(item, card, true));
         productsGridEl.appendChild(card);
 
         if (idx === 0) {
