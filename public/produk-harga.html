@@ -355,7 +355,7 @@
 
         let allProducts = [];
         let priceListMap = new Map();
-        let detectedPercent = 0;
+        let autoMarkupPercent = 0;
         let selectedProduct = null;
         let requiresZone = needZoneParam;
 
@@ -383,7 +383,6 @@
                 });
                 return map;
             } catch (e) {
-                console.warn('Referensi price-list tidak dapat dimuat:', e);
                 return new Map();
             }
         }
@@ -414,28 +413,41 @@
             return 0;
         }
 
-        function computeProfitStats(item, currentPrice) {
+        function computeAddOnPercent(item, currentPrice) {
             const refPrice = getReferencePrice(item);
             if (!refPrice || refPrice <= 0 || !currentPrice || currentPrice <= 0) {
-                return { refPrice: 0, profitRupiah: 0, profitPercent: 0, hasRef: false };
+                return 0;
             }
-            const profitRupiah = currentPrice - refPrice;
-            const profitPercent = Number(((profitRupiah / refPrice) * 100).toFixed(2));
-            return { refPrice, profitRupiah, profitPercent, hasRef: true };
+            // Selalu dihitung sebagai tambahan persen (bukan pengurangan harga)
+            const diff = Math.abs(currentPrice - refPrice);
+            return (diff / refPrice) * 100;
         }
 
-        function calculateAutoDetectedPercent(products) {
+        function detectAutoMarkupPercent(products) {
             const percents = [];
             products.forEach(item => {
                 const p = getProductPrice(item);
-                const stats = computeProfitStats(item, p);
-                if (stats.hasRef && Number.isFinite(stats.profitPercent)) {
-                    percents.push(stats.profitPercent);
+                const pct = computeAddOnPercent(item, p);
+                if (pct > 0 && Number.isFinite(pct)) {
+                    percents.push(pct);
                 }
             });
             if (!percents.length) return 0;
-            const sum = percents.reduce((acc, v) => acc + v, 0);
-            return Number((sum / percents.length).toFixed(2));
+            const avg = percents.reduce((acc, v) => acc + v, 0) / percents.length;
+            return Number(avg.toFixed(2));
+        }
+
+        function getFinalDisplayPrice(item) {
+            const basePrice = getProductPrice(item);
+            if (basePrice <= 0) return 0;
+            const refPrice = getReferencePrice(item);
+            // Jika ada harga referensi di price-list dan harga item lebih rendah, tambahkan selisih persennya (tambah harga)
+            if (refPrice > 0 && basePrice < refPrice) {
+                const addPct = Math.abs(autoMarkupPercent);
+                const addedPrice = Math.round(basePrice * (1 + addPct / 100));
+                return addedPrice;
+            }
+            return Math.round(basePrice);
         }
 
         gameTitle.innerText = game ? game.toUpperCase() : "DAFTAR HARGA";
@@ -495,21 +507,14 @@
                 const code = item.code || item.sku || item.id || "-";
                 const name = item.name || item.layanan || item.product_name || "-";
                 const isSelected = selectedProduct && String(selectedProduct._code) === String(code);
-                const displayPrice = getProductPrice(item);
+                const displayPrice = getFinalDisplayPrice(item);
                 const oriPrice = parseNumber(item.price_original || item.original_price);
-                const stats = computeProfitStats(item, displayPrice);
 
                 const card = document.createElement("div");
                 card.className = `comic-price-card ${isSelected ? "selected" : ""}`;
 
                 const originalPriceHtml = (oriPrice > displayPrice)
                     ? `<span class="comic-strike">${formatRupiah(oriPrice)}</span>`
-                    : "";
-
-                const profitBadgeHtml = stats.hasRef
-                    ? `<div class="small fw-bold mt-1" style="font-size: 0.72rem; color: ${stats.profitRupiah >= 0 ? '#15803d' : '#dc2626'};">
-                           ${stats.profitRupiah >= 0 ? '+' : ''}${formatRupiah(stats.profitRupiah)} (${stats.profitPercent > 0 ? '+' : ''}${stats.profitPercent}%)
-                       </div>`
                     : "";
 
                 card.innerHTML = `
@@ -521,22 +526,13 @@
                         <div>
                             <div class="comic-price-tag">${formatRupiah(displayPrice)}</div>
                             ${originalPriceHtml}
-                            ${profitBadgeHtml}
                         </div>
                         <i class="bi ${isSelected ? "bi-check-circle-fill text-success" : "bi-plus-circle-fill"} fs-4"></i>
                     </div>
                 `;
 
                 card.addEventListener("click", () => {
-                    selectedProduct = {
-                        ...item,
-                        _code: code,
-                        _name: name,
-                        _price: displayPrice,
-                        _profitRupiah: stats.profitRupiah,
-                        _profitPercent: stats.profitPercent,
-                        _refPrice: stats.refPrice
-                    };
+                    selectedProduct = { ...item, _code: code, _name: name, _price: displayPrice };
                     if (item.need_zone) {
                         requiresZone = true;
                         zoneCol.style.display = "block";
@@ -572,13 +568,13 @@
 
                 if (!rawList.length) {
                     allProducts = [];
-                    detectedPercent = 0;
+                    autoMarkupPercent = 0;
                     renderProducts([]);
                     return;
                 }
 
-                detectedPercent = calculateAutoDetectedPercent(rawList);
-                allProducts = rawList.sort((a, b) => getProductPrice(a) - getProductPrice(b));
+                autoMarkupPercent = detectAutoMarkupPercent(rawList);
+                allProducts = rawList.sort((a, b) => getFinalDisplayPrice(a) - getFinalDisplayPrice(b));
                 renderProducts(allProducts);
             } catch (err) {
                 console.error(err);
