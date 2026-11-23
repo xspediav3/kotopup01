@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
   authVersion: { type: Number, default: 0 },
   passwordOtp: String,
   passwordOtpExpired: Date,
-  loginLogs: [{ ip: String, time: Date }],
+  loginLogs: [{ ip: String, time: Date, sessionId: String }],
   whitelistIp: {
     type: [String],
     default: ["0.0.0.0"],
@@ -440,7 +440,7 @@ app.post("/auth/login", async (req, res) => {
     req.session.role = user.role;
     req.session.authVersion = user.authVersion || 0;
     user.lastLogin = new Date();
-    user.loginLogs.unshift({ ip: getClientIp(req), time: new Date() });
+    user.loginLogs.unshift({ ip: getClientIp(req), time: new Date(), sessionId: req.sessionID });
     user.loginLogs = user.loginLogs.slice(0, 20);
     await user.save();
     return res.status(200).json({
@@ -566,7 +566,12 @@ app.get("/profile/users", requireLogin, async (req, res) => {
         whitelistIp: user.whitelistIp,
         historyOrder: user.historyOrder,
         historyDeposit: user.historyDeposit,
-        loginLogs: (user.loginLogs || []).slice(0, 10),
+        loginLogs: (user.loginLogs || []).slice(0, 10).map((l) => ({
+          _id: l._id,
+          ip: l.ip,
+          time: l.time,
+          current: l.sessionId === req.sessionID,
+        })),
       },
     });
   } catch (error) {
@@ -1102,17 +1107,43 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
   }
 });
 
-app.post("/profile/logout-all", requireLogin, async (req, res) => {
+app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
-    return res.status(400).json({ success: false, message: "Admin tidak memiliki sesi perangkat" });
+    return res.status(400).json({ success: false, message: "Admin tidak memiliki riwayat login" });
+  }
+  const { logId } = req.body;
+  if (!logId || !mongoose.Types.ObjectId.isValid(logId)) {
+    return res.status(400).json({ success: false, message: "ID riwayat tidak valid" });
   }
   try {
-    await User.updateOne({ _id: req.session.userId }, { $inc: { authVersion: 1 } });
-    req.session.destroy(() => {
-      return res.json({ success: true, message: "Semua perangkat sudah dikeluarkan" });
-    });
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+    }
+    const entry = user.loginLogs.id(logId);
+    if (!entry) {
+      return res.status(404).json({ success: false, message: "Riwayat tidak ditemukan" });
+    }
+
+    const isCurrent = !!entry.sessionId && entry.sessionId === req.sessionID;
+    // Hapus sesi perangkat tersebut dari penyimpanan sesi (connect-mongo: collection "sessions")
+    if (entry.sessionId) {
+      await mongoose.connection.db
+        .collection("sessions")
+        .deleteOne({ _id: entry.sessionId });
+    }
+
+    user.loginLogs.pull(logId);
+    await user.save();
+
+    if (isCurrent) {
+      return req.session.destroy(() => {
+        return res.json({ success: true, loggedOut: true, message: "Anda sudah keluar dari perangkat ini" });
+      });
+    }
+    return res.json({ success: true, message: "Perangkat berhasil dikeluarkan" });
   } catch (err) {
-    console.error("Error logout-all:", err);
+    console.error("Error hapus login log:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
@@ -1184,6 +1215,9 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
 // ===== Email OTP (Gmail) =====
 const mailer = nodemailer.createTransport({
   service: "gmail",
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
