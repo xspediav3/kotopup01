@@ -436,43 +436,49 @@ const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
 const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
 
 // 0. Daftar harga layanan / produk topup (disesuaikan ke Ditznesia /tp-products)
+
+const normText = (s) =>
+  String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
 router.post("/layanan/price-list", requireLogin, async (req, res) => {
-  const user = await User.findById(req.session.userId);
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "User tidak ditemukan atau sesi tidak valid.",
-    });
-  }
-
-  const { code, game, provider } = req.body;
-  const selectedGame = game || provider;
-
   try {
-    const params = { apikey: DITZ_API_KEY };
-    if (selectedGame) {
-      params.game = selectedGame;
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User tidak ditemukan atau sesi tidak valid.",
+      });
     }
+
+    const { code, game, provider } = req.body || {};
+    const selectedGame = String(game || provider || "").trim();
+
+    const params = { apikey: DITZ_API_KEY };
+    if (selectedGame) params.game = selectedGame;
 
     const response = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
       params,
+      timeout: 15000,
     });
 
     const rawData = response.data?.data || response.data || [];
     let products = Array.isArray(rawData) ? rawData : [];
 
     if (selectedGame) {
-      products = products.filter(
-        (item) =>
-          String(item.game || "").toLowerCase() ===
-          String(selectedGame).toLowerCase()
-      );
+      const target = normText(selectedGame);
+
+      // Cocokkan exact dulu (abaikan spasi/huruf besar), lalu parsial
+      const exact = products.filter((item) => normText(item.game) === target);
+      products = exact.length
+        ? exact
+        : products.filter((item) => {
+            const g = normText(item.game);
+            return g && (g.includes(target) || target.includes(g));
+          });
     }
 
     if (code) {
-      products = products.filter(
-        (item) => String(item.code) === String(code)
-      );
+      products = products.filter((item) => String(item.code) === String(code));
     }
 
     const modifiedData = products.map((item) => {
@@ -516,7 +522,6 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
     });
   }
 });
-
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
   const { search } = req.query;
