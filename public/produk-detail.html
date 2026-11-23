@@ -1,70 +1,328 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Produk dari Provider</title>
-  <style>
-    .produk-card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px;
-      display: inline-block;
-      border-radius: 10px;
-      text-align: center;
-      width: 180px;
-    }
-    img { max-width: 60px; height: auto; }
-  </style>
-</head>
-<body>
-  <h2 id="judul">Memuat...</h2>
-  <div id="produk-container">Memuat...</div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const category = params.get("category");
-    const provider = params.get("provider");
-
-    // Ubah judul sesuai kondisi
-    const judul = document.getElementById("judul");
-    if (!category) {
-      judul.innerText = "Semua Produk";
-    } else if (provider) {
-      judul.innerText = `Produk: ${provider} (${category})`;
-    } else {
-      judul.innerText = `Kategori: ${category}`;
-    }
-
-    async function loadProduk() {
-      let url = "/api/webtrx/produk";
-      if (category) url += `?category=${encodeURIComponent(category)}`;
-
-      try {
-        const res = await fetch(url);
-        const json = await res.json();
-
-        const container = document.getElementById("produk-container");
-        container.innerHTML = "";
-
-        if (!json.success || json.data.length === 0) {
-          container.innerHTML = "<p>Tidak ada produk tersedia.</p>";
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Game & Layanan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vp-primary: #22c55e;
+            --vp-primary-rgb: 34, 197, 94;
+            --vp-primary-light: #ecfdf3;
+            --vp-primary-dark: #15803d;
+            --vp-body-bg: #f2fbf4;
+            --vp-card-bg: #ffffff;
+            --vp-dark: #212529;
+            --vp-text-muted: #66776b;
+            --vp-border-color: #dcefe1;
+            --vp-font-main: 'Manrope', sans-serif;
+            --vp-font-heading: 'Poppins', sans-serif;
+            --vp-radius-md: 0.5rem;
+            --vp-radius-lg: 0.75rem;
+            --vp-shadow-sm: 0 .125rem .25rem rgba(22, 101, 52, .06);
+            --vp-shadow-md: 0 .5rem 1rem rgba(22, 101, 52, .12);
         }
 
-        json.data.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "produk-card";
-          div.innerHTML = `
-            <img src="${item.img_url}" alt="icon" />
-            <h4>${item.provider}</h4>
-          `;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        document.getElementById("produk-container").innerHTML = "<p>Gagal memuat produk.</p>";
-      }
-    }
+        [data-theme="dark"] {
+            --vp-primary: #4ade80;
+            --vp-primary-light: rgba(74, 222, 128, 0.15);
+            --vp-primary-dark: #22c55e;
+            --vp-body-bg: #101b14;
+            --vp-card-bg: #17251b;
+            --vp-dark: #eaf5ec;
+            --vp-text-muted: #a4b8a8;
+            --vp-border-color: #2b4432;
+        }
 
-    loadProduk();
-  </script>
+        body {
+            font-family: var(--vp-font-main);
+            background: linear-gradient(180deg, #effcf2 0%, #f8fff9 42%, #ffffff 100%);
+            color: var(--vp-dark);
+            min-height: 100vh;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(180deg, #101b14 0%, #14251a 48%, #101b14 100%);
+        }
+
+        .page-topbar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--vp-border-color);
+            padding: 0.85rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        [data-theme="dark"] .page-topbar {
+            background: rgba(23, 37, 27, 0.9);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--vp-dark);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.45rem 0.85rem;
+            border-radius: var(--vp-radius-md);
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary-dark);
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background-color: var(--vp-primary);
+            color: #fff;
+        }
+
+        .search-box {
+            background-color: var(--vp-card-bg);
+            border: 1px solid var(--vp-border-color);
+            border-radius: var(--vp-radius-lg);
+            padding: 0.65rem 1rem;
+            color: var(--vp-dark);
+            box-shadow: var(--vp-shadow-sm);
+        }
+
+        .search-box:focus {
+            border-color: var(--vp-primary);
+            box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
+            outline: none;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 1rem;
+        }
+
+        .produk-card {
+            background-color: var(--vp-card-bg);
+            border: 1px solid var(--vp-border-color);
+            border-radius: var(--vp-radius-lg);
+            padding: 1.15rem 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--vp-dark);
+            box-shadow: var(--vp-shadow-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .produk-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--vp-primary);
+            box-shadow: var(--vp-shadow-md);
+            background-color: var(--vp-primary-light);
+        }
+
+        .game-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 6px 14px rgba(22, 163, 74, 0.22);
+        }
+
+        .game-title {
+            font-family: var(--vp-font-heading);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.35rem;
+            line-height: 1.3;
+        }
+
+        .game-meta {
+            font-size: 0.75rem;
+            color: var(--vp-text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            justify-content: center;
+            margin-top: 0.35rem;
+        }
+
+        .badge-soft {
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary-dark);
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+
+        .badge-zone {
+            background-color: rgba(13, 202, 240, 0.14);
+            color: #0891b2;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <header class="page-topbar">
+        <div class="container d-flex align-items-center justify-content-between gap-2">
+            <a href="/dashboard" class="btn-back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Dashboard</span>
+            </a>
+            <h5 id="judul" class="mb-0 fw-bold text-truncate" style="font-family: var(--vp-font-heading);">Memuat...</h5>
+            <div style="width: 90px;" class="d-none d-sm-block"></div>
+        </div>
+    </header>
+
+    <main class="container py-4">
+        <div class="row justify-content-between align-items-center g-3 mb-4">
+            <div class="col-md-6">
+                <p class="mb-0 text-muted small">Pilih game atau layanan di bawah untuk melihat daftar nominal dan harga.</p>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--vp-border-color); color: var(--vp-text-muted);">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control search-box border-start-0" placeholder="Cari nama game (contoh: Mobile Legends)...">
+                </div>
+            </div>
+        </div>
+
+        <div id="produk-container" class="game-grid">
+            <div class="text-center py-5 w-100" style="grid-column: 1 / -1;">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-2 text-muted">Memuat daftar game...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const savedTheme = localStorage.getItem('vp-theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        const params = new URLSearchParams(window.location.search);
+        const category = params.get("category");
+        const initialSearch = params.get("search") || "";
+
+        const judul = document.getElementById("judul");
+        const searchInput = document.getElementById("searchInput");
+        const container = document.getElementById("produk-container");
+
+        let allGamesData = [];
+
+        if (category) {
+            judul.innerText = `Kategori: ${category}`;
+        } else {
+            judul.innerText = "Daftar Game & Topup";
+        }
+
+        if (initialSearch) {
+            searchInput.value = initialSearch;
+        }
+
+        function renderGames(list) {
+            container.innerHTML = "";
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5" style="grid-column: 1 / -1;">
+                        <i class="bi bi-controller fs-1 text-muted"></i>
+                        <p class="mt-2 text-muted mb-0">Tidak ada game atau produk tersedia.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(item => {
+                const gameName = item.game || item.provider || "Unknown";
+                const productCount = item.products ?? 0;
+                const needZone = Boolean(item.need_zone);
+
+                const targetUrl = `/produk-harga?game=${encodeURIComponent(gameName)}&need_zone=${needZone ? "1" : "0"}`;
+
+                const card = document.createElement("a");
+                card.href = targetUrl;
+                card.className = "produk-card";
+                card.innerHTML = `
+                    <div class="w-100 d-flex flex-column align-items-center">
+                        <div class="game-icon">
+                            ${item.img_url
+                                ? `<img src="${item.img_url}" alt="${gameName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`
+                                : `<i class="bi bi-controller"></i>`
+                            }
+                        </div>
+                        <div class="game-title">${gameName}</div>
+                    </div>
+                    <div class="game-meta">
+                        ${productCount ? `<span class="badge-soft">${productCount} Produk</span>` : `<span class="badge-soft">Lihat Harga</span>`}
+                        ${needZone ? `<span class="badge-zone">Butuh Zone</span>` : ""}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function loadProduk() {
+            // Sesuaikan dengan backend baru: GET /api/webtrx/produk
+            let url = "/api/webtrx/produk";
+            const queryParams = new URLSearchParams();
+            if (initialSearch) queryParams.set("search", initialSearch);
+            if (queryParams.toString()) url += `?${queryParams.toString()}`;
+
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
+                    allGamesData = [];
+                    renderGames([]);
+                    return;
+                }
+
+                allGamesData = json.data;
+                renderGames(allGamesData);
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `
+                    <div class="text-center py-5 text-danger" style="grid-column: 1 / -1;">
+                        <p class="mb-0">Gagal memuat daftar game. Silakan coba lagi.</p>
+                    </div>
+                `;
+            }
+        }
+
+        searchInput.addEventListener("input", (e) => {
+            const keyword = e.target.value.trim().toLowerCase();
+            if (!keyword) {
+                renderGames(allGamesData);
+                return;
+            }
+            const filtered = allGamesData.filter(item =>
+                (item.game || item.provider || "").toLowerCase().includes(keyword)
+            );
+            renderGames(filtered);
+        });
+
+        loadProduk();
+    </script>
 </body>
 </html>

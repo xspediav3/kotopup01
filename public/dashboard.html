@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1980,7 +1979,7 @@
                         <span class="footer-section-title">Kontak Kami</span>
                         <ul>
                             <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="astrapterodactyl@gmail.com">Email Support</a></li>
+                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
                             <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
@@ -2415,8 +2414,14 @@
         }
 
         function displayUserData(user) {
-            document.getElementById('userSaldo').textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
-            document.getElementById('userRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            const userSaldoEl = document.getElementById('userSaldo');
+            if (userSaldoEl) {
+                userSaldoEl.textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
+            }
+            const userRoleEl = document.getElementById('userRole');
+            if (userRoleEl && user.role) {
+                userRoleEl.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            }
             
             const saldoTopbar = document.getElementById('userSaldoTopbar');
             if (saldoTopbar) {
