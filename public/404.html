@@ -2,80 +2,66 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#073d3a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#063d3b">
+  <meta name="description" content="Halaman tidak ditemukan - Anemo 404">
   <title>404 - Halaman Tidak Ditemukan</title>
-  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style/404/404.css?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style/404/404.css?v=3">
 </head>
 <body>
   <main class="scene-container">
-    <div class="moon" aria-hidden="true">
-      <span class="moon__crater moon__crater1"></span>
-      <span class="moon__crater moon__crater2"></span>
-      <span class="moon__crater moon__crater3"></span>
-    </div>
+    <div class="sky-glow" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true"><span></span><i></i><b></b></div>
+    <div class="cloud cloud--top-left" aria-hidden="true"></div>
+    <div class="cloud cloud--top-right" aria-hidden="true"></div>
+    <div class="cloud cloud--left" aria-hidden="true"></div>
+    <div class="cloud cloud--right" aria-hidden="true"></div>
+    <div class="cloud cloud--bottom-left" aria-hidden="true"></div>
+    <div class="cloud cloud--bottom-right" aria-hidden="true"></div>
 
     <div class="stars" aria-hidden="true">
-      <i class="star star1"></i><i class="star star2"></i>
-      <i class="star star3"></i><i class="star star4"></i>
-      <i class="star star5"></i><i class="star star6"></i>
-      <i class="star star7"></i>
+      <i class="star star--1">✦</i><i class="star star--2">✧</i>
+      <i class="star star--3">✦</i><i class="star star--4">✧</i>
+      <i class="star star--5">✦</i><i class="star star--6">✧</i>
+      <i class="star star--7">·</i><i class="star star--8">·</i>
+      <i class="star star--9">✦</i>
     </div>
 
-    <section class="content-wrapper">
-      <div class="error">
-        <div class="error__eyebrow">ANEMO • PAGE NOT FOUND</div>
-        <h1 class="error__title">404</h1>
+    <div class="anemo-emblem" aria-hidden="true">❖</div>
+    <div class="wind-line wind-line--one" aria-hidden="true"></div>
+    <div class="wind-line wind-line--two" aria-hidden="true"></div>
+
+    <section class="content-wrapper" aria-labelledby="error-title">
+      <div class="error-card">
+        <div class="error__eyebrow"><span></span> ANEMO • PAGE NOT FOUND <span></span></div>
+        <h1 class="error__title" id="error-title">404</h1>
         <p class="error__subtitle">Hmmm... Halaman Tidak Ditemukan.</p>
         <p class="error__description">Sepertinya Xiao tersesat mencari halaman ini.</p>
         <div class="error__buttons-container">
-          <button class="error__button error__button--active" type="button" onclick="goHome()">Back to Home</button>
-          <button class="error__button" type="button" onclick="reportIssue()">Dashboard</button>
+          <a class="error__button error__button--active" href="/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+            <span>Back to Home</span>
+          </a>
+          <a class="error__button" href="/dashboard">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Dashboard</span>
+          </a>
         </div>
       </div>
 
-      <div class="xiao" role="img" aria-label="Maskot chibi Xiao dengan rambut hitam kehijauan dan tubuh sixpack">
-        <div class="xiao__aura"></div>
-        <div class="xiao__hair-back"></div>
-        <div class="xiao__body">
-          <div class="xiao__neck"></div>
-          <div class="xiao__torso">
-            <div class="xiao__chest xiao__chest--left"></div>
-            <div class="xiao__chest xiao__chest--right"></div>
-            <div class="xiao__abs">
-              <i></i><i></i><i></i><i></i><i></i><i></i>
-            </div>
-            <div class="xiao__tattoo"></div>
-          </div>
-          <div class="xiao__arm xiao__arm--left"></div>
-          <div class="xiao__arm xiao__arm--right"></div>
-          <div class="xiao__waist"></div>
-          <div class="xiao__pants"></div>
-        </div>
-        <div class="xiao__face">
-          <div class="xiao__hair-fringe xiao__hair-fringe--one"></div>
-          <div class="xiao__hair-fringe xiao__hair-fringe--two"></div>
-          <div class="xiao__brow xiao__brow--left"></div>
-          <div class="xiao__brow xiao__brow--right"></div>
-          <div class="xiao__eye xiao__eye--left"><i></i></div>
-          <div class="xiao__eye xiao__eye--right"><i></i></div>
-          <div class="xiao__nose"></div>
-          <div class="xiao__mouth"></div>
-          <div class="xiao__mark"></div>
-        </div>
-        <div class="xiao__hair-top"></div>
-        <div class="xiao__hair-lock xiao__hair-lock--left"></div>
-        <div class="xiao__hair-lock xiao__hair-lock--right"></div>
-        <div class="xiao__glove xiao__glove--left"></div>
-        <div class="xiao__glove xiao__glove--right"></div>
-        <div class="xiao__spark xiao__spark--one">✦</div>
-        <div class="xiao__spark xiao__spark--two">✧</div>
+      <div class="mascot-wrap">
+        <div class="mascot-aura" aria-hidden="true"></div>
+        <img class="xiao-mascot" src="/style/404/xiao-mascot.png?v=3" alt="Xiao chibi berambut hitam kehijauan dengan tato Anemo dan sixpack">
+        <span class="mascot-spark mascot-spark--left" aria-hidden="true">✦</span>
+        <span class="mascot-spark mascot-spark--right" aria-hidden="true">✧</span>
+        <span class="mascot-label" aria-hidden="true">Lost in the wind?</span>
       </div>
     </section>
-
     <canvas id="anemo" aria-hidden="true"></canvas>
   </main>
-  <script src="/style/404/404.js?v=2" defer></script>
+  <script src="/style/404/404.js?v=3" defer></script>
 </body>
 </html>
