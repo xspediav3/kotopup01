@@ -515,7 +515,7 @@
     <section class="panel hidden" id="panel-keamanan">
       <div class="card">
         <h3 class="card-title"><i class="fas fa-key"></i> Ubah Password</h3>
-        <p class="muted">Gunakan password yang kuat dan jangan dibagikan ke siapa pun.</p>
+        <p class="muted">Untuk keamanan, kode verifikasi 6 digit akan dikirim ke email akun Anda.</p>
         <form id="passwordForm" autocomplete="off">
           <div class="field">
             <input class="input" id="oldPass" type="password" placeholder="Password lama" autocomplete="current-password"/>
@@ -523,31 +523,11 @@
           <div class="field">
             <input class="input" id="newPass" type="password" placeholder="Password baru (min 6)" autocomplete="new-password"/>
           </div>
-          <button class="btn btn-primary btn-block" id="passBtn" type="submit">Simpan Password</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3 class="card-title"><i class="fas fa-envelope-circle-check"></i> Verifikasi Akun</h3>
-        <p class="muted" id="verifyStatus">Memuat status verifikasi...</p>
-        <button class="btn btn-primary btn-block hidden" id="verifyBtn" type="button">
-          <i class="fas fa-envelope"></i> Verifikasi Akun
-        </button>
-        <form id="verifyForm" class="box-panel hidden">
-          <p class="muted" style="margin-bottom:0">Kode verifikasi 6 digit sudah kami kirim ke email Anda.</p>
-          <div class="otp-group" id="verifyOtp">
-            <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"/>
-            <input type="text" maxlength="1" inputmode="numeric"/>
-            <input type="text" maxlength="1" inputmode="numeric"/>
-            <input type="text" maxlength="1" inputmode="numeric"/>
-            <input type="text" maxlength="1" inputmode="numeric"/>
-            <input type="text" maxlength="1" inputmode="numeric"/>
+          <div class="row">
+            <input class="input" id="pwOtp" type="text" inputmode="numeric" maxlength="6" placeholder="Kode OTP 6 digit" autocomplete="one-time-code"/>
+            <button class="btn btn-ghost" id="sendPwOtpBtn" type="button">Kirim Kode</button>
           </div>
-          <div class="row" style="justify-content:space-between">
-            <button type="button" class="btn btn-ghost" id="verifyCancel">Batal</button>
-            <button type="button" class="btn btn-ghost" id="resendOtp">Kirim Ulang</button>
-            <button type="submit" class="btn btn-primary" id="verifySubmit">Verifikasi</button>
-          </div>
+          <button class="btn btn-primary btn-block" id="passBtn" type="submit" style="margin-top:12px">Simpan Password</button>
         </form>
       </div>
 
@@ -556,11 +536,17 @@
         <div class="table-wrap">
           <table class="log">
             <thead>
-              <tr><th>IP</th><th>Perangkat</th><th>Waktu</th></tr>
+              <tr><th>Alamat IP</th><th>Waktu Login</th></tr>
             </thead>
             <tbody id="logBody"></tbody>
           </table>
         </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title"><i class="fas fa-right-from-bracket"></i> Keluar dari Semua Perangkat</h3>
+        <p class="muted">Semua perangkat yang sedang login akan dikeluarkan, termasuk perangkat ini.</p>
+        <button class="btn-danger" id="logoutAllBtn" type="button">Keluarkan dari semua perangkat</button>
       </div>
     </section>
 
@@ -702,7 +688,6 @@
       };
     }
     const phoneOtp = setupOtp($("phoneOtp"));
-    const verifyOtp = setupOtp($("verifyOtp"));
 
     /* ---------- Tabs ---------- */
     document.querySelectorAll(".tab").forEach((btn) => {
@@ -828,19 +813,17 @@
       const tb = $("logBody");
       tb.innerHTML = "";
       if (!logs.length) {
-        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data login</td></tr>';
+        tb.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:14px">Belum ada data login</td></tr>';
         return;
       }
-      logs.slice(0, 10).forEach((l) => {
+      logs.forEach((l) => {
         const tr = document.createElement("tr");
-        const cells = [l.ip || "-", l.device || "-", formatDate(l.time)];
-        cells.forEach((v, i) => {
-          const td = document.createElement("td");
-          td.textContent = v;
-          if (i === 0) td.className = "mono";
-          if (i === 1) td.className = "ellipsis";
-          tr.appendChild(td);
-        });
+        const ipTd = document.createElement("td");
+        ipTd.className = "mono";
+        ipTd.textContent = l.ip || "-";
+        const timeTd = document.createElement("td");
+        timeTd.textContent = formatDate(l.time);
+        tr.append(ipTd, timeTd);
         tb.appendChild(tr);
       });
     }
@@ -884,15 +867,6 @@
       pendingPhone = null;
       $("phoneOtpBox").classList.add("hidden");
       phoneOtp.clear(false);
-
-      if (u.isVerified) {
-        $("verifyStatus").textContent = "Akun Anda sudah terverifikasi.";
-        $("verifyBtn").classList.add("hidden");
-        $("verifyForm").classList.add("hidden");
-      } else {
-        $("verifyStatus").textContent = "Akun Anda belum terverifikasi.";
-        $("verifyBtn").classList.remove("hidden");
-      }
 
       $("apiKey").value = u.apiKey || "Tidak ada API Key";
 
@@ -1041,21 +1015,34 @@
     });
 
     /* ---------- Keamanan ---------- */
+    $("sendPwOtpBtn").addEventListener("click", async () => {
+      const btn = $("sendPwOtpBtn");
+      setLoading(btn, true);
+      try {
+        const d = await api("/profile/request-password-otp", { method: "POST" });
+        toast(d.message || "Gagal mengirim kode", d.success ? "success" : "error");
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+
     $("passwordForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const oldP = $("oldPass").value;
       const newP = $("newPass").value;
-      if (!oldP || !newP) return toast("Semua kolom harus diisi", "error");
+      const otp = $("pwOtp").value.trim();
+      if (!oldP || !newP || !otp) return toast("Semua kolom harus diisi", "error");
       if (newP.length < 6) return toast("Password baru minimal 6 karakter", "error");
 
       const btn = $("passBtn");
       setLoading(btn, true);
       try {
-        const d = await postJson("/profile/change-password", { oldPassword: oldP, newPassword: newP });
+        const d = await postJson("/profile/change-password", { oldPassword: oldP, newPassword: newP, otp });
         if (d.success) {
           toast("Password berhasil diubah", "success");
           $("oldPass").value = "";
           $("newPass").value = "";
+          $("pwOtp").value = "";
         } else {
           toast(d.message || "Gagal mengubah password", "error");
         }
@@ -1064,61 +1051,17 @@
       }
     });
 
-    $("verifyBtn").addEventListener("click", async () => {
-      const btn = $("verifyBtn");
+    $("logoutAllBtn").addEventListener("click", async () => {
+      if (!confirm("Keluarkan akun dari semua perangkat? Perangkat ini juga akan keluar.")) return;
+      const btn = $("logoutAllBtn");
       setLoading(btn, true);
-      try {
-        const d = await api("/profile/send-verification-otp", { method: "POST" });
-        if (d.success) {
-          $("verifyForm").classList.remove("hidden");
-          verifyOtp.clear();
-          toast("OTP dikirim ke email Anda", "success");
-        } else {
-          toast(d.message || "Gagal mengirim OTP", "error");
-        }
-      } finally {
-        setLoading(btn, false);
-      }
-    });
-
-    $("resendOtp").addEventListener("click", async () => {
-      const d = await api("/profile/send-verification-otp", { method: "POST" });
+      const d = await api("/profile/logout-all", { method: "POST" });
       if (d.success) {
-        verifyOtp.clear();
-        toast("OTP baru dikirim ke email Anda", "success");
-      } else {
-        toast(d.message || "Gagal mengirim ulang OTP", "error");
-      }
-    });
-
-    $("verifyCancel").addEventListener("click", () => {
-      $("verifyForm").classList.add("hidden");
-      verifyOtp.clear(false);
-    });
-
-    $("verifyForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const otp = verifyOtp.value;
-      if (!/^\d{6}$/.test(otp)) {
-        verifyOtp.markError();
-        toast("Masukkan 6 digit kode OTP", "error");
+        window.location.href = "/auth/login";
         return;
       }
-      const btn = $("verifySubmit");
-      setLoading(btn, true);
-      try {
-        const d = await postJson("/profile/verify-email", { otp });
-        if (d.success) {
-          toast("Email berhasil diverifikasi", "success");
-          $("verifyForm").classList.add("hidden");
-          await loadUser();
-        } else {
-          verifyOtp.markError();
-          toast(d.message || "OTP tidak valid", "error");
-        }
-      } finally {
-        setLoading(btn, false);
-      }
+      setLoading(btn, false);
+      toast(d.message || "Gagal mengeluarkan perangkat", "error");
     });
 
     /* ---------- API key ---------- */
