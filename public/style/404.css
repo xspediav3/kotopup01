@@ -105,21 +105,59 @@ body { display: flex; align-items: center; justify-content: center; text-align: 
 #anemo { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
 
 @media (max-width:768px) {
-  .scene-container { padding:18px; min-height:600px; }
-  .content-wrapper { flex-direction:column; gap:10px; padding-top:12px; }
-  .error { text-align:center; margin-top:2vh; }
-  .error__title { font-size:clamp(4.8em,18vw,7em); }
-  .error__subtitle { font-size:clamp(1.15em,5vw,1.55em); }
-  .error__buttons-container { justify-content:center; margin-top:20px; }
-  .xiao { width:clamp(175px,43vw,225px); height:clamp(270px,62vw,330px); margin-top:0; }
+  /* Mobile layout: pin the text and Xiao separately so the mascot cannot
+     be pushed below the viewport by the tall text block. */
+  html, body { height:100%; min-height:100%; }
+  .scene-container {
+    position:relative;
+    height:100svh;
+    min-height:560px;
+    padding:14px 14px max(14px, env(safe-area-inset-bottom));
+    overflow:hidden;
+  }
+  .content-wrapper { display:block; width:100%; height:100%; position:static; }
+  .error {
+    position:absolute;
+    z-index:4;
+    top:15%; left:50%;
+    width:min(94%, 520px);
+    max-width:520px;
+    transform:translateX(-50%);
+    text-align:center;
+    margin:0;
+  }
+  .error__eyebrow { font-size:clamp(.62rem, 2.5vw, .78rem); margin-bottom:8px; }
+  .error__title { font-size:clamp(4.5rem, 17vw, 7rem); }
+  .error__subtitle { font-size:clamp(1.05rem, 4.5vw, 1.5rem); line-height:1.25; margin-top:10px; }
+  .error__description { font-size:clamp(.78rem, 3vw, .95rem); margin-top:10px; line-height:1.35; }
+  .error__buttons-container { justify-content:center; gap:10px; margin-top:17px; }
+  .error__button { min-width:0; flex:1 1 0; max-width:190px; padding:12px 10px; font-size:clamp(.68rem, 2.8vw, .82rem); }
+  .xiao {
+    position:absolute;
+    z-index:3;
+    left:50%; bottom:2.5%;
+    width:clamp(165px, 42vw, 215px);
+    height:clamp(250px, 62vw, 305px);
+    margin:0;
+    transform:translateX(-50%);
+    animation:xiaoMobileFloat 3.8s ease-in-out infinite;
+  }
+  @keyframes xiaoMobileFloat {
+    0%,100% { transform:translate(-50%, 0) rotate(1deg); }
+    50% { transform:translate(-50%, -9px) rotate(-1deg); }
+  }
   .moon { top:52%; left:50%; transform:translate(-50%,-65%); }
 }
 @media (max-width:420px) {
-  .scene-container { padding:12px; }
-  .error__eyebrow { font-size:.65rem; }
-  .error__description { font-size:.88rem; }
-  .error__button { min-width:125px; padding:12px 15px; font-size:.78rem; }
-  .xiao { width:170px; height:260px; }
+  .scene-container { padding:10px 10px max(10px, env(safe-area-inset-bottom)); }
+  .error { top:14%; width:96%; }
+  .error__eyebrow { font-size:.62rem; }
+  .error__title { font-size:clamp(4.2rem, 18vw, 5.8rem); }
+  .error__subtitle { font-size:clamp(1rem, 4.7vw, 1.25rem); }
+  .error__description { font-size:.76rem; }
+  .error__buttons-container { margin-top:14px; gap:8px; }
+  .error__button { padding:11px 7px; font-size:.68rem; letter-spacing:.5px; }
+  .xiao { width:165px; height:250px; bottom:1.5%; }
 }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; }
