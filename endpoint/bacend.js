@@ -430,56 +430,77 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     });
   }
 });
+const axios = require("axios"); // atau gunakan fetch / cloudscraper sesuai kebutuhan
 
+const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
+const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+// 0. Daftar harga layanan / produk topup (disesuaikan ke Ditznesia /tp-products)
 router.post("/layanan/price-list", requireLogin, async (req, res) => {
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
+      message: "User tidak ditemukan atau sesi tidak valid.",
     });
   }
-  const {
-    code
-  } = req.body;
+
+  const { code, game, provider } = req.body;
+  const selectedGame = game || provider;
+
   try {
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: 'prabayar',
-      code: code,
-    };
-    const response = await cloudscraper.post(`${BASE_URL}/layanan/price_list`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders
-    });
-    const resultFromAtlantic = JSON.parse(response);
-    if (!resultFromAtlantic || !resultFromAtlantic.status || !Array.isArray(resultFromAtlantic.data)) {
-      return res.status(502).json({
-        success: false,
-        message: resultFromAtlantic?.message || "Gagal mendapatkan daftar harga dari provider.",
-        error: resultFromAtlantic?.data || resultFromAtlantic,
-      });
+    const params = { apikey: DITZ_API_KEY };
+    if (selectedGame) {
+      params.game = selectedGame;
     }
-    const modifiedData = resultFromAtlantic.data.map((item) => {
-      let originalPrice = parseInt(item.price) || 0;
+
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
+      params,
+    });
+
+    const rawData = response.data?.data || response.data || [];
+    let products = Array.isArray(rawData) ? rawData : [];
+
+    if (selectedGame) {
+      products = products.filter(
+        (item) =>
+          String(item.game || "").toLowerCase() ===
+          String(selectedGame).toLowerCase()
+      );
+    }
+
+    if (code) {
+      products = products.filter(
+        (item) => String(item.code) === String(code)
+      );
+    }
+
+    const modifiedData = products.map((item) => {
+      const originalPrice = parseInt(item.price, 10) || 0;
       let modifiedPrice = originalPrice;
       if (user.role === "user") {
         modifiedPrice = originalPrice + 600;
       } else if (user.role === "reseller") {
         modifiedPrice = originalPrice + 260;
       }
+
       return {
         code: item.code,
         name: item.name,
-        category: item.category,
-        type: item.type,
-        provider: item.provider,
+        category: item.game || item.category || null,
+        type: item.type || "topup_game",
+        provider: item.game || item.provider || null,
         price: modifiedPrice.toString(),
-        note: item.note,
-        status: item.status,
-        img_url: item.img_url,
+        price_original: item.price_original ?? null,
+        flash: item.flash ?? null,
+        need_zone: Boolean(item.need_zone),
+        check_name: Boolean(item.check_name),
+        note: item.note || null,
+        status: item.status || "available",
+        img_url: item.img_url || null,
       };
     });
+
     return res.status(200).json({
       success: true,
       data: modifiedData,
@@ -488,16 +509,13 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
     const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.message || "Terjadi kesalahan internal saat memproses permintaan.",
+      message:
+        apiError?.message ||
+        "Terjadi kesalahan internal saat memproses permintaan.",
       error: apiError || error.message,
     });
   }
 });
-
-const axios = require("axios"); // atau gunakan fetch / cloudscraper sesuai kebutuhan
-
-const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
-const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
@@ -781,6 +799,7 @@ router.post("/order/create", requireLogin, async (req, res) => {
     });
   }
 });
+
 
 router.post("/order/check", requireLogin, async (req, res) => {
   const user = await User.findById(req.session.userId);
