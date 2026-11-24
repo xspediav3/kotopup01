@@ -1019,14 +1019,80 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// Kirim OTP email khusus untuk perubahan password. Kredensial SMTP wajib dari environment.
+// Kirim OTP email khusus untuk perubahan password (mendukung env MAIL_USER/MAIL_APP_PASSWORD & fallback Gmail SMTP)
+const MAIL_USER = process.env.MAIL_USER || process.env.EMAIL_USER || "alfatharraby5@gmail.com";
+const MAIL_PASS = process.env.MAIL_APP_PASSWORD || process.env.EMAIL_PASS || "wyze rkkj auyr qsie";
+
 const passwordOtpTransporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_APP_PASSWORD,
+    user: MAIL_USER,
+    pass: MAIL_PASS,
   },
+  connectionTimeout: 12000,
+  greetingTimeout: 12000,
+  socketTimeout: 15000,
 });
+
+function buildPasswordOtpEmailHtml({ fullname, username, otp }) {
+  const displayName = String(fullname || username || "Pengguna")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kode OTP Ubah Password</title>
+</head>
+<body style="margin:0; padding:24px 12px; background-color:#f0fdf4; font-family:'Segoe UI', Arial, sans-serif; color:#14231a;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:520px; background-color:#ffffff; border:2px solid #4ade80; border-radius:14px; overflow:hidden;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#16a34a,#22c55e); padding:18px 22px; color:#ffffff;">
+              <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; opacity:0.9;">
+                ${footer} • Keamanan Akun
+              </div>
+              <div style="font-size:20px; font-weight:700; margin-top:4px;">
+                🔐 Verifikasi Perubahan Password
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:22px;">
+              <p style="margin:0 0 12px; font-size:14px; line-height:1.6;">
+                Halo <b>${displayName}</b>, kami menerima permintaan untuk mengubah password akun Anda di <b>${footer}</b>.
+              </p>
+              <p style="margin:0 0 14px; font-size:14px; line-height:1.6;">
+                Masukkan kode OTP 6 digit berikut di halaman Profil untuk melanjutkan:
+              </p>
+              <div style="background-color:#f7fdf9; border:2px dashed #16a34a; border-radius:12px; padding:16px; text-align:center; margin:16px 0;">
+                <span style="font-family:'Courier New', monospace; font-size:34px; font-weight:800; letter-spacing:10px; color:#166534;">
+                  ${otp}
+                </span>
+              </div>
+              <p style="margin:12px 0 0; font-size:13px; color:#4b5563; line-height:1.5;">
+                ⏳ Kode OTP ini berlaku selama <b>5 menit</b>. Jangan pernah membagikan kode ini kepada siapa pun, termasuk pihak admin.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f7fdf9; border-top:1px solid #bbf7d0; padding:12px 22px; text-align:center; font-size:12px; color:#66756b;">
+              Jika Anda tidak merasa meminta perubahan password, segera abaikan email ini. — <b>${footer}</b>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
 
 app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
@@ -1037,15 +1103,18 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
     if (!user || !user.email) {
       return res.status(404).json({ success: false, message: "Email akun tidak ditemukan" });
     }
-    if (!process.env.MAIL_USER || !process.env.MAIL_APP_PASSWORD) {
+    if (!MAIL_USER || !MAIL_PASS) {
       return res.status(503).json({ success: false, message: "Layanan email belum dikonfigurasi oleh admin" });
     }
+
     const now = Date.now();
     if (user.passwordChangeOtpRequestedAt &&
         now - new Date(user.passwordChangeOtpRequestedAt).getTime() < 60 * 1000) {
-      return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta OTP lagi" });
+      const waitSec = Math.ceil((60 * 1000 - (now - new Date(user.passwordChangeOtpRequestedAt).getTime())) / 1000);
+      return res.status(429).json({ success: false, message: `Tunggu ${waitSec} detik sebelum meminta OTP lagi` });
     }
 
+    // Generate 6 digit angka random (100000 - 999999)
     const otp = crypto.randomInt(100000, 1000000).toString();
     user.passwordChangeOtpHash = crypto.createHash("sha256").update(otp).digest("hex");
     user.passwordChangeOtpExpired = new Date(now + 5 * 60 * 1000);
@@ -1054,21 +1123,33 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
 
     try {
       await passwordOtpTransporter.sendMail({
-        from: `"Verifikasi Akun" <${process.env.MAIL_USER}>`,
+        from: `"${footer} Security" <${MAIL_USER}>`,
         to: user.email,
-        subject: "Kode OTP untuk Mengubah Password",
-        text: `Kode OTP perubahan password Anda adalah ${otp}. Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`,
-        html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #ddd;border-radius:12px"><h2>Verifikasi Perubahan Password</h2><p>Gunakan kode OTP berikut untuk mengubah password akun Anda:</p><div style="font-size:32px;font-weight:bold;letter-spacing:8px;padding:16px;background:#f3f4f6;text-align:center;border-radius:8px">${otp}</div><p>Kode berlaku selama <b>5 menit</b>. Jangan bagikan kode ini kepada siapa pun.</p><p>Jika Anda tidak meminta perubahan password, abaikan email ini.</p></div>`,
+        subject: `[${footer}] Kode OTP Ubah Password: ${otp}`,
+        text: `Halo ${user.fullname || user.username}, kode OTP perubahan password Anda adalah ${otp}. Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`,
+        html: buildPasswordOtpEmailHtml({
+          fullname: user.fullname,
+          username: user.username,
+          otp,
+        }),
       });
     } catch (mailError) {
       user.passwordChangeOtpHash = undefined;
       user.passwordChangeOtpExpired = undefined;
+      user.passwordChangeOtpRequestedAt = undefined;
       await user.save();
       console.error("Gagal mengirim OTP perubahan password:", mailError.message);
-      return res.status(502).json({ success: false, message: "Email OTP gagal dikirim. Periksa konfigurasi email server." });
+      return res.status(502).json({
+        success: false,
+        message: "Email OTP gagal dikirim: " + mailError.message,
+      });
     }
 
-    return res.json({ success: true, message: `OTP 6 digit dikirim ke email terdaftar (${user.email.replace(/^(.{1,2}).*(@.*)$/, "$1***$2")}). Kode berlaku 5 menit.` });
+    const maskedEmail = user.email.replace(/^(.{1,2}).*(@.*)$/, "$1***$2");
+    return res.json({
+      success: true,
+      message: `OTP 6 digit berhasil dikirim ke Gmail terdaftar (${maskedEmail}). Kode berlaku 5 menit.`,
+    });
   } catch (err) {
     console.error("Error request password OTP:", err);
     return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
