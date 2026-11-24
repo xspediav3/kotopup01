@@ -1046,30 +1046,50 @@ const smtpTransporter465 = nodemailer.createTransport({
   socketTimeout: 10000,
 });
 
-const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || process.env.MAIL_SENDER || MAIL_USER;
+const BREVO_SENDER_EMAIL =
+  process.env.BREVO_SENDER_EMAIL ||
+  process.env.BREVO_SRNDER_EMAIL ||
+  process.env.MAIL_SENDER ||
+  process.env.EMAIL_USER ||
+  MAIL_USER;
 const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || `${footer} Security`;
 
 async function sendOtpEmailSmart({ to, subject, text, html }) {
   // 1. Pengiriman utama via Brevo HTTPS API (port 443 - anti blokir SMTP Railway & mendukung HTML kustom penuh)
-  if (process.env.BREVO_API_KEY) {
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
-        to: [{ email: to }],
-        subject,
-        textContent: text,
-        htmlContent: html,
-      },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
+  const brevoApiKey = (process.env.BREVO_API_KEY || "").trim();
+  if (brevoApiKey) {
+    try {
+      await axios.post(
+        "https://api.brevo.com/v3/smtp/email",
+        {
+          sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+          to: [{ email: to }],
+          subject,
+          textContent: text,
+          htmlContent: html,
         },
-        timeout: 12000,
-      }
-    );
-    return "brevo-https";
+        {
+          headers: {
+            "api-key": brevoApiKey,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          timeout: 12000,
+        }
+      );
+      return "brevo-https";
+    } catch (brevoErr) {
+      const brevoDetail =
+        brevoErr.response?.data?.message ||
+        brevoErr.response?.data?.code ||
+        brevoErr.message;
+      const statusCode = brevoErr.response?.status;
+      throw new Error(
+        statusCode === 401
+          ? `Brevo API Key tidak valid / salah (401). Pastikan memakai API Key dari menu SMTP & API -> API Keys (bukan SMTP key / key terpotong). Detail: ${brevoDetail}`
+          : `Brevo (${statusCode || "error"}): ${brevoDetail}`
+      );
+    }
   }
 
   // 2. Alternatif HTTPS Resend jika memakai RESEND_API_KEY
