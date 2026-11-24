@@ -625,7 +625,7 @@
     // Baca respons sebagai teks dulu; batas 20 detik supaya tombol tidak loading selamanya
     async function api(url, options = {}) {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 20000);
+      const timer = setTimeout(() => controller.abort(), 35000);
       let res, text;
       try {
         res = await fetch(url, { credentials: "include", signal: controller.signal, ...options });
@@ -1061,15 +1061,61 @@
     });
 
     /* ---------- Keamanan ---------- */
-    $("sendPwOtpBtn").addEventListener("click", async () => {
+    let pwOtpCooldownTimer = null;
+    let pwOtpAutoSent = false;
+
+    function startPwOtpCooldown(seconds = 60) {
       const btn = $("sendPwOtpBtn");
+      clearInterval(pwOtpCooldownTimer);
+      let rem = seconds;
+      btn.disabled = true;
+      btn.textContent = `Kirim Ulang (${rem}s)`;
+      pwOtpCooldownTimer = setInterval(() => {
+        rem -= 1;
+        if (rem <= 0) {
+          clearInterval(pwOtpCooldownTimer);
+          btn.disabled = false;
+          btn.textContent = "Kirim Kode";
+        } else {
+          btn.textContent = `Kirim Ulang (${rem}s)`;
+        }
+      }, 1000);
+    }
+
+    async function requestPasswordOtp(isAuto = false) {
+      const btn = $("sendPwOtpBtn");
+      if (btn.disabled) return;
       setLoading(btn, true);
+      let succeeded = false;
       try {
         const d = await api("/profile/request-password-otp", { method: "POST" });
-        toast(d.message || "Gagal mengirim kode", d.success ? "success" : "error");
+        if (d.success) {
+          succeeded = true;
+          pwOtpAutoSent = true;
+          toast(d.message || "Kode OTP 6 digit telah dikirim ke Gmail Anda", "success");
+        } else {
+          if (!isAuto) {
+            toast(d.message || "Gagal mengirim kode OTP", "error");
+          }
+        }
       } finally {
         setLoading(btn, false);
+        if (succeeded) {
+          startPwOtpCooldown(60);
+        }
       }
+    }
+
+    $("sendPwOtpBtn").addEventListener("click", () => requestPasswordOtp(false));
+
+    // Otomatis generate & kirim OTP 6 digit ke Gmail saat user mulai mengisi form ubah password
+    ["oldPass", "newPass", "pwOtp"].forEach((fieldId) => {
+      $(fieldId).addEventListener("focus", () => {
+        if (!pwOtpAutoSent) {
+          pwOtpAutoSent = true;
+          requestPasswordOtp(true);
+        }
+      });
     });
 
     $("passwordForm").addEventListener("submit", async (e) => {
@@ -1089,6 +1135,7 @@
           $("oldPass").value = "";
           $("newPass").value = "";
           $("pwOtp").value = "";
+          pwOtpAutoSent = false;
         } else {
           toast(d.message || "Gagal mengubah password", "error");
         }
