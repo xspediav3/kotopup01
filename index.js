@@ -1046,82 +1046,36 @@ const smtpTransporter465 = nodemailer.createTransport({
   socketTimeout: 10000,
 });
 
-const BREVO_SENDER_EMAIL =
-  process.env.BREVO_SENDER_EMAIL ||
-  process.env.BREVO_SRNDER_EMAIL ||
-  process.env.MAIL_SENDER ||
-  process.env.EMAIL_USER ||
-  MAIL_USER;
-const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || `${footer} Security`;
+const WEBHOOK_SENDER_NAME = process.env.WEBHOOK_SENDER_NAME || process.env.BREVO_SENDER_NAME || `${footer} Security`;
 
 async function sendOtpEmailSmart({ to, subject, text, html }) {
-  // 1. Pengiriman utama via Brevo HTTPS API (port 443 - anti blokir SMTP Railway & mendukung HTML kustom penuh)
-  const brevoApiKey = (process.env.BREVO_API_KEY || "").trim();
-  if (brevoApiKey) {
+  // 1. Pengiriman utama via Google Apps Script Webhook (HTTPS port 443 - langsung lewat Gmail pribadi tanpa blokir SMTP Railway)
+  const webhookUrl = (process.env.WEBHOOK_MAIL_URL || "").trim();
+  if (webhookUrl) {
     try {
-      await axios.post(
-        "https://api.brevo.com/v3/smtp/email",
+      const resp = await axios.post(
+        webhookUrl,
         {
-          sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
-          to: [{ email: to }],
+          to,
           subject,
-          textContent: text,
-          htmlContent: html,
+          text,
+          html,
+          senderName: WEBHOOK_SENDER_NAME,
+          secret: (process.env.WEBHOOK_MAIL_SECRET || "").trim(),
         },
         {
-          headers: {
-            "api-key": brevoApiKey,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          timeout: 12000,
+          headers: { "Content-Type": "application/json" },
+          timeout: 15000,
         }
       );
-      return "brevo-https";
-    } catch (brevoErr) {
-      const brevoDetail =
-        brevoErr.response?.data?.message ||
-        brevoErr.response?.data?.code ||
-        brevoErr.message;
-      const statusCode = brevoErr.response?.status;
-      throw new Error(
-        statusCode === 401
-          ? `Brevo API Key tidak valid / salah (401). Pastikan memakai API Key dari menu SMTP & API -> API Keys (bukan SMTP key / key terpotong). Detail: ${brevoDetail}`
-          : `Brevo (${statusCode || "error"}): ${brevoDetail}`
-      );
-    }
-  }
-
-  // 2. Alternatif HTTPS Resend jika memakai RESEND_API_KEY
-  if (process.env.RESEND_API_KEY) {
-    await axios.post(
-      "https://api.resend.com/emails",
-      {
-        from: process.env.RESEND_FROM || `${footer} Security <onboarding@resend.dev>`,
-        to: [to],
-        subject,
-        text,
-        html,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 12000,
+      if (resp.data && resp.data.success === false) {
+        throw new Error(resp.data.message || "Google Apps Script menolak pengiriman email");
       }
-    );
-    return "resend-https";
-  }
-
-  // 3. Jika ada WEBHOOK_MAIL_URL (misal Google Apps Script Web App gratis untuk kirim via Gmail Anda!)
-  if (process.env.WEBHOOK_MAIL_URL) {
-    await axios.post(
-      process.env.WEBHOOK_MAIL_URL,
-      { to, subject, text, html, secret: process.env.WEBHOOK_MAIL_SECRET || "" },
-      { timeout: 12000 }
-    );
-    return "webhook-https";
+      return "webhook-https";
+    } catch (whErr) {
+      const detail = whErr.response?.data?.message || whErr.message;
+      throw new Error(`Google Webhook gagal: ${detail}`);
+    }
   }
 
   // 4. Fallback SMTP langsung (coba port 587 STARTTLS lalu 465 SSL)
@@ -1208,7 +1162,7 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
     if (!user || !user.email) {
       return res.status(404).json({ success: false, message: "Email akun tidak ditemukan" });
     }
-    if (!process.env.BREVO_API_KEY && !process.env.RESEND_API_KEY && !process.env.WEBHOOK_MAIL_URL && (!MAIL_USER || !MAIL_PASS)) {
+    if (!process.env.WEBHOOK_MAIL_URL && (!MAIL_USER || !MAIL_PASS)) {
       return res.status(503).json({ success: false, message: "Layanan email belum dikonfigurasi oleh admin" });
     }
 
@@ -1247,7 +1201,7 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
       return res.status(502).json({
         success: false,
         message: isTimeout
-          ? "Server hosting memblokir port SMTP Gmail. Pastikan BREVO_API_KEY sudah diisi di Variables Railway."
+          ? "Server hosting memblokir port SMTP Gmail. Tambahkan WEBHOOK_MAIL_URL (Google Apps Script) di Variables Railway."
           : "Email OTP gagal dikirim: " + mailError.message,
       });
     }
