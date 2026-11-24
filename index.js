@@ -12,8 +12,8 @@ const FormData = require("form-data");
 const axios = require("axios");
 const qs = require("qs");
 const path = require("path");
+const crypto = require("crypto");
 const app = express();
-app.set("trust proxy", 1);
 const footer = 'FelixTopUp'
 const ATLAN_API_KEY = process.env.ATLAN_API_KEY;
 const BASE_URL = "https://atlantich2h.com";
@@ -41,12 +41,11 @@ const userSchema = new mongoose.Schema({
   referralCode: String,
   otpCode: String,
   otpCodeExpired: Date,
+  passwordChangeOtpHash: String,
+  passwordChangeOtpExpired: Date,
+  passwordChangeOtpRequestedAt: Date,
   aktifitas: String,
   isLocked: { type: Boolean, default: false },
-  authVersion: { type: Number, default: 0 },
-  passwordOtp: String,
-  passwordOtpExpired: Date,
-  loginLogs: [{ ip: String, time: Date, sessionId: String }],
   whitelistIp: {
     type: [String],
     default: ["0.0.0.0"],
@@ -115,39 +114,22 @@ app.use(
   })
 );
 
-function getClientIp(req) {
-  const raw = req.ip || (req.socket && req.socket.remoteAddress) || "-";
-  return raw.replace(/^::ffff:/, "");
-}
-
-async function requireLogin(req, res, next) {
+function requireLogin(req, res, next) {
   if (!req.session.userId) {
     return res.redirect("/auth/login");
   }
-
+  
   // Handle custom admin session
   if (req.session.userId === "custom-admin") {
     return next();
   }
-
+  
   // Validate MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(req.session.userId)) {
-    req.session.destroy(() => {});
+    req.session.destroy();
     return res.redirect("/auth/login");
   }
-
-  try {
-    const u = await User.findById(req.session.userId).select("authVersion").lean();
-    // Sesi lama (dari "keluarkan semua perangkat" / ganti password) dianggap tidak valid
-    if (!u || (u.authVersion || 0) !== (req.session.authVersion || 0)) {
-      req.session.destroy(() => {});
-      return res.redirect("/auth/login");
-    }
-  } catch (err) {
-    console.error("requireLogin error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-
+  
   next();
 }
 
@@ -438,10 +420,7 @@ app.post("/auth/login", async (req, res) => {
     }
     req.session.userId = user._id;
     req.session.role = user.role;
-    req.session.authVersion = user.authVersion || 0;
     user.lastLogin = new Date();
-    user.loginLogs.unshift({ ip: getClientIp(req), time: new Date(), sessionId: req.sessionID });
-    user.loginLogs = user.loginLogs.slice(0, 20);
     await user.save();
     return res.status(200).json({
       success: true,
@@ -566,12 +545,6 @@ app.get("/profile/users", requireLogin, async (req, res) => {
         whitelistIp: user.whitelistIp,
         historyOrder: user.historyOrder,
         historyDeposit: user.historyDeposit,
-        loginLogs: (user.loginLogs || []).slice(0, 10).map((l) => ({
-          _id: l._id,
-          ip: l.ip,
-          time: l.time,
-          current: l.sessionId === req.sessionID,
-        })),
       },
     });
   } catch (error) {
@@ -1046,78 +1019,14 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// ===== OTP ganti password (Gmail) =====
-function mailErrorMessage(err) {
-  const usingBrevo = !!process.env.BREVO_API_KEY;
-  if (usingBrevo) {
-    if (!process.env.BREVO_SENDER_EMAIL) {
-      return "Email server belum diatur: BREVO_SENDER_EMAIL kosong di Railway";
-    }
-    if (err && err.response) {
-      const status = err.response.status;
-      const detail = (err.response.data && err.response.data.message) || "";
-      if (status === 401) return "API key Brevo salah, cek BREVO_API_KEY di Railway";
-      if (status === 400) return "Brevo menolak email: " + detail;
-      return "Brevo error (" + status + "): " + detail;
-    }
-    return "Tidak bisa terhubung ke Brevo, coba lagi nanti";
-  }
-
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    return "Email server belum diatur: isi BREVO_API_KEY dan BREVO_SENDER_EMAIL di Railway";
-  }
-  const code = err && err.code;
-  const text = (err && err.message) || "";
-  if (code === "EAUTH" || /Invalid login|Username and Password|535/i.test(text)) {
-    return "Login Gmail ditolak, cek GMAIL_USER dan App Password di Railway";
-  }
-  if (["ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNREFUSED", "EDNS", "ENOTFOUND"].includes(code)) {
-    return "Server tidak bisa terhubung ke Gmail (kemungkinan koneksi SMTP diblokir)";
-  }
-  return "Gagal mengirim email: " + (code || text || "error tidak diketahui");
-}
-
-async function sendPasswordOtpEmail(toEmail, otpCode, username) {
-  const safeName = String(username || "").replace(/[<>&"]/g, "");
-  const subject = "Kode Ganti Password - Felix TopUp";
-  const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-      <h2 style="color:#166534;margin:0 0 8px;">Ganti Password</h2>
-      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:</p>
-      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
-      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.</p>
-    </div>`;
-
-  // Utama: Brevo (HTTP API, tidak terkena blokir SMTP)
-  if (process.env.BREVO_API_KEY) {
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: { name: "Felix TopUp", email: process.env.BREVO_SENDER_EMAIL },
-        to: [{ email: toEmail }],
-        subject,
-        htmlContent: html,
-      },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "content-type": "application/json",
-          accept: "application/json",
-        },
-        timeout: 15000,
-      }
-    );
-    return;
-  }
-
-  // Cadangan: Gmail SMTP
-  await mailer.sendMail({
-    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
-    to: toEmail,
-    subject,
-    html,
-  });
-}
+// Kirim OTP email khusus untuk perubahan password. Kredensial SMTP wajib dari environment.
+const passwordOtpTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_APP_PASSWORD,
+  },
+});
 
 app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
@@ -1125,179 +1034,98 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
   }
   try {
     const user = await User.findById(req.session.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+    if (!user || !user.email) {
+      return res.status(404).json({ success: false, message: "Email akun tidak ditemukan" });
     }
-    if (!user.email) {
-      return res.status(400).json({ success: false, message: "Email akun belum diatur" });
+    if (!process.env.MAIL_USER || !process.env.MAIL_APP_PASSWORD) {
+      return res.status(503).json({ success: false, message: "Layanan email belum dikonfigurasi oleh admin" });
     }
     const now = Date.now();
-    // Cooldown 60 detik supaya email tidak terkirim berulang-ulang
-    if (user.passwordOtpExpired && user.passwordOtpExpired.getTime() - now > 4 * 60 * 1000) {
-      return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta kode baru" });
+    if (user.passwordChangeOtpRequestedAt &&
+        now - new Date(user.passwordChangeOtpRequestedAt).getTime() < 60 * 1000) {
+      return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta OTP lagi" });
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await User.updateOne(
-      { _id: user._id },
-      { $set: { passwordOtp: otpCode, passwordOtpExpired: new Date(now + 5 * 60 * 1000) } }
-    );
-
-    try {
-      await sendPasswordOtpEmail(user.email, otpCode, user.username);
-    } catch (mailErr) {
-      console.error("Gagal kirim email OTP password:", mailErr);
-      await User.updateOne(
-        { _id: user._id },
-        { $unset: { passwordOtp: "", passwordOtpExpired: "" } }
-      );
-      return res.status(500).json({ success: false, message: mailErrorMessage(mailErr) });
-    }
-
-    return res.json({ success: true, message: "Kode OTP sudah dikirim ke email Anda" });
-  } catch (err) {
-    console.error("Error request password OTP:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
-  if (req.session.userId === "custom-admin") {
-    return res.status(400).json({ success: false, message: "Admin tidak memiliki riwayat login" });
-  }
-  const { logId } = req.body;
-  if (!logId || !mongoose.Types.ObjectId.isValid(logId)) {
-    return res.status(400).json({ success: false, message: "ID riwayat tidak valid" });
-  }
-  try {
-    const user = await User.findById(req.session.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
-    }
-    const entry = user.loginLogs.id(logId);
-    if (!entry) {
-      return res.status(404).json({ success: false, message: "Riwayat tidak ditemukan" });
-    }
-
-    const isCurrent = !!entry.sessionId && entry.sessionId === req.sessionID;
-    // Hapus sesi perangkat tersebut dari penyimpanan sesi (connect-mongo: collection "sessions")
-    if (entry.sessionId) {
-      await mongoose.connection.db
-        .collection("sessions")
-        .deleteOne({ _id: entry.sessionId });
-    }
-
-    user.loginLogs.pull(logId);
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    user.passwordChangeOtpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    user.passwordChangeOtpExpired = new Date(now + 5 * 60 * 1000);
+    user.passwordChangeOtpRequestedAt = new Date(now);
     await user.save();
 
-    if (isCurrent) {
-      return req.session.destroy(() => {
-        return res.json({ success: true, loggedOut: true, message: "Anda sudah keluar dari perangkat ini" });
+    try {
+      await passwordOtpTransporter.sendMail({
+        from: `"Verifikasi Akun" <${process.env.MAIL_USER}>`,
+        to: user.email,
+        subject: "Kode OTP untuk Mengubah Password",
+        text: `Kode OTP perubahan password Anda adalah ${otp}. Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #ddd;border-radius:12px"><h2>Verifikasi Perubahan Password</h2><p>Gunakan kode OTP berikut untuk mengubah password akun Anda:</p><div style="font-size:32px;font-weight:bold;letter-spacing:8px;padding:16px;background:#f3f4f6;text-align:center;border-radius:8px">${otp}</div><p>Kode berlaku selama <b>5 menit</b>. Jangan bagikan kode ini kepada siapa pun.</p><p>Jika Anda tidak meminta perubahan password, abaikan email ini.</p></div>`,
       });
+    } catch (mailError) {
+      user.passwordChangeOtpHash = undefined;
+      user.passwordChangeOtpExpired = undefined;
+      await user.save();
+      console.error("Gagal mengirim OTP perubahan password:", mailError.message);
+      return res.status(502).json({ success: false, message: "Email OTP gagal dikirim. Periksa konfigurasi email server." });
     }
-    return res.json({ success: true, message: "Perangkat berhasil dikeluarkan" });
+
+    return res.json({ success: true, message: `OTP 6 digit dikirim ke email terdaftar (${user.email.replace(/^(.{1,2}).*(@.*)$/, "$1***$2")}). Kode berlaku 5 menit.` });
   } catch (err) {
-    console.error("Error hapus login log:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error request password OTP:", err);
+    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
   }
 });
 
 app.post("/profile/change-password", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
-    return res.status(400).json({
-      success: false,
-      message: "Admin tidak dapat mengubah password",
-    });
+    return res.status(400).json({ success: false, message: "Admin tidak dapat mengubah password" });
   }
-  
+
   const { oldPassword, newPassword, otp } = req.body;
   if (!oldPassword || !newPassword || !otp) {
-    return res.status(400).json({
-      success: false,
-      message: "Password lama, password baru, dan kode OTP wajib diisi",
-    });
+    return res.status(400).json({ success: false, message: "Password lama, password baru, dan OTP wajib diisi" });
   }
+  if (typeof newPassword !== "string" || newPassword.length < 6 || newPassword.length > 128) {
+    return res.status(400).json({ success: false, message: "Password baru harus 6–128 karakter" });
+  }
+  if (!/^\d{6}$/.test(String(otp))) {
+    return res.status(400).json({ success: false, message: "OTP harus terdiri dari 6 digit" });
+  }
+
   try {
     const user = await User.findById(req.session.userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-    if (!user.passwordOtp || !user.passwordOtpExpired) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Minta kode OTP terlebih dahulu" });
-    }
-    if (String(otp) !== user.passwordOtp) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Kode OTP tidak cocok" });
-    }
-    if (user.passwordOtpExpired < new Date()) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Kode OTP sudah kadaluarsa" });
-    }
+    if (!user) return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+
     const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isOldPasswordValid) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Old password is incorrect" });
+      return res.status(400).json({ success: false, message: "Password lama tidak benar" });
     }
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    user.passwordOtp = undefined;
-    user.passwordOtpExpired = undefined;
-    // Keluarkan perangkat lain, sesi sekarang tetap aktif
-    user.authVersion = (user.authVersion || 0) + 1;
+    if (!user.passwordChangeOtpHash || !user.passwordChangeOtpExpired ||
+        new Date(user.passwordChangeOtpExpired).getTime() < Date.now()) {
+      user.passwordChangeOtpHash = undefined;
+      user.passwordChangeOtpExpired = undefined;
+      await user.save();
+      return res.status(400).json({ success: false, message: "OTP belum diminta atau sudah kedaluwarsa. Kirim OTP baru." });
+    }
+
+    const submittedHash = crypto.createHash("sha256").update(String(otp)).digest("hex");
+    const expectedHash = Buffer.from(user.passwordChangeOtpHash, "hex");
+    const actualHash = Buffer.from(submittedHash, "hex");
+    if (expectedHash.length !== actualHash.length || !crypto.timingSafeEqual(expectedHash, actualHash)) {
+      return res.status(400).json({ success: false, message: "OTP tidak valid" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordChangeOtpHash = undefined;
+    user.passwordChangeOtpExpired = undefined;
+    user.passwordChangeOtpRequestedAt = undefined;
     await user.save();
-    req.session.authVersion = user.authVersion;
-    return res.status(200).json({
-      success: true,
-      message: "Password has been successfully changed",
-    });
+
+    return res.json({ success: true, message: "Password berhasil diubah setelah verifikasi OTP email" });
   } catch (err) {
     console.error("Error changing password:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
   }
 });
-
-// ===== Email OTP (Gmail) =====
-const mailer = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
-
-async function sendVerificationEmail(toEmail, otpCode, username) {
-  const safeName = String(username || "").replace(/[<>&"]/g, "");
-  const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-      <h2 style="color:#166534;margin:0 0 8px;">Verifikasi Email</h2>
-      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk memverifikasi email akun Anda:</p>
-      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
-      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.</p>
-    </div>`;
-
-  await mailer.sendMail({
-    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
-    to: toEmail,
-    subject: "Kode Verifikasi Email - Felix TopUp",
-    html,
-  });
-}
 
 app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
   // Skip untuk custom admin
@@ -1307,54 +1135,32 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
       message: "Admin sudah terverifikasi",
     });
   }
-
+  
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
     }
-    if (user.isVerified) {
-      return res.status(400).json({ success: false, message: "Email sudah terverifikasi" });
-    }
-    if (!user.email) {
-      return res.status(400).json({ success: false, message: "Email akun belum diatur" });
-    }
 
-    const now = Date.now();
-    // Cooldown 60 detik supaya email tidak dikirim berulang-ulang
-    if (user.otpCodeExpired && user.otpCodeExpired.getTime() - now > 4 * 60 * 1000) {
-      return res.status(429).json({
-        success: false,
-        message: "Tunggu 60 detik sebelum meminta kode baru",
-      });
+    const now = new Date();
+    if (user.otpCodeExpired && user.otpCodeExpired > now) {
+    } else {
+      await User.updateOne({ _id: user._id }, { $set: { otpCode: null, otpCodeExpired: null } });
     }
-
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(now + 5 * 60 * 1000); // berlaku 5 menit
-
-    await User.updateOne(
-      { _id: user._id },
-      { $set: { otpCode, otpCodeExpired: otpExpiry, aktifitas: "Verify H2H" } }
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 10 menit
+    await User.findByIdAndUpdate(
+      user._id,
+      {
+        otpCode,
+        otpCodeExpired: otpExpiry,
+        aktifitas: "Verify H2H"
+      }
     );
-
-    try {
-      await sendVerificationEmail(user.email, otpCode, user.username);
-    } catch (mailErr) {
-      console.error("Gagal kirim email OTP:", mailErr);
-      await User.updateOne(
-        { _id: user._id },
-        { $set: { otpCode: null, otpCodeExpired: null } }
-      );
-      return res.status(500).json({
-        success: false,
-        message: "Gagal mengirim email, coba lagi nanti",
-      });
-    }
-
-    // Kode OTP TIDAK dikirim ke browser, hanya ke email
     return res.json({
       success: true,
-      message: "Kode verifikasi sudah dikirim ke email Anda",
+      message: "OTP berhasil dibuat, silakan Verify H2H",
+      otp: otpCode 
     });
   } catch (err) {
     console.error("Error generate OTP:", err);
