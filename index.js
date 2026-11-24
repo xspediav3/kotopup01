@@ -1019,22 +1019,107 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// Kirim OTP email khusus untuk perubahan password (mendukung env MAIL_USER/MAIL_APP_PASSWORD & fallback Gmail SMTP)
+// Kirim OTP email khusus untuk perubahan password
+// Catatan: Railway memblokir koneksi keluar SMTP (port 465/587) pada paket gratis/trial,
+// sehingga kita sediakan pengiriman via HTTPS API (Brevo / Resend / EmailJS / Webhook) dan fallback SMTP port 587/465.
 const MAIL_USER = process.env.MAIL_USER || process.env.EMAIL_USER || "alfatharraby5@gmail.com";
 const MAIL_PASS = process.env.MAIL_APP_PASSWORD || process.env.EMAIL_PASS || "wyze rkkj auyr qsie";
 
-const passwordOtpTransporter = nodemailer.createTransport({
+const smtpTransporter587 = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: { user: MAIL_USER, pass: MAIL_PASS },
+  connectionTimeout: 8000,
+  greetingTimeout: 8000,
+  socketTimeout: 10000,
+});
+
+const smtpTransporter465 = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
-  auth: {
-    user: MAIL_USER,
-    pass: MAIL_PASS,
-  },
-  connectionTimeout: 12000,
-  greetingTimeout: 12000,
-  socketTimeout: 15000,
+  auth: { user: MAIL_USER, pass: MAIL_PASS },
+  connectionTimeout: 8000,
+  greetingTimeout: 8000,
+  socketTimeout: 10000,
 });
+
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || process.env.MAIL_SENDER || MAIL_USER;
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || `${footer} Security`;
+
+async function sendOtpEmailSmart({ to, subject, text, html }) {
+  // 1. Pengiriman utama via Brevo HTTPS API (port 443 - anti blokir SMTP Railway & mendukung HTML kustom penuh)
+  if (process.env.BREVO_API_KEY) {
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        htmlContent: html,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        timeout: 12000,
+      }
+    );
+    return "brevo-https";
+  }
+
+  // 2. Alternatif HTTPS Resend jika memakai RESEND_API_KEY
+  if (process.env.RESEND_API_KEY) {
+    await axios.post(
+      "https://api.resend.com/emails",
+      {
+        from: process.env.RESEND_FROM || `${footer} Security <onboarding@resend.dev>`,
+        to: [to],
+        subject,
+        text,
+        html,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 12000,
+      }
+    );
+    return "resend-https";
+  }
+
+  // 3. Jika ada WEBHOOK_MAIL_URL (misal Google Apps Script Web App gratis untuk kirim via Gmail Anda!)
+  if (process.env.WEBHOOK_MAIL_URL) {
+    await axios.post(
+      process.env.WEBHOOK_MAIL_URL,
+      { to, subject, text, html, secret: process.env.WEBHOOK_MAIL_SECRET || "" },
+      { timeout: 12000 }
+    );
+    return "webhook-https";
+  }
+
+  // 4. Fallback SMTP langsung (coba port 587 STARTTLS lalu 465 SSL)
+  const mailPayload = {
+    from: `"${footer} Security" <${MAIL_USER}>`,
+    to,
+    subject,
+    text,
+    html,
+  };
+  try {
+    await smtpTransporter587.sendMail(mailPayload);
+    return "smtp-587";
+  } catch (err587) {
+    await smtpTransporter465.sendMail(mailPayload);
+    return "smtp-465";
+  }
+}
 
 function buildPasswordOtpEmailHtml({ fullname, username, otp }) {
   const displayName = String(fullname || username || "Pengguna")
@@ -1103,7 +1188,7 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
     if (!user || !user.email) {
       return res.status(404).json({ success: false, message: "Email akun tidak ditemukan" });
     }
-    if (!MAIL_USER || !MAIL_PASS) {
+    if (!process.env.BREVO_API_KEY && !process.env.RESEND_API_KEY && !process.env.WEBHOOK_MAIL_URL && (!MAIL_USER || !MAIL_PASS)) {
       return res.status(503).json({ success: false, message: "Layanan email belum dikonfigurasi oleh admin" });
     }
 
@@ -1122,8 +1207,7 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
     await user.save();
 
     try {
-      await passwordOtpTransporter.sendMail({
-        from: `"${footer} Security" <${MAIL_USER}>`,
+      await sendOtpEmailSmart({
         to: user.email,
         subject: `[${footer}] Kode OTP Ubah Password: ${otp}`,
         text: `Halo ${user.fullname || user.username}, kode OTP perubahan password Anda adalah ${otp}. Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`,
@@ -1139,9 +1223,12 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
       user.passwordChangeOtpRequestedAt = undefined;
       await user.save();
       console.error("Gagal mengirim OTP perubahan password:", mailError.message);
+      const isTimeout = /timeout|ETIMEDOUT|ECONNREFUSED|ENETUNREACH/i.test(mailError.message);
       return res.status(502).json({
         success: false,
-        message: "Email OTP gagal dikirim: " + mailError.message,
+        message: isTimeout
+          ? "Server hosting memblokir port SMTP Gmail. Pastikan BREVO_API_KEY sudah diisi di Variables Railway."
+          : "Email OTP gagal dikirim: " + mailError.message,
       });
     }
 
