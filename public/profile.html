@@ -956,7 +956,12 @@
       try {
         data = JSON.parse(text);
       } catch (err) {
-        data = { success: false, message: `Respons server tidak valid (HTTP ${res.status})` };
+        const trimmed = (text || "").trim();
+        if (res.status === 401 || res.status === 403 || trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) {
+          data = { success: false, status: res.status || 401, message: "Sesi login berakhir atau belum terautentikasi" };
+        } else {
+          data = { success: false, message: `Respons server tidak valid (HTTP ${res.status})` };
+        }
       }
       data.status = res.status;
       if (data.success === undefined) data.success = res.ok;
@@ -1441,11 +1446,18 @@
     }
 
     async function loadUser() {
-      const data = await api("/profile/users");
-      if (data.success && data.user) {
-        populate(data.user);
-      } else {
-        toast(data.message || "Gagal memuat data pengguna", "error");
+      try {
+        const data = await api("/profile/users");
+        const u = data?.user || data?.data?.user || (data?.username ? data : null);
+        if (data.success && u) {
+          populate(u);
+        } else {
+          if ($("nameDisplay")) $("nameDisplay").textContent = "Akun";
+          if ($("emailDisplay")) $("emailDisplay").textContent = data?.message || "Gagal memuat";
+          toast(data?.message || "Gagal memuat data pengguna", "error");
+        }
+      } catch (err) {
+        toast("Terjadi kesalahan saat memuat data profil", "error");
       }
     }
 
@@ -1653,17 +1665,10 @@
       if (!recipient) return { sent: false, message: "Email tujuan tidak tersedia" };
       const subject = "[FelixTopUp] Notifikasi Perubahan Profil Akun";
       const text =
-        `Halo ${user?.fullname || user?.username || "Pengguna"},
-
-` +
-        `Data profil akun Anda baru saja disimpan/diperbarui:
-` +
-        changesSummary.map((item) => `- ${item}`).join("
-") +
-        `
-
-Waktu: ${new Date().toLocaleString("id-ID")}
-` +
+        `Halo ${user?.fullname || user?.username || "Pengguna"},\n\n` +
+        `Data profil akun Anda baru saja disimpan/diperbarui:\n` +
+        changesSummary.map((item) => `- ${item}`).join("\n") +
+        `\n\nWaktu: ${new Date().toLocaleString("id-ID")}\n` +
         `Jika Anda tidak merasa melakukan perubahan ini, segera hubungi admin.`;
 
       const d = await postJson("/profile/send-notification-email", {
@@ -1946,8 +1951,19 @@ Waktu: ${new Date().toLocaleString("id-ID")}
     });
 
     /* ---------- Init ---------- */
-    setProfileFormUnlocked(false);
-    loadUser();
+    function initPage() {
+      try {
+        setProfileFormUnlocked(false);
+      } catch (e) {
+        // ignore if locked before user load
+      }
+      loadUser();
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>
