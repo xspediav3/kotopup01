@@ -630,7 +630,7 @@
         <div class="card-head-row">
           <div>
             <h3 class="card-title" style="margin-bottom:2px"><i class="fas fa-pen"></i> Edit Profil</h3>
-            <p class="muted" style="margin-bottom:0">Klik <b>Edit</b> untuk membuka kolom. Jika data baru belum ada di DB, kode otomatis dikirim; jika sudah ada, muncul teks merah.</p>
+            <p class="muted" style="margin-bottom:0">Klik <b>Edit</b> untuk membuka kolom, lalu klik <b>Minta Kode OTP</b> untuk menampilkan kotak OTP sebelum menyimpan.</p>
           </div>
           <button class="btn btn-sm" id="unlockEditBtn" type="button">
             <i class="fas fa-lock-open"></i> Edit
@@ -671,25 +671,32 @@
           </div>
 
           <div class="box-panel" id="profileOtpBox">
-            <label for="profileOtpDirect" style="display:block;font-size:12.5px;font-weight:600;color:var(--green-dark);margin-bottom:4px">
-              <i class="fas fa-key"></i> Kode Verifikasi OTP Edit Profil
-            </label>
-            <p class="muted" id="phoneOtpHint" style="margin-bottom:8px">Masukkan kode OTP 6 digit yang dikirim otomatis (atau klik Kirim Kode) sebelum menyimpan perubahan profil.</p>
-            <div class="row" style="margin-bottom:8px">
-              <input class="input" id="profileOtpDirect" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan kode OTP 6 digit" autocomplete="one-time-code" disabled/>
-              <button type="button" class="btn btn-ghost btn-sm" id="phoneResend" disabled>Kirim Kode</button>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--green-dark)">
+                  <i class="fas fa-key"></i> Verifikasi OTP Edit Profil
+                </div>
+                <p class="muted" id="phoneOtpHint" style="margin:2px 0 0">Klik tombol <b>Minta Kode OTP</b> untuk memunculkan kotak pengisian kode.</p>
+              </div>
+              <button type="button" class="btn btn-sm" id="phoneResend" disabled>
+                <i class="fas fa-paper-plane"></i> Minta Kode OTP
+              </button>
             </div>
-            <div class="otp-group" id="phoneOtp">
-              <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code" disabled/>
-              <input type="text" maxlength="1" inputmode="numeric" disabled/>
-              <input type="text" maxlength="1" inputmode="numeric" disabled/>
-              <input type="text" maxlength="1" inputmode="numeric" disabled/>
-              <input type="text" maxlength="1" inputmode="numeric" disabled/>
-              <input type="text" maxlength="1" inputmode="numeric" disabled/>
-            </div>
-            <p class="err-text hidden" id="phoneOtpErr"></p>
-            <div class="row" style="justify-content:flex-end">
-              <button type="button" class="btn btn-ghost btn-sm" id="phoneCancel" disabled>Reset OTP</button>
+
+            <div id="profileOtpInputsWrap" class="hidden" style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--stroke-soft)">
+              <div class="row" style="margin-bottom:8px">
+                <input class="input" id="profileOtpDirect" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan kode OTP 6 digit" autocomplete="one-time-code" disabled/>
+                <button type="button" class="btn btn-ghost btn-sm" id="phoneCancel" disabled>Reset</button>
+              </div>
+              <div class="otp-group" id="phoneOtp">
+                <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code" disabled/>
+                <input type="text" maxlength="1" inputmode="numeric" disabled/>
+                <input type="text" maxlength="1" inputmode="numeric" disabled/>
+                <input type="text" maxlength="1" inputmode="numeric" disabled/>
+                <input type="text" maxlength="1" inputmode="numeric" disabled/>
+                <input type="text" maxlength="1" inputmode="numeric" disabled/>
+              </div>
+              <p class="err-text hidden" id="phoneOtpErr"></p>
             </div>
           </div>
 
@@ -927,6 +934,8 @@
           banner.innerHTML = '<span><i class="fas fa-lock"></i> Mode Edit Terkunci — kolom tidak dapat diklik atau diubah.</span>';
         }
         if (saveBtn) saveBtn.disabled = true;
+        const wrap = $("profileOtpInputsWrap");
+        if (wrap) wrap.classList.add("hidden");
         clearDbFieldStatuses();
       }
     }
@@ -1205,26 +1214,99 @@
 
     /* ---------- Riwayat Login (Tampilkan IP + Perbaiki 404 Saat Keluarkan Device) ---------- */
     let detectedClientIp = "";
+    let ipDetectionFinished = false;
+
+    function applyDetectedIp(ip) {
+      if (!ip || ip === "-") return;
+      detectedClientIp = ip;
+      ipDetectionFinished = true;
+      if (user && (!user.currentIp || user.currentIp === "-")) user.currentIp = ip;
+      if ($("myIp") && ($("myIp").textContent === "-" || !$("myIp").textContent)) {
+        $("myIp").textContent = ip;
+        $("myIpWrap")?.classList.remove("hidden");
+      }
+      if (Array.isArray(fallbackLoginLogs) && fallbackLoginLogs.length) {
+        renderLogs(fallbackLoginLogs);
+      }
+    }
+
+    async function fetchWithTimeout(url, ms = 4000) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        return await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
     async function detectClientIpIfMissing() {
       if (detectedClientIp) return detectedClientIp;
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const j = await res.json();
-        if (j && j.ip) {
-          detectedClientIp = j.ip;
-          if (user && (!user.currentIp || user.currentIp === "-")) user.currentIp = j.ip;
-          if ($("myIp") && ($("myIp").textContent === "-" || !$("myIp").textContent)) {
-            $("myIp").textContent = j.ip;
-            $("myIpWrap")?.classList.remove("hidden");
-          }
-          if (Array.isArray(fallbackLoginLogs) && fallbackLoginLogs.length) {
-            renderLogs(fallbackLoginLogs);
-          }
+
+      const providers = [
+        async () => {
+          const r = await fetchWithTimeout("https://1.1.1.1/cdn-cgi/trace", 3500);
+          const txt = await r.text();
+          const m = txt.match(/ip=([^\s]+)/);
+          if (m && m[1]) return m[1].trim();
+          throw new Error("no ip");
+        },
+        async () => {
+          const r = await fetchWithTimeout("https://api64.ipify.org?format=json", 3500);
+          const j = await r.json();
+          if (j?.ip) return j.ip;
+          throw new Error("no ip");
+        },
+        async () => {
+          const r = await fetchWithTimeout("https://api.ipify.org?format=json", 3500);
+          const j = await r.json();
+          if (j?.ip) return j.ip;
+          throw new Error("no ip");
+        },
+        async () => {
+          const r = await fetchWithTimeout("https://api.seeip.org/jsonip", 3500);
+          const j = await r.json();
+          if (j?.ip) return j.ip;
+          throw new Error("no ip");
+        },
+        async () => {
+          const r = await fetchWithTimeout("https://ipwho.is/", 3500);
+          const j = await r.json();
+          if (j?.ip) return j.ip;
+          throw new Error("no ip");
         }
+      ];
+
+      try {
+        const ip = await Promise.any(providers.map((fn) => fn()));
+        applyDetectedIp(ip);
+        return ip;
       } catch (e) {
-        // ignore if blocked
+        ipDetectionFinished = true;
+        if (Array.isArray(fallbackLoginLogs) && fallbackLoginLogs.length) {
+          renderLogs(fallbackLoginLogs);
+        }
+        return "";
       }
-      return detectedClientIp;
+    }
+
+    function getBrowserDeviceLabel() {
+      const ua = navigator.userAgent || "";
+      let browser = "Browser";
+      if (/Edg\//i.test(ua)) browser = "Edge";
+      else if (/OPR\/|Opera/i.test(ua)) browser = "Opera";
+      else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browser = "Chrome";
+      else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browser = "Safari";
+      else if (/Firefox\//i.test(ua)) browser = "Firefox";
+
+      let os = "Perangkat";
+      if (/Android/i.test(ua)) os = "Android";
+      else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+      else if (/Windows/i.test(ua)) os = "Windows";
+      else if (/Mac OS X/i.test(ua)) os = "macOS";
+      else if (/Linux/i.test(ua)) os = "Linux";
+
+      return `${browser} • ${os}`;
     }
 
     function resolveWhoAndIp(logItem) {
@@ -1249,8 +1331,10 @@
         detectedClientIp ||
         "";
 
-      const ip = rawIp && rawIp !== "-" ? rawIp : "Mendeteksi IP...";
-      const ua = logItem?.userAgent || logItem?.device || "";
+      const ip = rawIp && rawIp !== "-"
+        ? rawIp
+        : (ipDetectionFinished ? "Tidak tersedia" : "Mendeteksi...");
+      const ua = logItem?.userAgent || logItem?.device || (logItem?.current ? getBrowserDeviceLabel() : "");
       return { who, ip, ua };
     }
 
@@ -1710,8 +1794,7 @@
           if (res.exists) {
             setDbFieldStatus(fieldId, "exists", res.message || "Sudah terdaftar di database");
           } else {
-            setDbFieldStatus(fieldId, "available", res.message || "Belum ada di DB — mengirim kode otomatis...");
-            await autoSendCodeForNewField(fieldType, latestVal);
+            setDbFieldStatus(fieldId, "available", res.message || "Tersedia (belum terdaftar di database)");
           }
         }, 550);
       });
@@ -1848,6 +1931,12 @@
             toast("Nomor telepon sudah terdaftar di database", "error");
             return;
           }
+          if (!profileManualOtpRequested) {
+            toast("Klik tombol 'Minta Kode OTP' terlebih dahulu untuk memunculkan kotak OTP", "info");
+            $("phoneResend")?.focus();
+            return;
+          }
+          $("profileOtpInputsWrap")?.classList.remove("hidden");
           await autoSendCodeForNewField("phone", phoneNew);
           return;
         }
@@ -1860,6 +1949,12 @@
         const hasFieldChanges = (newFull && newFull !== oldFull) || (newUser && newUser !== cur.username) || (newEmail && newEmail !== cur.email);
 
         if (hasFieldChanges && enteredOtp.length !== 6) {
+          if (!profileManualOtpRequested) {
+            toast("Klik tombol 'Minta Kode OTP' terlebih dahulu untuk memunculkan kotak OTP", "info");
+            $("phoneResend")?.focus();
+            return;
+          }
+          $("profileOtpInputsWrap")?.classList.remove("hidden");
           $("phoneOtpErr").textContent = "Masukkan 6 digit kode OTP di kotak OTP Edit Profil terlebih dahulu.";
           $("phoneOtpErr").classList.remove("hidden");
           phoneOtp.markError();
@@ -1924,18 +2019,39 @@
     $("phoneCancel").addEventListener("click", () => {
       pendingPhone = null;
       autoSentKey = "";
-      phoneOtp.clear(false);
+      phoneOtp.clear(true);
       $("phoneOtpErr").classList.add("hidden");
-      $("phone").value = user?.nomor || "";
-      setDbFieldStatus("phone", "", "");
       toast("Input OTP direset", "info");
     });
 
+    let profileManualOtpRequested = false;
     $("phoneResend").addEventListener("click", async () => {
-      const targetPhone = pendingPhone || $("phone").value.trim() || user?.nomor || "";
-      autoSentKey = "";
-      await autoSendCodeForNewField("phone", targetPhone);
-      phoneOtp.clear();
+      if (!isProfileEditUnlocked) {
+        toast("Klik tombol Edit terlebih dahulu", "info");
+        return;
+      }
+      const btn = $("phoneResend");
+      const wrap = $("profileOtpInputsWrap");
+      if (wrap) wrap.classList.remove("hidden");
+      profileManualOtpRequested = true;
+
+      const phoneVal = $("phone").value.trim();
+      const emailVal = $("email").value.trim();
+      const oldPhone = user?.nomor || "";
+      const isPhoneChanged = phoneVal && phoneVal !== oldPhone;
+      const fieldType = isPhoneChanged ? "phone" : (emailVal && emailVal !== user?.email ? "email" : "profile");
+      const targetVal = isPhoneChanged ? phoneVal : (emailVal || user?.email || "");
+
+      setLoading(btn, true);
+      try {
+        autoSentKey = "";
+        await autoSendCodeForNewField(fieldType, targetVal);
+        if (isPhoneChanged) pendingPhone = phoneVal;
+        phoneOtp.clear(true);
+      } finally {
+        setLoading(btn, false);
+        btn.innerHTML = '<i class="fas fa-rotate-right"></i> Kirim Ulang OTP';
+      }
     });
 
     /* ---------- Keamanan ---------- */
@@ -2072,6 +2188,7 @@
       } catch (e) {
         // ignore if locked before user load
       }
+      detectClientIpIfMissing();
       loadUser();
     }
     if (document.readyState === "loading") {
