@@ -1477,7 +1477,7 @@
         };
       }
 
-      // 1. Try purpose-specific backend endpoint first, then fallback to working Gmail OTP endpoint (/profile/request-password-otp)
+      // 1. Try purpose-specific backend endpoint first, then fallback to /profile/request-password-otp carrying explicit purpose
       const endpointMap = {
         reset_password: ["/profile/request-password-otp"],
         logout_device: ["/profile/request-remove-device-otp", "/profile/login-log/request-otp", "/profile/request-password-otp"],
