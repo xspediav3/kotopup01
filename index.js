@@ -120,15 +120,6 @@ function getClientIp(req) {
   return raw.replace(/^::ffff:/, "");
 }
 
-function escapeHtml(str) {
-  return String(str || "").replace(/[<>&"]/g, (ch) => ({
-    "<": "&lt;",
-    ">": "&gt;",
-    "&": "&amp;",
-    '"': "&quot;",
-  }[ch]));
-}
-
 async function requireLogin(req, res, next) {
   if (!req.session.userId) {
     return res.redirect("/auth/login");
@@ -1055,7 +1046,7 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// ===== OTP ganti password / hapus device / ubah profil (Gmail) =====
+// ===== OTP ganti password (Gmail) =====
 // ===== Gmail API (HTTPS, tidak terkena blokir SMTP) =====
 let googleTokenCache = { token: null, expiresAt: 0 };
 
@@ -1167,54 +1158,24 @@ function mailErrorMessage(err) {
   return "Gagal mengirim email: " + (code || text || "error tidak diketahui");
 }
 
-function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
-  const safeName = escapeHtml(username || "Pengguna");
+async function sendPasswordOtpEmail(toEmail, otpCode, username) {
+  const safeName = String(username || "").replace(/[<>&"]/g, "");
+  const subject = "Kode Ganti Password - Felix TopUp";
+  const html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
+      <h2 style="color:#166534;margin:0 0 8px;">Ganti Password</h2>
+      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:</p>
+      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
+      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.</p>
+    </div>`;
 
-  if (purpose === "logout_device") {
-    const safeWho = escapeHtml(meta.who || username || "Perangkat");
-    const safeIp = escapeHtml(meta.ip || "-");
-    return {
-      subject: "Kode OTP Keluarkan Perangkat - Felix TopUp",
-      heading: "Konfirmasi Keluarkan Perangkat",
-      intro: `Halo ${safeName}, kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun Anda:`,
-      detailHtml: `
-        <div style="background:#f7fdf9;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#14231a;">
-          <div><strong>Perangkat / Akun:</strong> ${safeWho}</div>
-          <div><strong>Alamat IP:</strong> ${safeIp}</div>
-        </div>`,
-      footer: "Kode berlaku 5 menit. Jika Anda tidak meminta mengeluarkan perangkat ini, segera ganti password akun Anda.",
-      toastMessage: "Kode OTP Keluarkan Perangkat sudah dikirim ke email Anda",
-    };
-  }
-
-  if (purpose === "edit_profile") {
-    const safeFieldInfo = escapeHtml(meta.changedSummary || meta.value || meta.field || "Perubahan data profil");
-    return {
-      subject: "Kode OTP Ubah Profil - Felix TopUp",
-      heading: "Verifikasi Ubah Profil",
-      intro: `Halo ${safeName}, gunakan kode berikut untuk mengonfirmasi perubahan data profil (${safeFieldInfo}) pada akun Anda:`,
-      detailHtml: "",
-      footer: "Kode berlaku 5 menit. Jika Anda tidak mengajukan perubahan profil, abaikan email ini dan amankan akun Anda.",
-      toastMessage: "Kode OTP Ubah Profil sudah dikirim ke email Anda",
-    };
-  }
-
-  return {
-    subject: "Kode Ganti Password - Felix TopUp",
-    heading: "Ganti Password",
-    intro: `Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:`,
-    detailHtml: "",
-    footer: "Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.",
-    toastMessage: "Kode OTP Ganti Password sudah dikirim ke email Anda",
-  };
-}
-
-async function dispatchHtmlEmail(toEmail, subject, html) {
+  // Utama: Gmail API
   if (process.env.GOOGLE_REFRESH_TOKEN) {
     await sendViaGmailApi(toEmail, subject, html);
     return;
   }
 
+  // Cadangan 1: Brevo
   if (process.env.BREVO_API_KEY) {
     await axios.post(
       "https://api.brevo.com/v3/smtp/email",
@@ -1236,6 +1197,7 @@ async function dispatchHtmlEmail(toEmail, subject, html) {
     return;
   }
 
+  // Cadangan 2: Gmail SMTP (sering diblokir di Railway)
   await mailer.sendMail({
     from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
     to: toEmail,
@@ -1244,33 +1206,10 @@ async function dispatchHtmlEmail(toEmail, subject, html) {
   });
 }
 
-async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_password", meta = {}) {
-  const tpl = buildPurposeOtpTemplate(purpose, otpCode, username, meta);
-  const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-      <h2 style="color:#166534;margin:0 0 8px;">${tpl.heading}</h2>
-      <p style="margin:0 0 14px;">${tpl.intro}</p>
-      ${tpl.detailHtml}
-      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${escapeHtml(otpCode)}</div>
-      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">${tpl.footer}</p>
-    </div>`;
-
-  await dispatchHtmlEmail(toEmail, tpl.subject, html);
-}
-
-async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
+app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
-    return res.status(400).json({ success: false, message: "Admin tidak menggunakan fitur ini" });
+    return res.status(400).json({ success: false, message: "Admin tidak dapat mengubah password" });
   }
-  const purpose = String(req.body?.purpose || fallbackPurpose || "reset_password").trim();
-  const meta = {
-    who: req.body?.who || "",
-    ip: req.body?.ip || getClientIp(req),
-    field: req.body?.field || "",
-    value: req.body?.value || "",
-    changedSummary: req.body?.changedSummary || req.body?.text || "",
-  };
-
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
@@ -1279,78 +1218,33 @@ async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
     if (!user.email) {
       return res.status(400).json({ success: false, message: "Email akun belum diatur" });
     }
-
     const now = Date.now();
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const tpl = buildPurposeOtpTemplate(purpose, otpCode, user.username, meta);
+    // Cooldown 60 detik supaya email tidak terkirim berulang-ulang
+    if (user.passwordOtpExpired && user.passwordOtpExpired.getTime() - now > 4 * 60 * 1000) {
+      return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta kode baru" });
+    }
 
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     await User.updateOne(
       { _id: user._id },
-      {
-        $set: {
-          passwordOtp: otpCode,
-          passwordOtpExpired: new Date(now + 5 * 60 * 1000),
-          otpCode,
-          otpCodeExpired: new Date(now + 5 * 60 * 1000),
-          aktifitas: purpose,
-        },
-      }
+      { $set: { passwordOtp: otpCode, passwordOtpExpired: new Date(now + 5 * 60 * 1000) } }
     );
 
     try {
-      await sendPurposeOtpEmail(user.email, otpCode, user.username, purpose, meta);
+      await sendPasswordOtpEmail(user.email, otpCode, user.username);
     } catch (mailErr) {
-      console.error(`Gagal kirim email OTP (${purpose}):`, mailErr);
+      console.error("Gagal kirim email OTP password:", mailErr);
       await User.updateOne(
         { _id: user._id },
-        { $unset: { passwordOtp: "", passwordOtpExpired: "", otpCode: "", otpCodeExpired: "" } }
+        { $unset: { passwordOtp: "", passwordOtpExpired: "" } }
       );
       return res.status(500).json({ success: false, message: mailErrorMessage(mailErr) });
     }
 
-    return res.json({ success: true, message: tpl.toastMessage, purpose });
+    return res.json({ success: true, message: "Kode OTP sudah dikirim ke email Anda" });
   } catch (err) {
-    console.error(`Error request OTP (${purpose}):`, err);
+    console.error("Error request password OTP:", err);
     return res.status(500).json({ success: false, message: "Server error" });
-  }
-}
-
-app.post("/profile/request-password-otp", requireLogin, (req, res) =>
-  handlePurposeOtpRequest(req, res, "reset_password")
-);
-
-app.post(
-  ["/profile/request-remove-device-otp", "/profile/login-log/request-otp"],
-  requireLogin,
-  (req, res) => handlePurposeOtpRequest(req, res, "logout_device")
-);
-
-app.post(
-  ["/profile/request-profile-otp", "/profile/send-verification-code", "/profile/request-email-otp"],
-  requireLogin,
-  (req, res) => handlePurposeOtpRequest(req, res, "edit_profile")
-);
-
-app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req.session.userId);
-    const toEmail = String(req.body?.email || user?.email || "").trim();
-    if (!toEmail) {
-      return res.status(400).json({ success: false, message: "Email tujuan tidak tersedia" });
-    }
-    const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
-    const rawText = String(req.body?.text || "Ada aktivitas pada akun Anda.");
-    const html = `
-      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-        <h2 style="color:#166534;margin:0 0 8px;">${escapeHtml(subject)}</h2>
-        <pre style="white-space:pre-wrap;font-family:'Segoe UI',Arial,sans-serif;margin:0;font-size:13px;color:#14231a;">${escapeHtml(rawText)}</pre>
-      </div>`;
-
-    await dispatchHtmlEmail(toEmail, subject, html);
-    return res.json({ success: true, message: "Notifikasi berhasil dikirim ke Gmail" });
-  } catch (err) {
-    console.error("Error send-notification-email:", err);
-    return res.status(500).json({ success: false, message: mailErrorMessage(err) });
   }
 });
 
@@ -1358,7 +1252,7 @@ app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({ success: false, message: "Admin tidak memiliki riwayat login" });
   }
-  const { logId, otp } = req.body;
+  const { logId } = req.body;
   if (!logId || !mongoose.Types.ObjectId.isValid(logId)) {
     return res.status(400).json({ success: false, message: "ID riwayat tidak valid" });
   }
@@ -1366,16 +1260,6 @@ app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
-    }
-    if (otp !== undefined) {
-      const validOtp = user.passwordOtp || user.otpCode;
-      const validExp = user.passwordOtpExpired || user.otpCodeExpired;
-      if (!validOtp || String(otp).trim() !== String(validOtp)) {
-        return res.status(400).json({ success: false, message: "Kode OTP tidak cocok" });
-      }
-      if (validExp && new Date(validExp) < new Date()) {
-        return res.status(400).json({ success: false, message: "Kode OTP sudah kadaluarsa" });
-      }
     }
     const entry = user.loginLogs.id(logId);
     if (!entry) {
@@ -1524,7 +1408,7 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
     }
 
     const now = Date.now();
-    // Cooldown 60 detik supaya email tidak terkirim berulang-ulang
+    // Cooldown 60 detik supaya email tidak dikirim berulang-ulang
     if (user.otpCodeExpired && user.otpCodeExpired.getTime() - now > 4 * 60 * 1000) {
       return res.status(429).json({
         success: false,
