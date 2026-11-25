@@ -367,7 +367,7 @@
     .otp-group input.err { border-color: var(--danger); }
     .err-text { color: var(--danger); font-size: 12px; margin: 6px 0 0; }
 
-    /* ---------- Log login ---------- */
+    /* ---------- Log login & Device OTP Modal ---------- */
     .table-wrap { overflow-x: auto; }
     .log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     .log th {
@@ -379,9 +379,48 @@
       padding: 8px 6px;
       border-bottom: 1.5px solid var(--stroke-soft);
     }
-    .log td { padding: 10px 6px; border-bottom: 1px solid var(--stroke-soft); vertical-align: top; }
+    .log td { padding: 10px 6px; border-bottom: 1px solid var(--stroke-soft); vertical-align: middle; }
     .log td.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
-    .log td.ellipsis { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .who-name { font-weight: 600; color: var(--text); font-size: 12.5px; }
+    .who-meta { font-size: 11px; color: var(--muted); }
+    .badge-cur {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--green-dark);
+      background: #dcfce7;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      padding: 1px 7px;
+    }
+    .device-otp-panel {
+      margin-top: 14px;
+      border: 1.5px solid var(--stroke);
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .device-otp-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .device-otp-title {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--green-dark);
+    }
+    .device-target-box {
+      background: var(--card);
+      border: 1px solid var(--stroke-soft);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
 
     /* ---------- IP ---------- */
     .ip-row {
@@ -410,8 +449,8 @@
       border: 1.5px solid #fca5a5;
       color: var(--danger);
       border-radius: 8px;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
       display: grid;
       place-items: center;
@@ -609,17 +648,34 @@
       </div>
 
       <div class="card">
-        <h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Riwayat Login</h3>
+        <h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Aktivitas Login</h3>
+        <p class="muted">Menampilkan siapa yang login, alamat IP/perangkat, dan waktu login. Klik ikon tong sampah untuk mengeluarkan device setelah konfirmasi kode OTP dari Gmail terdaftar.</p>
         <div class="table-wrap">
           <table class="log">
             <thead>
-              <tr><th>Alamat IP</th><th>Waktu Login</th><th></th></tr>
+              <tr><th>Siapa &amp; IP</th><th>Waktu Login</th><th>Aksi</th></tr>
             </thead>
             <tbody id="logBody"></tbody>
           </table>
         </div>
-      </div>
 
+        <div class="device-otp-panel hidden" id="deviceOtpPanel">
+          <div class="device-otp-head">
+            <div class="device-otp-title"><i class="fas fa-envelope-circle-check"></i> Konfirmasi Kode OTP Gmail</div>
+            <button type="button" class="btn btn-sm btn-ghost" id="cancelDeviceOtpBtn">Batal</button>
+          </div>
+          <div class="device-target-box" id="deviceTargetInfo">
+            Device terpilih: <b>-</b>
+          </div>
+          <div class="row" style="margin-bottom:8px">
+            <input class="input" id="deviceOtpInput" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan kode OTP 6 digit dari Gmail" autocomplete="one-time-code"/>
+            <button type="button" class="btn btn-ghost btn-sm" id="resendDeviceOtpBtn">Kirim Kode</button>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="confirmRemoveDeviceBtn">
+            <i class="fas fa-trash-can"></i> Konfirmasi &amp; Keluarkan Device
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- ================= API ================= -->
@@ -666,6 +722,7 @@
     let pendingPhone = null;
     let ipList = [];
     let isProfileEditUnlocked = false;
+    let pendingDeviceToRemove = null;
 
     const EDITABLE_INPUT_IDS = ["firstName", "lastName", "username", "email", "phone"];
 
@@ -945,55 +1002,176 @@
       if (e.key === "Enter") { e.preventDefault(); addIp(); }
     });
 
-    /* ---------- Riwayat login ---------- */
+    /* ---------- Aktivitas Login + OTP Gmail untuk Tong Sampah Device ---------- */
+    function resolveWhoLoggedIn(logItem) {
+      const who =
+        logItem?.who ||
+        logItem?.user ||
+        logItem?.username ||
+        logItem?.fullname ||
+        logItem?.email ||
+        logItem?.device ||
+        user?.fullname ||
+        user?.username ||
+        "Akun Pengguna";
+      const ip = logItem?.ip || "-";
+      const ua = logItem?.userAgent || logItem?.deviceName || "";
+      return { who, ip, ua };
+    }
+
     function renderLogs(logs) {
       const tb = $("logBody");
       tb.innerHTML = "";
-      if (!logs.length) {
-        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data login</td></tr>';
+      if (!Array.isArray(logs) || !logs.length) {
+        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data aktivitas login</td></tr>';
         return;
       }
-      logs.forEach((l) => {
+      logs.forEach((l, idx) => {
+        const { who, ip, ua } = resolveWhoLoggedIn(l);
+        const logId = l._id || l.id || String(idx);
+
         const tr = document.createElement("tr");
-        const ipTd = document.createElement("td");
-        ipTd.className = "mono";
-        ipTd.textContent = l.ip || "-";
+
+        const whoTd = document.createElement("td");
+        const nameEl = document.createElement("div");
+        nameEl.className = "who-name";
+        nameEl.textContent = `${who} • ${ip}`;
+        whoTd.appendChild(nameEl);
+
+        if (ua) {
+          const uaEl = document.createElement("div");
+          uaEl.className = "who-meta";
+          uaEl.textContent = ua;
+          whoTd.appendChild(uaEl);
+        }
+
+        if (l.current) {
+          const curBadge = document.createElement("span");
+          curBadge.className = "badge-cur";
+          curBadge.textContent = "Perangkat ini";
+          whoTd.appendChild(curBadge);
+        }
+
         const timeTd = document.createElement("td");
-        timeTd.textContent = formatDate(l.time) + (l.current ? " (perangkat ini)" : "");
+        timeTd.textContent = formatDate(l.time || l.loginAt || l.createdAt);
+
         const actTd = document.createElement("td");
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "trash-btn";
-        btn.dataset.id = l._id;
-        btn.setAttribute("aria-label", "Keluarkan perangkat ini");
-        btn.title = "Keluarkan perangkat ini";
+        btn.dataset.id = logId;
+        btn.dataset.who = who;
+        btn.dataset.ip = ip;
+        btn.dataset.time = l.time || l.loginAt || l.createdAt || "";
+        btn.dataset.current = l.current ? "1" : "0";
+        btn.setAttribute("aria-label", `Keluarkan device ${who} (${ip})`);
+        btn.title = "Kirim kode OTP Gmail & keluarkan device";
         btn.innerHTML = '<i class="fas fa-trash-can"></i>';
         actTd.appendChild(btn);
-        tr.append(ipTd, timeTd, actTd);
+
+        tr.append(whoTd, timeTd, actTd);
         tb.appendChild(tr);
       });
+    }
+
+    async function sendDeviceRemovalOtp(deviceInfo, triggerBtn = null) {
+      if (triggerBtn) setLoading(triggerBtn, true);
+      try {
+        const targetEmail = user?.email || "";
+        const d = await postJson("/profile/request-remove-device-otp", {
+          logId: deviceInfo.logId,
+          who: deviceInfo.who,
+          ip: deviceInfo.ip,
+          loginTime: deviceInfo.time,
+          email: targetEmail,
+        });
+        if (d.success) {
+          toast(
+            d.message || `Kode OTP 6 digit telah dikirim ke Gmail terdaftar (${targetEmail || "akun Anda"})`,
+            "success"
+          );
+          return true;
+        }
+        toast(d.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
+        return false;
+      } finally {
+        if (triggerBtn) setLoading(triggerBtn, false);
+      }
     }
 
     $("logBody").addEventListener("click", async (e) => {
       const btn = e.target.closest(".trash-btn");
       if (!btn) return;
-      const isCurrent = btn.closest("tr").textContent.includes("(perangkat ini)");
-      const msg = isCurrent
-        ? "Keluarkan perangkat ini? Anda akan keluar dari akun."
-        : "Keluarkan perangkat ini dari akun?";
-      if (!confirm(msg)) return;
-      setLoading(btn, true);
-      const d = await postJson("/profile/login-log/delete", { logId: btn.dataset.id });
-      if (d.loggedOut) {
-        window.location.href = "/auth/login";
+
+      const deviceInfo = {
+        logId: btn.dataset.id,
+        who: btn.dataset.who || user?.fullname || user?.username || "Pengguna",
+        ip: btn.dataset.ip || "-",
+        time: btn.dataset.time || "",
+        isCurrent: btn.dataset.current === "1",
+      };
+
+      pendingDeviceToRemove = deviceInfo;
+      $("deviceTargetInfo").innerHTML =
+        `Device terpilih: <b>${deviceInfo.who}</b> (IP: <code>${deviceInfo.ip}</code>)` +
+        (deviceInfo.time ? `<br>Waktu login: <b>${formatDate(deviceInfo.time)}</b>` : "") +
+        (deviceInfo.isCurrent ? `<br><span style="color:var(--danger);font-weight:600">Perangkat ini (akan logout setelah konfirmasi)</span>` : "");
+      $("deviceOtpInput").value = "";
+      $("deviceOtpPanel").classList.remove("hidden");
+      $("deviceOtpInput").focus();
+
+      await sendDeviceRemovalOtp(deviceInfo, btn);
+    });
+
+    $("resendDeviceOtpBtn").addEventListener("click", async () => {
+      if (!pendingDeviceToRemove) {
+        toast("Pilih device terlebih dahulu", "error");
         return;
       }
-      if (d.success) {
-        toast(d.message || "Perangkat berhasil dikeluarkan", "success");
-        await loadUser();
-      } else {
+      await sendDeviceRemovalOtp(pendingDeviceToRemove, $("resendDeviceOtpBtn"));
+    });
+
+    $("cancelDeviceOtpBtn").addEventListener("click", () => {
+      pendingDeviceToRemove = null;
+      $("deviceOtpInput").value = "";
+      $("deviceOtpPanel").classList.add("hidden");
+    });
+
+    $("confirmRemoveDeviceBtn").addEventListener("click", async () => {
+      if (!pendingDeviceToRemove) {
+        toast("Pilih device yang ingin dikeluarkan terlebih dahulu", "error");
+        return;
+      }
+      const otp = $("deviceOtpInput").value.trim();
+      if (!/^\d{6}$/.test(otp)) {
+        toast("Masukkan kode OTP 6 digit dari Gmail terdaftar", "error");
+        $("deviceOtpInput").focus();
+        return;
+      }
+
+      const btn = $("confirmRemoveDeviceBtn");
+      setLoading(btn, true);
+      try {
+        const d = await postJson("/profile/login-log/delete", {
+          logId: pendingDeviceToRemove.logId,
+          otp,
+        });
+        if (d.loggedOut) {
+          toast("Device dikonfirmasi & dikeluarkan. Mengarahkan ke halaman login...", "success");
+          setTimeout(() => { window.location.href = "/auth/login"; }, 800);
+          return;
+        }
+        if (d.success) {
+          toast(d.message || "Device berhasil dikeluarkan setelah konfirmasi OTP", "success");
+          pendingDeviceToRemove = null;
+          $("deviceOtpInput").value = "";
+          $("deviceOtpPanel").classList.add("hidden");
+          await loadUser();
+        } else {
+          toast(d.message || "Kode OTP tidak valid atau gagal mengeluarkan device", "error");
+        }
+      } finally {
         setLoading(btn, false);
-        toast(d.message || "Gagal mengeluarkan perangkat", "error");
       }
     });
 
@@ -1047,7 +1225,16 @@
         $("myIpWrap").classList.remove("hidden");
       }
 
-      renderLogs(Array.isArray(u.loginLogs) ? u.loginLogs : []);
+      const rawLogs = Array.isArray(u.loginLogs) && u.loginLogs.length
+        ? u.loginLogs
+        : (u.lastLogin ? [{
+            _id: "last-login",
+            who: display,
+            ip: u.currentIp || "-",
+            time: u.lastLogin,
+            current: true,
+          }] : []);
+      renderLogs(rawLogs);
     }
 
     async function loadUser() {
