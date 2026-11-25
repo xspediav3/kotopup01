@@ -93,7 +93,6 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-
 const User = mongoose.model("User", userSchema);
 
 app.use(express.json());
@@ -120,17 +119,24 @@ function getClientIp(req) {
   return raw.replace(/^::ffff:/, "");
 }
 
+function escapeHtml(str) {
+  return String(str || "").replace(/[<>&"]/g, (ch) => ({
+    "<": "&lt;",
+    ">": "&gt;",
+    "&": "&amp;",
+    '"': "&quot;",
+  }[ch]));
+}
+
 async function requireLogin(req, res, next) {
   if (!req.session.userId) {
     return res.redirect("/auth/login");
   }
 
-  // Handle custom admin session
   if (req.session.userId === "custom-admin") {
     return next();
   }
 
-  // Validate MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(req.session.userId)) {
     req.session.destroy(() => {});
     return res.redirect("/auth/login");
@@ -138,7 +144,6 @@ async function requireLogin(req, res, next) {
 
   try {
     const u = await User.findById(req.session.userId).select("authVersion").lean();
-    // Sesi lama (dari "keluarkan semua perangkat" / ganti password) dianggap tidak valid
     if (!u || (u.authVersion || 0) !== (req.session.authVersion || 0)) {
       req.session.destroy(() => {});
       return res.redirect("/auth/login");
@@ -158,10 +163,8 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Helper function untuk mendapatkan user data dengan aman
 async function getCurrentUser(userId) {
   if (userId === "custom-admin") {
-    // Return dummy admin data
     return {
       _id: "custom-admin",
       fullname: "Admin Felix",
@@ -193,7 +196,6 @@ async function getCurrentUser(userId) {
 
 async function tambahHistoryDeposit(userId, depositData) {
   try {
-    // Skip untuk custom admin
     if (userId === "custom-admin") {
       return { _id: "custom-admin" };
     }
@@ -229,7 +231,6 @@ async function tambahHistoryDeposit(userId, depositData) {
 
 async function editHistoryDeposit(userId, depositId, newStatus) {
   try {
-    // Skip untuk custom admin
     if (userId === "custom-admin") {
       return { _id: "custom-admin" };
     }
@@ -251,7 +252,6 @@ async function editHistoryDeposit(userId, depositId, newStatus) {
 
 async function tambahHistoryOrder(userId, orderData) {
   try {
-    // Skip untuk custom admin
     if (userId === "custom-admin") {
       return { _id: "custom-admin" };
     }
@@ -286,7 +286,6 @@ async function tambahHistoryOrder(userId, orderData) {
 
 async function editHistoryOrder(userId, orderId, updateData) {
   try {
-    // Skip untuk custom admin
     if (userId === "custom-admin") {
       return { _id: "custom-admin" };
     }
@@ -328,7 +327,6 @@ function generateReffId() {
   return "TRX-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -340,7 +338,6 @@ app.get("/support", (req, res) => {
 app.get("/auth/forgot-password", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "forgot.html"));
 });
-
 
 app.get("/auth/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
@@ -401,7 +398,6 @@ app.get("/auth/login", (req, res) => {
 
 app.post("/auth/login", async (req, res) => {
   try {
-    // CUSTOM ADMIN LOGIN
     if (req.body.usernameOrEmail === "Felix" && req.body.password === "100209") {
         req.session.userId = "custom-admin";
         req.session.role = "admin";
@@ -511,8 +507,6 @@ app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "docs.html"));
 });
 
-//ADMIN RUTE 
-
 app.get("/admin/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "dashboard.html"));
 });
@@ -529,13 +523,10 @@ app.get("/admin/order", requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "order.html"));
 });
 
-
 app.get("/auth/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/auth/login");
 });
-
-
 
 app.get("/profile/users", requireLogin, async (req, res) => {
   try {
@@ -586,14 +577,12 @@ app.get("/profile/users", requireLogin, async (req, res) => {
 app.get("/api/history/deposit", requireLogin, async (req, res) => {
   try {
     const user = await getCurrentUser(req.session.userId);
-    
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User tidak ditemukan",
       });
     }
-
     return res.status(200).json({
       success: true,
       historyDeposit: user.historyDeposit || [],
@@ -610,14 +599,12 @@ app.get("/api/history/deposit", requireLogin, async (req, res) => {
 app.get("/api/history/order", requireLogin, async (req, res) => {
   try {
     const user = await getCurrentUser(req.session.userId);
-    
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User tidak ditemukan",
       });
     }
-
     return res.status(200).json({
       success: true,
       historyOrder: user.historyOrder || [],
@@ -652,40 +639,35 @@ async function CatBox(buffer, originalname) {
   return api.data;
 }
 
-app.post("/profile/update-photo",requireLogin, uploadMemory.single("photo"), async (req, res) => {
-    try {
-      // Skip untuk custom admin
-      if (req.session.userId === "custom-admin") {
-        return res.status(400).json({
-          success: false,
-          message: "Admin tidak dapat mengubah foto profil",
-        });
-      }
-      
-      const file = req.file;
-      if (!file) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No file uploaded" });
-      }
-      const uploadedUrl = await CatBox(file.buffer, file.originalname);
-      await User.findByIdAndUpdate(req.session.userId, {
-        profileUrl: uploadedUrl,
-      });
-      return res.status(200).json({
-        success: true,
-        message: "Profile photo updated successfully",
-        profileUrl: uploadedUrl,
-      });
-    } catch (error) {
-      console.error("Error update profile photo:", error);
-      return res.status(500).json({
+app.post("/profile/update-photo", requireLogin, uploadMemory.single("photo"), async (req, res) => {
+  try {
+    if (req.session.userId === "custom-admin") {
+      return res.status(400).json({
         success: false,
-        message: "Failed to update profile photo",
+        message: "Admin tidak dapat mengubah foto profil",
       });
     }
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+    const uploadedUrl = await CatBox(file.buffer, file.originalname);
+    await User.findByIdAndUpdate(req.session.userId, {
+      profileUrl: uploadedUrl,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Profile photo updated successfully",
+      profileUrl: uploadedUrl,
+    });
+  } catch (error) {
+    console.error("Error update profile photo:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile photo",
+    });
   }
-);
+});
 
 app.post("/get/forgot-password", async (req, res) => {
   const { nomor } = req.body;
@@ -706,7 +688,7 @@ app.post("/get/forgot-password", async (req, res) => {
       );
     }
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // OTP berlaku 5 menit
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await User.findOneAndUpdate(
       { nomor: normalizedNomor },
       {
@@ -785,7 +767,7 @@ app.get("/api/user-otp-info", async (req, res) => {
           aktifitas: user.aktifitas || null,
         };
       })
-      .filter((user) => user.otpCode && user.aktifitas); // Filter hanya data dengan otpCode dan aktifitas tidak null
+      .filter((user) => user.otpCode && user.aktifitas);
 
     res.json({ success: true, data: result });
   } catch (error) {
@@ -797,47 +779,34 @@ app.get("/api/user-otp-info", async (req, res) => {
   }
 });
 
-
 app.post("/profile/request-email-change", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah email",
     });
   }
-  
   const { newEmail } = req.body;
-  
   if (!newEmail) {
-    return res
-      .status(400)
-      .json({ success: false, message: "New email is required" });
+    return res.status(400).json({ success: false, message: "New email is required" });
   }
-  
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  
   if (newEmail === user.email) {
     return res.status(400).json({
       success: false,
       message: "New email cannot be the same as current email",
     });
   }
-  
   const emailUsed = await User.findOne({ email: newEmail });
   if (emailUsed) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Email already in use" });
+    return res.status(400).json({ success: false, message: "Email already in use" });
   }
-  
   try {
     user.email = newEmail;
     await user.save();
-
     return res.json({
       success: true,
       message: "Email updated successfully",
@@ -850,20 +819,15 @@ app.post("/profile/request-email-change", requireLogin, async (req, res) => {
 });
 
 app.post("/profile/change-fullname", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah nama lengkap",
     });
   }
-  
   const { newFullname } = req.body;
-
   if (!newFullname) {
-    return res
-      .status(400)
-      .json({ success: false, message: "New fullname is required" });
+    return res.status(400).json({ success: false, message: "New fullname is required" });
   }
   const user = await User.findById(req.session.userId);
   if (!user) {
@@ -879,26 +843,20 @@ app.post("/profile/change-fullname", requireLogin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error changing fullname:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 app.post("/profile/change-username", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah username",
     });
   }
-  
   const { newUsername } = req.body;
   if (!newUsername) {
-    return res
-      .status(400)
-      .json({ success: false, message: "New username is required" });
+    return res.status(400).json({ success: false, message: "New username is required" });
   }
   const user = await User.findById(req.session.userId);
   if (!user) {
@@ -906,9 +864,7 @@ app.post("/profile/change-username", requireLogin, async (req, res) => {
   }
   const existingUsername = await User.findOne({ username: newUsername });
   if (existingUsername) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Username already exists" });
+    return res.status(400).json({ success: false, message: "Username already exists" });
   }
   try {
     user.username = newUsername;
@@ -920,21 +876,17 @@ app.post("/profile/change-username", requireLogin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error changing username:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 app.post("/get/otp-change-nomor", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah nomor telepon",
     });
   }
-  
   const { nomorLama } = req.body;
   if (!nomorLama) {
     return res.status(400).json({ success: false, message: "Nomor lama harus diisi" });
@@ -945,12 +897,11 @@ app.post("/get/otp-change-nomor", requireLogin, async (req, res) => {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
     }
     const now = new Date();
-    if (user.otpCodeExpired && user.otpCodeExpired > now) {
-    } else {
+    if (!(user.otpCodeExpired && user.otpCodeExpired > now)) {
       await User.updateOne({ nomor: nomorLama }, { $set: { otpCode: null, otpCodeExpired: null } });
     }
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 menit
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await User.findOneAndUpdate(
       { nomor: nomorLama },
       {
@@ -964,21 +915,19 @@ app.post("/get/otp-change-nomor", requireLogin, async (req, res) => {
       message: "OTP berhasil dibuat, gunakan untuk konfirmasi",
       otp: otpCode, 
     });
-  } catch (err) {
-    console.error("Error generate OTP:", err);
+  } catch (error) {
+    console.error("Error generate OTP:", error);
     return res.status(500).json({ success: false, message: "Gagal generate OTP" });
   }
 });
 
 app.post("/auth/change-number", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah nomor telepon",
     });
   }
-  
   const { nomorLama, otp, nomorBaru } = req.body;
   if (!nomorLama || !otp || !nomorBaru) {
     return res.status(400).json({ success: false, message: "Semua field harus diisi" });
@@ -1003,21 +952,19 @@ app.post("/auth/change-number", requireLogin, async (req, res) => {
       { nomor: nomorBaru, $unset: { otpCode: "", otpCodeExpired: "" } }
     );
     res.json({ success: true, message: "Nomor berhasil diubah", nomorBaru });
-  } catch (err) {
-    console.error("Error mengubah nomor:", err);
+  } catch (error) {
+    console.error("Error mengubah nomor:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak memiliki API Key",
     });
   }
-  
   try {
     let newApiKey = generateApiKey();
     let apiKeyExists = await User.findOne({ apiKey: newApiKey });
@@ -1027,9 +974,7 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
     }
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     user.apiKey = newApiKey;
     await user.save();
@@ -1040,176 +985,119 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error regenerating API Key:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
-// ===== OTP ganti password (Gmail) =====
-// ===== Gmail API (HTTPS, tidak terkena blokir SMTP) =====
-let googleTokenCache = { token: null, expiresAt: 0 };
+// ===== Email OTP & Notifikasi (Gmail SMTP - tanpa perlu GOOGLE_REFRESH_TOKEN) =====
+const mailer = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-async function getGoogleAccessToken() {
-  if (googleTokenCache.token && Date.now() < googleTokenCache.expiresAt - 60000) {
-    return googleTokenCache.token;
-  }
-  const res = await axios.post(
-    "https://oauth2.googleapis.com/token",
-    new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-      grant_type: "refresh_token",
-    }).toString(),
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" }, timeout: 15000 }
-  );
-  googleTokenCache = {
-    token: res.data.access_token,
-    expiresAt: Date.now() + (res.data.expires_in || 3600) * 1000,
-  };
-  return googleTokenCache.token;
-}
-
-function buildRawEmail({ from, to, subject, html }) {
-  const encodedSubject = "=?UTF-8?B?" + Buffer.from(subject, "utf8").toString("base64") + "?=";
-  const body = Buffer.from(html, "utf8").toString("base64").replace(/.{1,76}/g, "$&\r\n");
-  const message = [
-    `From: ${from}`,
-    `To: ${to}`,
-    `Subject: ${encodedSubject}`,
-    "MIME-Version: 1.0",
-    'Content-Type: text/html; charset="UTF-8"',
-    "Content-Transfer-Encoding: base64",
-    "",
-    body,
-  ].join("\r\n");
-  return Buffer.from(message, "utf8")
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-
-async function sendViaGmailApi(toEmail, subject, html) {
-  const accessToken = await getGoogleAccessToken();
-  await axios.post(
-    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
-    {
-      raw: buildRawEmail({
-        from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
-        to: toEmail,
-        subject,
-        html,
-      }),
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      timeout: 15000,
-    }
-  );
-}
-
-function mailErrorMessage(err) {
-  const status = err && err.response && err.response.status;
-  const data = (err && err.response && err.response.data) || {};
-
-  if (process.env.GOOGLE_REFRESH_TOKEN) {
-    if (!process.env.GMAIL_USER || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      return "Email server belum lengkap: cek GMAIL_USER, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET di Railway";
-    }
-    if (status === 400 || status === 401) {
-      if (data.error === "invalid_grant") {
-        return "Refresh token Google sudah tidak berlaku, buat ulang GOOGLE_REFRESH_TOKEN";
-      }
-      return "Kredensial Google salah: " + (data.error_description || "cek GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET");
-    }
-    if (status === 403) {
-      return "Gmail API ditolak: " + ((data.error && data.error.message) || "pastikan Gmail API aktif dan scope gmail.send diizinkan");
-    }
-    if (status) return "Gmail API error (" + status + ")";
-    return "Tidak bisa terhubung ke Google, coba lagi nanti";
-  }
-
-  if (process.env.BREVO_API_KEY) {
-    if (!process.env.BREVO_SENDER_EMAIL) {
-      return "Email server belum diatur: BREVO_SENDER_EMAIL kosong di Railway";
-    }
-    if (status === 401) return "API key Brevo salah, cek BREVO_API_KEY di Railway";
-    if (status === 400) return "Brevo menolak email: " + (data.message || "");
-    if (status) return "Brevo error (" + status + "): " + (data.message || "");
-    return "Tidak bisa terhubung ke Brevo, coba lagi nanti";
-  }
-
+function smtpErrorMessage(err) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    return "Email server belum diatur: isi GOOGLE_REFRESH_TOKEN di Railway";
+    return "Email server belum diatur: isi GMAIL_USER dan GMAIL_APP_PASSWORD di Railway";
   }
   const code = err && err.code;
   const text = (err && err.message) || "";
   if (code === "EAUTH" || /Invalid login|Username and Password|535/i.test(text)) {
-    return "Login Gmail ditolak, cek GMAIL_USER dan App Password di Railway";
+    return "Login Gmail ditolak, cek GMAIL_USER dan GMAIL_APP_PASSWORD di Railway";
   }
   if (["ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNREFUSED", "EDNS", "ENOTFOUND"].includes(code)) {
-    return "Server tidak bisa terhubung ke Gmail (kemungkinan koneksi SMTP diblokir)";
+    return "Server tidak bisa terhubung ke Gmail (cek koneksi SMTP/port 587 di Railway)";
   }
   return "Gagal mengirim email: " + (code || text || "error tidak diketahui");
 }
 
-async function sendPasswordOtpEmail(toEmail, otpCode, username) {
-  const safeName = String(username || "").replace(/[<>&"]/g, "");
-  const subject = "Kode Ganti Password - Felix TopUp";
+function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
+  const safeName = escapeHtml(username || "Pengguna");
+
+  if (purpose === "logout_device") {
+    const safeWho = escapeHtml(meta.who || username || "Perangkat");
+    const safeIp = escapeHtml(meta.ip || "-");
+    return {
+      subject: "Kode OTP Keluarkan Perangkat - Felix TopUp",
+      heading: "Konfirmasi Keluarkan Perangkat",
+      intro: `Halo ${safeName}, kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun Anda:`,
+      detailHtml: `
+        <div style="background:#f7fdf9;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#14231a;">
+          <div><strong>Perangkat / Akun:</strong> ${safeWho}</div>
+          <div><strong>Alamat IP:</strong> ${safeIp}</div>
+        </div>`,
+      footer: "Kode berlaku 5 menit. Jika Anda tidak meminta mengeluarkan perangkat ini, segera ganti password akun Anda.",
+      toastMessage: "Kode OTP Keluarkan Perangkat sudah dikirim ke email Anda",
+    };
+  }
+
+  if (purpose === "edit_profile") {
+    const safeFieldInfo = escapeHtml(meta.changedSummary || meta.value || meta.field || "Perubahan data profil");
+    return {
+      subject: "Kode OTP Ubah Profil - Felix TopUp",
+      heading: "Verifikasi Ubah Profil",
+      intro: `Halo ${safeName}, gunakan kode berikut untuk mengonfirmasi perubahan data profil (${safeFieldInfo}) pada akun Anda:`,
+      detailHtml: "",
+      footer: "Kode berlaku 5 menit. Jika Anda tidak mengajukan perubahan profil, abaikan email ini dan amankan akun Anda.",
+      toastMessage: "Kode OTP Ubah Profil sudah dikirim ke email Anda",
+    };
+  }
+
+  return {
+    subject: "Kode Ganti Password - Felix TopUp",
+    heading: "Ganti Password",
+    intro: `Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:`,
+    detailHtml: "",
+    footer: "Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.",
+    toastMessage: "Kode OTP Ganti Password sudah dikirim ke email Anda",
+  };
+}
+
+async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_password", meta = {}) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    const missingErr = new Error("Missing GMAIL_USER or GMAIL_APP_PASSWORD");
+    missingErr.code = "MISSING_SMTP_ENV";
+    throw missingErr;
+  }
+  const tpl = buildPurposeOtpTemplate(purpose, otpCode, username, meta);
   const html = `
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-      <h2 style="color:#166534;margin:0 0 8px;">Ganti Password</h2>
-      <p style="margin:0 0 16px;">Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:</p>
-      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${otpCode}</div>
-      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.</p>
+      <h2 style="color:#166534;margin:0 0 8px;">${tpl.heading}</h2>
+      <p style="margin:0 0 14px;">${tpl.intro}</p>
+      ${tpl.detailHtml}
+      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${escapeHtml(otpCode)}</div>
+      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">${tpl.footer}</p>
     </div>`;
 
-  // Utama: Gmail API
-  if (process.env.GOOGLE_REFRESH_TOKEN) {
-    await sendViaGmailApi(toEmail, subject, html);
-    return;
-  }
-
-  // Cadangan 1: Brevo
-  if (process.env.BREVO_API_KEY) {
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: { name: "Felix TopUp", email: process.env.BREVO_SENDER_EMAIL },
-        to: [{ email: toEmail }],
-        subject,
-        htmlContent: html,
-      },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "content-type": "application/json",
-          accept: "application/json",
-        },
-        timeout: 15000,
-      }
-    );
-    return;
-  }
-
-  // Cadangan 2: Gmail SMTP (sering diblokir di Railway)
   await mailer.sendMail({
     from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
     to: toEmail,
-    subject,
+    subject: tpl.subject,
     html,
   });
 }
 
-app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
+async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
   if (req.session.userId === "custom-admin") {
-    return res.status(400).json({ success: false, message: "Admin tidak dapat mengubah password" });
+    return res.status(400).json({ success: false, message: "Admin tidak menggunakan fitur ini" });
   }
+  const purpose = String(req.body?.purpose || fallbackPurpose || "reset_password").trim();
+  const meta = {
+    who: req.body?.who || "",
+    ip: req.body?.ip || getClientIp(req),
+    field: req.body?.field || "",
+    value: req.body?.value || "",
+    changedSummary: req.body?.changedSummary || req.body?.text || "",
+  };
+
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
@@ -1218,33 +1106,98 @@ app.post("/profile/request-password-otp", requireLogin, async (req, res) => {
     if (!user.email) {
       return res.status(400).json({ success: false, message: "Email akun belum diatur" });
     }
+
     const now = Date.now();
-    // Cooldown 60 detik supaya email tidak terkirim berulang-ulang
-    if (user.passwordOtpExpired && user.passwordOtpExpired.getTime() - now > 4 * 60 * 1000) {
+    if (
+      fallbackPurpose === "reset_password" &&
+      !req.body?.purpose &&
+      user.passwordOtpExpired &&
+      user.passwordOtpExpired.getTime() - now > 4 * 60 * 1000
+    ) {
       return res.status(429).json({ success: false, message: "Tunggu 60 detik sebelum meminta kode baru" });
     }
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const tpl = buildPurposeOtpTemplate(purpose, otpCode, user.username, meta);
+
     await User.updateOne(
       { _id: user._id },
-      { $set: { passwordOtp: otpCode, passwordOtpExpired: new Date(now + 5 * 60 * 1000) } }
+      {
+        $set: {
+          passwordOtp: otpCode,
+          passwordOtpExpired: new Date(now + 5 * 60 * 1000),
+          otpCode,
+          otpCodeExpired: new Date(now + 5 * 60 * 1000),
+          aktifitas: purpose,
+        },
+      }
     );
 
     try {
-      await sendPasswordOtpEmail(user.email, otpCode, user.username);
+      await sendPurposeOtpEmail(user.email, otpCode, user.username, purpose, meta);
     } catch (mailErr) {
-      console.error("Gagal kirim email OTP password:", mailErr);
+      console.error(`Gagal kirim email OTP (${purpose}):`, mailErr);
       await User.updateOne(
         { _id: user._id },
-        { $unset: { passwordOtp: "", passwordOtpExpired: "" } }
+        { $unset: { passwordOtp: "", passwordOtpExpired: "", otpCode: "", otpCodeExpired: "" } }
       );
-      return res.status(500).json({ success: false, message: mailErrorMessage(mailErr) });
+      return res.status(500).json({ success: false, message: smtpErrorMessage(mailErr) });
     }
 
-    return res.json({ success: true, message: "Kode OTP sudah dikirim ke email Anda" });
+    return res.json({ success: true, message: tpl.toastMessage, purpose });
   } catch (err) {
-    console.error("Error request password OTP:", err);
+    console.error(`Error request OTP (${purpose}):`, err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+app.post("/profile/request-password-otp", requireLogin, (req, res) =>
+  handlePurposeOtpRequest(req, res, "reset_password")
+);
+
+app.post(
+  ["/profile/request-remove-device-otp", "/profile/login-log/request-otp"],
+  requireLogin,
+  (req, res) => handlePurposeOtpRequest(req, res, "logout_device")
+);
+
+app.post(
+  ["/profile/request-profile-otp", "/profile/send-verification-code", "/profile/request-email-otp"],
+  requireLogin,
+  (req, res) => handlePurposeOtpRequest(req, res, "edit_profile")
+);
+
+app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req.session.userId);
+    const toEmail = String(req.body?.email || user?.email || "").trim();
+    if (!toEmail) {
+      return res.status(400).json({ success: false, message: "Email tujuan tidak tersedia" });
+    }
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      return res.status(500).json({
+        success: false,
+        message: "Email server belum diatur: isi GMAIL_USER dan GMAIL_APP_PASSWORD di Railway",
+      });
+    }
+    const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
+    const rawText = String(req.body?.text || "Ada aktivitas pada akun Anda.");
+    const html = `
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
+        <h2 style="color:#166534;margin:0 0 8px;">${escapeHtml(subject)}</h2>
+        <pre style="white-space:pre-wrap;font-family:'Segoe UI',Arial,sans-serif;margin:0;font-size:13px;color:#14231a;">${escapeHtml(rawText)}</pre>
+      </div>`;
+
+    await mailer.sendMail({
+      from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+      to: toEmail,
+      subject,
+      html,
+    });
+    return res.json({ success: true, message: "Notifikasi berhasil dikirim ke Gmail" });
+  } catch (err) {
+    console.error("Error send-notification-email:", err);
+    return res.status(500).json({ success: false, message: smtpErrorMessage(err) });
   }
 });
 
@@ -1252,7 +1205,7 @@ app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({ success: false, message: "Admin tidak memiliki riwayat login" });
   }
-  const { logId } = req.body;
+  const { logId, otp } = req.body;
   if (!logId || !mongoose.Types.ObjectId.isValid(logId)) {
     return res.status(400).json({ success: false, message: "ID riwayat tidak valid" });
   }
@@ -1261,13 +1214,22 @@ app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
     }
+    if (otp !== undefined) {
+      const validOtp = user.passwordOtp || user.otpCode;
+      const validExp = user.passwordOtpExpired || user.otpCodeExpired;
+      if (!validOtp || String(otp).trim() !== String(validOtp)) {
+        return res.status(400).json({ success: false, message: "Kode OTP tidak cocok" });
+      }
+      if (validExp && new Date(validExp) < new Date()) {
+        return res.status(400).json({ success: false, message: "Kode OTP sudah kadaluarsa" });
+      }
+    }
     const entry = user.loginLogs.id(logId);
     if (!entry) {
       return res.status(404).json({ success: false, message: "Riwayat tidak ditemukan" });
     }
 
     const isCurrent = !!entry.sessionId && entry.sessionId === req.sessionID;
-    // Hapus sesi perangkat tersebut dari penyimpanan sesi (connect-mongo: collection "sessions")
     if (entry.sessionId) {
       await mongoose.connection.db
         .collection("sessions")
@@ -1290,14 +1252,12 @@ app.post("/profile/login-log/delete", requireLogin, async (req, res) => {
 });
 
 app.post("/profile/change-password", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat mengubah password",
     });
   }
-  
   const { oldPassword, newPassword, otp } = req.body;
   if (!oldPassword || !newPassword || !otp) {
     return res.status(400).json({
@@ -1308,36 +1268,25 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     if (!user.passwordOtp || !user.passwordOtpExpired) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Minta kode OTP terlebih dahulu" });
+      return res.status(400).json({ success: false, message: "Minta kode OTP terlebih dahulu" });
     }
     if (String(otp) !== user.passwordOtp) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Kode OTP tidak cocok" });
+      return res.status(400).json({ success: false, message: "Kode OTP tidak cocok" });
     }
     if (user.passwordOtpExpired < new Date()) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Kode OTP sudah kadaluarsa" });
+      return res.status(400).json({ success: false, message: "Kode OTP sudah kadaluarsa" });
     }
     const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isOldPasswordValid) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Old password is incorrect" });
+      return res.status(400).json({ success: false, message: "Old password is incorrect" });
     }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedNewPassword;
     user.passwordOtp = undefined;
     user.passwordOtpExpired = undefined;
-    // Keluarkan perangkat lain, sesi sekarang tetap aktif
     user.authVersion = (user.authVersion || 0) + 1;
     await user.save();
     req.session.authVersion = user.authVersion;
@@ -1347,25 +1296,8 @@ app.post("/profile/change-password", requireLogin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error changing password:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
-
-// ===== Email OTP (Gmail) =====
-const mailer = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
 });
 
 async function sendVerificationEmail(toEmail, otpCode, username) {
@@ -1387,14 +1319,12 @@ async function sendVerificationEmail(toEmail, otpCode, username) {
 }
 
 app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin sudah terverifikasi",
     });
   }
-
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
@@ -1406,24 +1336,19 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
     if (!user.email) {
       return res.status(400).json({ success: false, message: "Email akun belum diatur" });
     }
-
     const now = Date.now();
-    // Cooldown 60 detik supaya email tidak dikirim berulang-ulang
     if (user.otpCodeExpired && user.otpCodeExpired.getTime() - now > 4 * 60 * 1000) {
       return res.status(429).json({
         success: false,
         message: "Tunggu 60 detik sebelum meminta kode baru",
       });
     }
-
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(now + 5 * 60 * 1000); // berlaku 5 menit
-
+    const otpExpiry = new Date(now + 5 * 60 * 1000);
     await User.updateOne(
       { _id: user._id },
       { $set: { otpCode, otpCodeExpired: otpExpiry, aktifitas: "Verify H2H" } }
     );
-
     try {
       await sendVerificationEmail(user.email, otpCode, user.username);
     } catch (mailErr) {
@@ -1434,11 +1359,9 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
       );
       return res.status(500).json({
         success: false,
-        message: "Gagal mengirim email, coba lagi nanti",
+        message: smtpErrorMessage(mailErr),
       });
     }
-
-    // Kode OTP TIDAK dikirim ke browser, hanya ke email
     return res.json({
       success: true,
       message: "Kode verifikasi sudah dikirim ke email Anda",
@@ -1450,14 +1373,12 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
 });
 
 app.post("/profile/verify-email", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin sudah terverifikasi",
     });
   }
-  
   const { otp } = req.body;
   if (!otp) {
     return res.status(400).json({ success: false, message: "OTP harus diisi" });
@@ -1500,46 +1421,26 @@ app.post('/profile/whitelist-ip/add', requireLogin, async (req, res) => {
       message: "Admin tidak memiliki IP Whitelist",
     });
   }
-
   const { ip } = req.body;
-
   if (!ip) {
-    return res.status(400).json({
-      success: false,
-      message: "Alamat IP diperlukan",
-    });
+    return res.status(400).json({ success: false, message: "Alamat IP diperlukan" });
   }
-
   if (!isValidIp(ip)) {
-    return res.status(400).json({
-      success: false,
-      message: "Format alamat IP tidak valid",
-    });
+    return res.status(400).json({ success: false, message: "Format alamat IP tidak valid" });
   }
-
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Pengguna tidak ditemukan",
-      });
+      return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
     }
-
     if (user.whitelistIp.includes(ip)) {
-      return res.status(400).json({
-        success: false,
-        message: "IP sudah ada di whitelist",
-      });
+      return res.status(400).json({ success: false, message: "IP sudah ada di whitelist" });
     }
-
     if (user.whitelistIp.length === 1 && user.whitelistIp[0] === "0.0.0.0" && ip !== "0.0.0.0") {
       user.whitelistIp = [];
     }
-
     user.whitelistIp.push(ip);
     await user.save();
-
     return res.status(200).json({
       success: true,
       message: "IP berhasil ditambahkan",
@@ -1547,22 +1448,17 @@ app.post('/profile/whitelist-ip/add', requireLogin, async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 app.post('/profile/whitelist-ip/remove', requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak memiliki IP Whitelist",
     });
   }
-  
   const { ip } = req.body;
   if (!ip) {
     return res.status(400).json({ success: false, message: 'Alamat IP diperlukan' });
@@ -1593,14 +1489,12 @@ app.post('/profile/whitelist-ip/remove', requireLogin, async (req, res) => {
 });
 
 app.post('/profile/whitelist-ip/set', requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak memiliki IP Whitelist",
     });
   }
-  
   const { ips } = req.body;
   if (!Array.isArray(ips)) {
     return res.status(400).json({ success: false, message: 'Input "ips" harus berupa array' });
@@ -1634,56 +1528,40 @@ app.post('/profile/whitelist-ip/set', requireLogin, async (req, res) => {
 });
 
 app.post("/exchange/coin-to-saldo", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin tidak dapat menukar coin",
     });
   }
-  
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-
     const { coinAmount } = req.body;
-
     if (!coinAmount || isNaN(coinAmount) || coinAmount <= 0) {
       return res.status(400).json({
         success: false,
         message: "Jumlah coin harus lebih besar dari 0 dan berupa angka",
       });
     }
-
     const coinToExchange = parseInt(coinAmount);
-    
-    // Validasi kelipatan 10
     if (coinToExchange % 10 !== 0) {
       return res.status(400).json({
         success: false,
         message: "Jumlah coin harus kelipatan 10",
       });
     }
-
     const saldoToAdd = Math.floor(coinToExchange / 10);
-
     if (user.coin < coinToExchange) {
       return res.status(400).json({
         success: false,
         message: "Coin tidak mencukupi untuk ditukar",
       });
     }
-
-    // Update saldo dan coin
     user.coin -= coinToExchange;
     user.saldo += saldoToAdd;
-
-    // Tambahkan ke history
     user.history.push({
       aktivitas: "Tukar Coin ke Saldo",
       nominal: saldoToAdd,
@@ -1692,9 +1570,7 @@ app.post("/exchange/coin-to-saldo", requireLogin, async (req, res) => {
       notes: `Tukar ${coinToExchange} coin menjadi ${saldoToAdd} saldo`,
       tanggal: new Date(),
     });
-
     await user.save();
-
     return res.status(200).json({
       success: true,
       message: "Penukaran coin berhasil",
@@ -1707,57 +1583,43 @@ app.post("/exchange/coin-to-saldo", requireLogin, async (req, res) => {
     });
   } catch (error) {
     console.error("Error saat menukar coin:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 app.post("/upgrade/reseller", requireLogin, async (req, res) => {
-  // Skip untuk custom admin
   if (req.session.userId === "custom-admin") {
     return res.status(400).json({
       success: false,
       message: "Admin sudah memiliki akses penuh",
     });
   }
-  
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-
     if (user.role === "reseller" || user.role === "admin") {
       return res.status(400).json({
         success: false,
         message: "Anda sudah memiliki status reseller atau admin",
       });
     }
-
     const totalResellers = await User.countDocuments({ role: "reseller" });
-
     let upgradePrice = 25000;
     if (totalResellers >= 100 && totalResellers < 300) {
       upgradePrice = 50000;
     } else if (totalResellers >= 300) {
       upgradePrice = 70000;
     }
-
     if (user.saldo < upgradePrice) {
       return res.status(400).json({
         success: false,
         message: `Saldo tidak mencukupi. Harga upgrade saat ini adalah ${upgradePrice}`,
       });
     }
-
     user.saldo -= upgradePrice;
     user.role = "reseller";
-
     user.history.push({
       aktivitas: "Upgrade Reseller",
       nominal: upgradePrice,
@@ -1766,9 +1628,7 @@ app.post("/upgrade/reseller", requireLogin, async (req, res) => {
       notes: `Upgrade ke reseller dengan harga ${upgradePrice}`,
       tanggal: new Date(),
     });
-
     await user.save();
-
     return res.status(200).json({
       success: true,
       message: "Upgrade ke reseller berhasil",
@@ -1779,13 +1639,9 @@ app.post("/upgrade/reseller", requireLogin, async (req, res) => {
     });
   } catch (error) {
     console.error("Error saat upgrade reseller:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-
 
 async function getServerPublicIp() {
   try {
@@ -1807,10 +1663,7 @@ function validateApiKey(req, res, next) {
   User.findOne({ apiKey })
     .then(async (user) => {
       if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid API Key",
-        });
+        return res.status(401).json({ success: false, message: "Invalid API Key" });
       }
       const requestIp =
         req.headers['x-forwarded-for']?.split(',').shift().trim() || 
@@ -1868,10 +1721,7 @@ function validateApiKey(req, res, next) {
     })
     .catch((error) => {
       console.error("Error validating API Key (DB query):", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+      return res.status(500).json({ success: false, message: "Internal server error" });
     });
 }
 
@@ -1892,8 +1742,6 @@ module.exports = {
 app.use("/h2h", require("./endpoint/api"));
 app.use("/api/webtrx", require("./endpoint/bacend"));
 app.use("/admin", require("./endpoint/admin"));
-
-
 
 app.get("/api/notif", (req, res) => {
   const notifPath = path.join(__dirname, "./notif.json");
@@ -1924,8 +1772,6 @@ app.get("/api/notif", (req, res) => {
   });
 });
 
-//=====[ ADMIN BACKEND ]=====//
-
 app.get("/data/users", requireAdmin, async (req, res) => {
   try {
     const users = await User.find({}, "-password -__v");
@@ -1934,8 +1780,6 @@ app.get("/data/users", requireAdmin, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
-
 
 app.post("/admin/unblock-user", requireAdmin, async (req, res) => {
   const { userId } = req.body;
@@ -1973,8 +1817,6 @@ app.post("/admin/unblock-user", requireAdmin, async (req, res) => {
     });
   }
 });
-
-
 
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
