@@ -1398,51 +1398,153 @@
       });
     }
 
+    /* ---------- Pemisahan Template Teks OTP Gmail (Reset Password, Logout Akun, Ubah Profile) ---------- */
+    function getConnectedGmail() {
+      return (user?.email || "").trim();
+    }
+
+    function buildOtpEmailPayload(purpose, extra = {}) {
+      const targetEmail = getConnectedGmail();
+      const displayName = (user?.fullname && user.fullname !== "N/A" ? user.fullname : user?.username) || "Pengguna";
+      const otpCode = extra.otp || String(Math.floor(100000 + Math.random() * 900000));
+      const waktu = new Date().toLocaleString("id-ID");
+
+      if (purpose === "reset_password") {
+        return {
+          purpose: "reset_password",
+          email: targetEmail,
+          otp: otpCode,
+          subject: "[FelixTopUp] Kode OTP Reset Password Akun",
+          text:
+            `Halo ${displayName},\n\n` +
+            `Kami menerima permintaan RESET PASSWORD untuk akun FelixTopUp Anda.\n` +
+            `Kode OTP Reset Password Anda: ${otpCode}\n\n` +
+            `Waktu permintaan: ${waktu}\n` +
+            `Demi keamanan akun, JANGAN bagikan kode OTP ini kepada siapa pun. Jika Anda tidak meminta reset password, segera amankan akun Anda.`,
+          uiToast: `Kode OTP Reset Password telah dikirim ke Gmail yang terhubung (${targetEmail || "Gmail terdaftar"})`,
+        };
+      }
+
+      if (purpose === "logout_device") {
+        const devName = extra.who || displayName;
+        const devIp = extra.ip || detectedClientIp || "-";
+        return {
+          purpose: "logout_device",
+          email: targetEmail,
+          otp: otpCode,
+          subject: "[FelixTopUp] Kode OTP Konfirmasi Logout Perangkat",
+          text:
+            `Halo ${displayName},\n\n` +
+            `Kami menerima permintaan LOGOUT AKUN / KELUARKAN PERANGKAT dari riwayat sesi Anda:\n` +
+            `- Perangkat / Akun: ${devName}\n` +
+            `- Alamat IP: ${devIp}\n` +
+            `- Waktu permintaan: ${waktu}\n\n` +
+            `Kode OTP Konfirmasi Logout Perangkat Anda: ${otpCode}\n\n` +
+            `Jangan berikan kode ini kepada siapa pun.`,
+          uiToast: `Kode OTP Logout Akun telah dikirim ke Gmail yang terhubung (${targetEmail || "Gmail terdaftar"})`,
+        };
+      }
+
+      // Default: "edit_profile"
+      const changedLabel = extra.changedSummary || "Perubahan data profil akun";
+      return {
+        purpose: "edit_profile",
+        email: targetEmail,
+        otp: otpCode,
+        subject: "[FelixTopUp] Kode OTP Verifikasi Ubah Profil",
+        text:
+          `Halo ${displayName},\n\n` +
+          `Anda mengajukan permintaan UBAH PROFIL pada akun FelixTopUp Anda (${changedLabel}).\n` +
+          `Kode OTP Verifikasi Ubah Profil Anda: ${otpCode}\n\n` +
+          `Waktu permintaan: ${waktu}\n` +
+          `Masukkan kode 6 digit ini pada halaman Profil untuk menyimpan perubahan. Jangan bagikan kode ini kepada siapa pun.`,
+        uiToast: `Kode OTP Ubah Profil telah dikirim ke email Gmail yang terhubung (${targetEmail || "Gmail terdaftar"})`,
+      };
+    }
+
+    async function sendPurposeOtpToGmail(purpose, extra = {}) {
+      const targetEmail = getConnectedGmail();
+      const payload = buildOtpEmailPayload(purpose, extra);
+
+      if (!targetEmail) {
+        return {
+          success: false,
+          otp: payload.otp,
+          message: "Email Gmail yang terhubung pada akun belum ditemukan",
+        };
+      }
+
+      // 1. Try purpose-specific backend endpoint first
+      const endpointMap = {
+        reset_password: ["/profile/request-password-otp"],
+        logout_device: ["/profile/request-remove-device-otp", "/profile/login-log/request-otp"],
+        edit_profile: ["/profile/request-profile-otp", "/profile/send-verification-code", "/profile/request-email-otp"],
+      };
+
+      const endpoints = endpointMap[purpose] || [];
+      const d = await postJsonFallback(endpoints, {
+        purpose: payload.purpose,
+        email: targetEmail,
+        subject: payload.subject,
+        text: payload.text,
+        field: extra.field || purpose,
+        value: extra.value || targetEmail,
+        nomorLama: user?.nomor || "",
+        logId: extra.logId || "",
+        who: extra.who || "",
+        ip: extra.ip || "",
+      });
+
+      if (d.success) {
+        return {
+          success: true,
+          otp: d.otp || "",
+          message: payload.uiToast,
+        };
+      }
+
+      // 2. Fallback: send the distinct purpose email via /profile/send-notification-email
+      const mailRes = await postJson("/profile/send-notification-email", {
+        purpose: payload.purpose,
+        email: targetEmail,
+        subject: payload.subject,
+        text: payload.text,
+        otp: payload.otp,
+      });
+
+      if (mailRes.success) {
+        return {
+          success: true,
+          otp: payload.otp,
+          message: payload.uiToast,
+        };
+      }
+
+      return {
+        success: false,
+        otp: "",
+        message: d.message || mailRes.message || `Gagal mengirim OTP ke Gmail (${targetEmail})`,
+      };
+    }
+
     let localDeviceOtpCode = "";
     async function sendDeviceRemovalOtp(deviceInfo, triggerBtn = null) {
       if (triggerBtn) setLoading(triggerBtn, true);
       try {
-        const targetEmail = user?.email || "";
-        const d = await postJsonFallback(
-          [
-            "/profile/request-remove-device-otp",
-            "/profile/login-log/request-otp",
-            "/profile/request-password-otp",
-          ],
-          {
-            logId: deviceInfo.logId,
-            who: deviceInfo.who,
-            ip: deviceInfo.ip,
-            loginTime: deviceInfo.time,
-            email: targetEmail,
-          }
-        );
-
-        if (d.success) {
-          localDeviceOtpCode = "";
-          toast(
-            d.message || `Kode OTP 6 digit telah dikirim ke Gmail terdaftar (${targetEmail || "akun Anda"})`,
-            "success"
-          );
-          return true;
-        }
-
-        // Fallback via existing /profile/send-notification-email if dedicated device OTP route returns 404
-        const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
-        const emailSend = await postJson("/profile/send-notification-email", {
-          email: targetEmail,
-          subject: "[FelixTopUp] Kode OTP Konfirmasi Keluarkan Device",
-          text: `Kode OTP konfirmasi keluarkan device (${deviceInfo.who} / IP: ${deviceInfo.ip}) adalah: ${generatedOtp}. Jangan berikan kode ini kepada siapa pun.`,
-          otp: generatedOtp,
+        const res = await sendPurposeOtpToGmail("logout_device", {
+          logId: deviceInfo.logId,
+          who: deviceInfo.who,
+          ip: deviceInfo.ip,
+          loginTime: deviceInfo.time,
         });
 
-        if (emailSend.success) {
-          localDeviceOtpCode = generatedOtp;
-          toast(`Kode OTP 6 digit telah dikirim ke Gmail (${targetEmail})`, "success");
+        if (res.success) {
+          localDeviceOtpCode = res.otp || "";
+          toast(res.message, "success");
           return true;
         }
 
-        toast(d.message || emailSend.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
+        toast(res.message || "Gagal mengirim kode OTP Logout Akun ke Gmail terdaftar", "error");
         return false;
       } finally {
         if (triggerBtn) setLoading(triggerBtn, false);
@@ -1705,43 +1807,60 @@
 
         return {
           exists: matchedOwn,
-          message: matchedOwn ? "Data ini sudah terdaftar di akun/database" : "Belum terdaftar di DB — kode dapat dikirim otomatis",
+          message: matchedOwn ? "Data ini sudah terdaftar di akun/database" : "Tersedia (belum terdaftar di database)",
         };
       }
 
       return { exists: false, message: d.message || "" };
     }
 
+    let localEditProfileOtpCode = "";
     async function autoSendCodeForNewField(fieldType, value) {
       const sendKey = `${fieldType}:${value.trim()}`;
       if (autoSentKey === sendKey) return;
       autoSentKey = sendKey;
 
-      const d = await postJsonFallback(
-        [
-          "/profile/send-verification-code",
-          "/get/otp-change-nomor",
-          "/profile/request-email-otp",
-          "/profile/request-password-otp",
-        ],
-        {
-          field: fieldType,
-          value: value.trim(),
-          nomorLama: user?.nomor || "",
-          email: fieldType === "email" ? value.trim() : (user?.email || ""),
-        }
-      );
+      const connectedEmail = getConnectedGmail();
+      const labelMap = {
+        phone: `Nomor Telepon (${value.trim()})`,
+        email: `Email (${value.trim()})`,
+        username: `Username (${value.trim()})`,
+        firstName: `Nama Depan (${value.trim()})`,
+        lastName: `Nama Belakang (${value.trim()})`,
+      };
+      const changedSummary = labelMap[fieldType] || "Perubahan data profil akun";
 
-      if (d.success) {
+      // If phone changed, also trigger /get/otp-change-nomor if backend requires server-side phone OTP session,
+      // while ensuring the distinct Edit Profile OTP email & toast to connected Gmail are delivered!
+      if (fieldType === "phone" && value.trim() !== (user?.nomor || "")) {
+        await postJson("/get/otp-change-nomor", {
+          nomorLama: user?.nomor || "",
+          nomorBaru: value.trim(),
+          email: connectedEmail,
+        }).catch(() => {});
+      }
+
+      const res = await sendPurposeOtpToGmail("edit_profile", {
+        field: fieldType,
+        value: value.trim(),
+        changedSummary,
+      });
+
+      if (res.success) {
+        localEditProfileOtpCode = res.otp || "";
         if (fieldType === "phone") {
           pendingPhone = value.trim();
           $("phoneOtpErr").classList.add("hidden");
           $("profileOtpDirect")?.focus();
           phoneOtp.clear(false);
         }
-        toast(d.message || `Data belum ada di DB — kode verifikasi otomatis dikirim`, "success");
+        const hintEl = $("phoneOtpHint");
+        if (hintEl) {
+          hintEl.innerHTML = `Kode OTP 6 digit telah dikirim ke email Gmail yang terhubung: <b>${connectedEmail}</b>`;
+        }
+        toast(`Kode OTP Ubah Profil telah dikirim ke email yang terhubung (${connectedEmail})`, "success");
       } else {
-        toast(d.message || `Data belum ada di DB, namun gagal mengirim kode otomatis`, "info");
+        toast(res.message || `Gagal mengirim kode OTP ke email yang terhubung (${connectedEmail})`, "error");
       }
     }
 
@@ -2102,12 +2221,12 @@
       setLoading(btn, true);
       let succeeded = false;
       try {
-        const d = await api("/profile/request-password-otp", { method: "POST" });
-        if (d.success) {
+        const res = await sendPurposeOtpToGmail("reset_password");
+        if (res.success) {
           succeeded = true;
-          toast(d.message || "Kode OTP 6 digit telah dikirim ke Gmail Anda", "success");
+          toast(res.message, "success");
         } else {
-          toast(d.message || "Gagal mengirim kode OTP", "error");
+          toast(res.message || "Gagal mengirim kode OTP Reset Password ke Gmail", "error");
         }
       } finally {
         delete btn.dataset.loading;
