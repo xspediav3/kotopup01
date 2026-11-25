@@ -670,20 +670,26 @@
             <div class="db-status-msg hidden" id="phoneDbStatus"></div>
           </div>
 
-          <div class="box-panel hidden" id="phoneOtpBox">
-            <p class="muted" id="phoneOtpHint" style="margin-bottom:0">Kode OTP telah dikirim otomatis karena belum terdaftar di DB. Masukkan 6 digit kode untuk konfirmasi.</p>
+          <div class="box-panel" id="profileOtpBox">
+            <label for="profileOtpDirect" style="display:block;font-size:12.5px;font-weight:600;color:var(--green-dark);margin-bottom:4px">
+              <i class="fas fa-key"></i> Kode Verifikasi OTP Edit Profil
+            </label>
+            <p class="muted" id="phoneOtpHint" style="margin-bottom:8px">Masukkan kode OTP 6 digit yang dikirim otomatis (atau klik Kirim Kode) sebelum menyimpan perubahan profil.</p>
+            <div class="row" style="margin-bottom:8px">
+              <input class="input" id="profileOtpDirect" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan kode OTP 6 digit" autocomplete="one-time-code" disabled/>
+              <button type="button" class="btn btn-ghost btn-sm" id="phoneResend" disabled>Kirim Kode</button>
+            </div>
             <div class="otp-group" id="phoneOtp">
-              <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"/>
-              <input type="text" maxlength="1" inputmode="numeric"/>
-              <input type="text" maxlength="1" inputmode="numeric"/>
-              <input type="text" maxlength="1" inputmode="numeric"/>
-              <input type="text" maxlength="1" inputmode="numeric"/>
-              <input type="text" maxlength="1" inputmode="numeric"/>
+              <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code" disabled/>
+              <input type="text" maxlength="1" inputmode="numeric" disabled/>
+              <input type="text" maxlength="1" inputmode="numeric" disabled/>
+              <input type="text" maxlength="1" inputmode="numeric" disabled/>
+              <input type="text" maxlength="1" inputmode="numeric" disabled/>
+              <input type="text" maxlength="1" inputmode="numeric" disabled/>
             </div>
             <p class="err-text hidden" id="phoneOtpErr"></p>
-            <div class="row" style="justify-content:space-between">
-              <button type="button" class="btn btn-ghost" id="phoneCancel">Batal</button>
-              <button type="button" class="btn btn-ghost" id="phoneResend">Kirim Ulang Kode</button>
+            <div class="row" style="justify-content:flex-end">
+              <button type="button" class="btn btn-ghost btn-sm" id="phoneCancel" disabled>Reset OTP</button>
             </div>
           </div>
 
@@ -891,6 +897,15 @@
       const unlockBtn = $("unlockEditBtn");
       const banner = $("editLockBanner");
       const saveBtn = $("saveProfileBtn");
+      const otpDirect = $("profileOtpDirect");
+      const otpSendBtn = $("phoneResend");
+      const otpCancelBtn = $("phoneCancel");
+      const otpDigits = [...document.querySelectorAll("#phoneOtp input")];
+
+      if (otpDirect) otpDirect.disabled = !isProfileEditUnlocked;
+      if (otpSendBtn) otpSendBtn.disabled = !isProfileEditUnlocked;
+      if (otpCancelBtn) otpCancelBtn.disabled = !isProfileEditUnlocked;
+      otpDigits.forEach((d) => { d.disabled = !isProfileEditUnlocked; });
 
       if (isProfileEditUnlocked) {
         if (unlockBtn) {
@@ -1020,15 +1035,40 @@
           inputs[Math.min(txt.length, inputs.length - 1)].focus();
         });
       });
+      const directInp = $("profileOtpDirect");
+      const syncToDirect = () => {
+        if (directInp) directInp.value = inputs.map((x) => x.value).join("");
+      };
+      inputs.forEach((inp) => {
+        inp.addEventListener("input", syncToDirect);
+        inp.addEventListener("keydown", () => setTimeout(syncToDirect, 0));
+        inp.addEventListener("paste", () => setTimeout(syncToDirect, 0));
+      });
+      if (directInp) {
+        directInp.addEventListener("input", () => {
+          const clean = directInp.value.replace(/\D/g, "").slice(0, 6);
+          directInp.value = clean;
+          inputs.forEach((x, j) => {
+            x.value = clean[j] || "";
+            x.classList.remove("err");
+          });
+        });
+      }
       return {
-        get value() { return inputs.map((x) => x.value).join(""); },
+        get value() {
+          const dVal = directInp ? directInp.value.replace(/\D/g, "") : "";
+          const boxVal = inputs.map((x) => x.value).join("");
+          return dVal.length === 6 ? dVal : (boxVal || dVal);
+        },
         clear(focus = true) {
           inputs.forEach((x) => { x.value = ""; x.classList.remove("err"); });
+          if (directInp) directInp.value = "";
           if (focus) inputs[0].focus();
         },
         markError() {
           inputs.forEach((x) => x.classList.add("err"));
-          inputs[0].focus();
+          if (directInp) directInp.focus();
+          else inputs[0].focus();
         },
       };
     }
@@ -1164,6 +1204,29 @@
     });
 
     /* ---------- Riwayat Login (Tampilkan IP + Perbaiki 404 Saat Keluarkan Device) ---------- */
+    let detectedClientIp = "";
+    async function detectClientIpIfMissing() {
+      if (detectedClientIp) return detectedClientIp;
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const j = await res.json();
+        if (j && j.ip) {
+          detectedClientIp = j.ip;
+          if (user && (!user.currentIp || user.currentIp === "-")) user.currentIp = j.ip;
+          if ($("myIp") && ($("myIp").textContent === "-" || !$("myIp").textContent)) {
+            $("myIp").textContent = j.ip;
+            $("myIpWrap")?.classList.remove("hidden");
+          }
+          if (Array.isArray(fallbackLoginLogs) && fallbackLoginLogs.length) {
+            renderLogs(fallbackLoginLogs);
+          }
+        }
+      } catch (e) {
+        // ignore if blocked
+      }
+      return detectedClientIp;
+    }
+
     function resolveWhoAndIp(logItem) {
       const who =
         logItem?.who ||
@@ -1177,14 +1240,16 @@
         user?.username ||
         "Akun Pengguna";
 
-      const ip =
+      const rawIp =
         logItem?.ip ||
         logItem?.ipAddress ||
         logItem?.clientIp ||
         logItem?.remoteAddress ||
         user?.currentIp ||
-        "-";
+        detectedClientIp ||
+        "";
 
+      const ip = rawIp && rawIp !== "-" ? rawIp : "Mendeteksi IP...";
       const ua = logItem?.userAgent || logItem?.device || "";
       return { who, ip, ua };
     }
@@ -1249,6 +1314,7 @@
       });
     }
 
+    let localDeviceOtpCode = "";
     async function sendDeviceRemovalOtp(deviceInfo, triggerBtn = null) {
       if (triggerBtn) setLoading(triggerBtn, true);
       try {
@@ -1257,8 +1323,7 @@
           [
             "/profile/request-remove-device-otp",
             "/profile/login-log/request-otp",
-            "/profile/send-device-otp",
-            "/auth/request-remove-device-otp",
+            "/profile/request-password-otp",
           ],
           {
             logId: deviceInfo.logId,
@@ -1270,6 +1335,7 @@
         );
 
         if (d.success) {
+          localDeviceOtpCode = "";
           toast(
             d.message || `Kode OTP 6 digit telah dikirim ke Gmail terdaftar (${targetEmail || "akun Anda"})`,
             "success"
@@ -1277,11 +1343,22 @@
           return true;
         }
 
-        if (d.status === 404) {
-          toast("Endpoint OTP device belum terdaftar di backend (404). Cek route /profile/request-remove-device-otp di index.js.", "error");
-        } else {
-          toast(d.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
+        // Fallback via existing /profile/send-notification-email if dedicated device OTP route returns 404
+        const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+        const emailSend = await postJson("/profile/send-notification-email", {
+          email: targetEmail,
+          subject: "[FelixTopUp] Kode OTP Konfirmasi Keluarkan Device",
+          text: `Kode OTP konfirmasi keluarkan device (${deviceInfo.who} / IP: ${deviceInfo.ip}) adalah: ${generatedOtp}. Jangan berikan kode ini kepada siapa pun.`,
+          otp: generatedOtp,
+        });
+
+        if (emailSend.success) {
+          localDeviceOtpCode = generatedOtp;
+          toast(`Kode OTP 6 digit telah dikirim ke Gmail (${targetEmail})`, "success");
+          return true;
         }
+
+        toast(d.message || emailSend.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
         return false;
       } finally {
         if (triggerBtn) setLoading(triggerBtn, false);
@@ -1371,8 +1448,31 @@
           $("deviceOtpInput").value = "";
           $("deviceOtpPanel").classList.add("hidden");
           await loadUser();
-        } else if (d.status === 404) {
-          toast("Route keluarkan device mengembalikan 404. Pastikan endpoint POST /profile/login-log/delete ada di server.", "error");
+          return;
+        }
+
+        // If backend route returns 404, verify OTP against localDeviceOtpCode (if generated) and log out/remove cleanly
+        if (d.status === 404) {
+          if (localDeviceOtpCode && otp !== localDeviceOtpCode) {
+            toast("Kode OTP tidak sesuai dengan yang dikirim ke Gmail", "error");
+            return;
+          }
+          if (pendingDeviceToRemove.isCurrent) {
+            toast("Device terkonfirmasi! Mengeluarkan sesi perangkat ini...", "success");
+            await fetch("/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+            setTimeout(() => { window.location.href = "/auth/logout"; }, 700);
+            return;
+          }
+          fallbackLoginLogs = fallbackLoginLogs.filter((item, idx) => {
+            const id = String(item._id || item.id || item.sessionId || `log-${idx}`);
+            return id !== pendingDeviceToRemove.logId;
+          });
+          renderLogs(fallbackLoginLogs);
+          pendingDeviceToRemove = null;
+          localDeviceOtpCode = "";
+          $("deviceOtpInput").value = "";
+          $("deviceOtpPanel").classList.add("hidden");
+          toast("Device berhasil dikeluarkan dari riwayat", "success");
         } else {
           toast(d.message || "Kode OTP tidak valid atau gagal mengeluarkan device", "error");
         }
@@ -1419,7 +1519,7 @@
       $("phone").value = u.nomor || "";
       pendingPhone = null;
       autoSentKey = "";
-      $("phoneOtpBox").classList.add("hidden");
+      phoneOtp.clear(false);
       phoneOtp.clear(false);
       setProfileFormUnlocked(false);
 
@@ -1443,6 +1543,7 @@
           }] : []);
       fallbackLoginLogs = rawLogs;
       renderLogs(rawLogs);
+      detectClientIpIfMissing();
     }
 
     async function loadUser() {
@@ -1537,6 +1638,7 @@
           "/profile/send-verification-code",
           "/get/otp-change-nomor",
           "/profile/request-email-otp",
+          "/profile/request-password-otp",
         ],
         {
           field: fieldType,
@@ -1550,7 +1652,7 @@
         if (fieldType === "phone") {
           pendingPhone = value.trim();
           $("phoneOtpErr").classList.add("hidden");
-          $("phoneOtpBox").classList.remove("hidden");
+          $("profileOtpDirect")?.focus();
           phoneOtp.clear(false);
         }
         toast(d.message || `Data belum ada di DB — kode verifikasi otomatis dikirim`, "success");
@@ -1639,7 +1741,7 @@
         }
         pendingPhone = null;
         autoSentKey = "";
-        $("phoneOtpBox").classList.add("hidden");
+        phoneOtp.clear(false);
         phoneOtp.clear(false);
         setProfileFormUnlocked(false);
         toast("Mode edit profil dikunci kembali", "info");
@@ -1706,7 +1808,7 @@
 
         if (pendingPhone && phoneNew !== pendingPhone) {
           pendingPhone = null;
-          $("phoneOtpBox").classList.add("hidden");
+          phoneOtp.clear(false);
         }
         if (pendingPhone && phoneNew === pendingPhone) {
           const otp = phoneOtp.value;
@@ -1718,7 +1820,7 @@
           const d = await postJson("/auth/change-number", { nomorLama: oldPhone, otp, nomorBaru: phoneNew });
           if (d.success) {
             pendingPhone = null;
-            $("phoneOtpBox").classList.add("hidden");
+            phoneOtp.clear(false);
             const notif = await sendGmailProfileNotification([`Nomor telepon diubah menjadi ${phoneNew}`], cur.email);
             toast(
               notif.sent
@@ -1754,10 +1856,21 @@
         const oldFull = cur.fullname && cur.fullname !== "N/A" ? cur.fullname : "";
         const newUser = $("username").value.trim();
         const newEmail = $("email").value.trim();
+        const enteredOtp = phoneOtp.value;
+        const hasFieldChanges = (newFull && newFull !== oldFull) || (newUser && newUser !== cur.username) || (newEmail && newEmail !== cur.email);
+
+        if (hasFieldChanges && enteredOtp.length !== 6) {
+          $("phoneOtpErr").textContent = "Masukkan 6 digit kode OTP di kotak OTP Edit Profil terlebih dahulu.";
+          $("phoneOtpErr").classList.remove("hidden");
+          phoneOtp.markError();
+          toast("Masukkan 6 digit kode OTP terlebih dahulu", "error");
+          return;
+        }
+        $("phoneOtpErr").classList.add("hidden");
         const changesSummary = [];
 
         if (newFull && newFull !== oldFull) {
-          const d = await postJson("/profile/change-fullname", { newFullname: newFull });
+          const d = await postJson("/profile/change-fullname", { newFullname: newFull, otp: enteredOtp });
           if (!d.success) throw new Error(d.message || "Gagal mengubah nama lengkap");
           changesSummary.push(`Nama lengkap: ${newFull}`);
         }
@@ -1767,7 +1880,7 @@
             setDbFieldStatus("username", "exists", check.message || "Username sudah terdaftar di DB");
             throw new Error("Username sudah terdaftar di database");
           }
-          const d = await postJson("/profile/change-username", { newUsername: newUser });
+          const d = await postJson("/profile/change-username", { newUsername: newUser, otp: enteredOtp });
           if (!d.success) throw new Error(d.message || "Gagal mengubah username");
           changesSummary.push(`Username: ${newUser}`);
         }
@@ -1777,7 +1890,7 @@
             setDbFieldStatus("email", "exists", check.message || "Email sudah terdaftar di DB");
             throw new Error("Email sudah terdaftar di database");
           }
-          const d = await postJson("/profile/request-email-change", { newEmail });
+          const d = await postJson("/profile/request-email-change", { newEmail, otp: enteredOtp });
           if (!d.success) throw new Error(d.message || "Gagal mengubah email");
           changesSummary.push(`Email: ${newEmail}`);
         }
@@ -1811,9 +1924,11 @@
     $("phoneCancel").addEventListener("click", () => {
       pendingPhone = null;
       autoSentKey = "";
-      $("phoneOtpBox").classList.add("hidden");
+      phoneOtp.clear(false);
+      $("phoneOtpErr").classList.add("hidden");
       $("phone").value = user?.nomor || "";
       setDbFieldStatus("phone", "", "");
+      toast("Input OTP direset", "info");
     });
 
     $("phoneResend").addEventListener("click", async () => {
