@@ -989,7 +989,7 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// ===== Email OTP & Notifikasi (Gmail SMTP - tanpa perlu GOOGLE_REFRESH_TOKEN) =====
+// ===== Email OTP & Notifikasi (Prioritas Webhook Apps Script, fallback ke Gmail SMTP) =====
 const mailer = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -999,24 +999,38 @@ const mailer = nodemailer.createTransport({
   greetingTimeout: 10000,
   socketTimeout: 15000,
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
+    user: process.env.EMAIL_USER || process.env.GMAIL_USER,
+    pass: process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD,
   },
 });
 
-function smtpErrorMessage(err) {
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    return "Email server belum diatur: isi GMAIL_USER dan GMAIL_APP_PASSWORD di Railway";
+function hasWebhookConfig() {
+  return Boolean(process.env.WEBHOOK_MAIL_URL && String(process.env.WEBHOOK_MAIL_URL).trim());
+}
+
+function hasSmtpConfig() {
+  const u = process.env.EMAIL_USER || process.env.GMAIL_USER;
+  const p = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
+  return Boolean(u && p);
+}
+
+function mailTransportErrorMessage(err) {
+  if (!hasWebhookConfig() && !hasSmtpConfig()) {
+    return "Email server belum diatur: isi WEBHOOK_MAIL_URL & WEBHOOK_MAIL_SECRET atau EMAIL_USER & EMAIL_PASS";
   }
   const code = err && err.code;
+  const status = err && err.response && err.response.status;
   const text = (err && err.message) || "";
+  if (status === 401 || status === 403 || /secret|unauthorized|forbidden/i.test(text)) {
+    return "Webhook ditolak: cek WEBHOOK_MAIL_SECRET atau izin deploy Apps Script (Anyone)";
+  }
   if (code === "EAUTH" || /Invalid login|Username and Password|535/i.test(text)) {
-    return "Login Gmail ditolak, cek GMAIL_USER dan GMAIL_APP_PASSWORD di Railway";
+    return "Login Gmail ditolak: cek EMAIL_USER dan EMAIL_PASS (App Password)";
   }
   if (["ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNREFUSED", "EDNS", "ENOTFOUND"].includes(code)) {
-    return "Server tidak bisa terhubung ke Gmail (cek koneksi SMTP/port 587 di Railway)";
+    return "Gagal terhubung ke server email/webhook dari Railway";
   }
-  return "Gagal mengirim email: " + (code || text || "error tidak diketahui");
+  return "Gagal mengirim email: " + (code || status || text || "error tidak diketahui");
 }
 
 function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
@@ -1061,12 +1075,53 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   };
 }
 
-async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_password", meta = {}) {
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    const missingErr = new Error("Missing GMAIL_USER or GMAIL_APP_PASSWORD");
-    missingErr.code = "MISSING_SMTP_ENV";
+async function sendViaWebhookOrSmtp({ to, subject, html, text }) {
+  const senderName = process.env.WEBHOOK_SENDER_NAME || "Felix TopUp";
+  const secret = process.env.WEBHOOK_MAIL_SECRET || "";
+  const webhookUrl = String(process.env.WEBHOOK_MAIL_URL || "").trim();
+
+  if (webhookUrl) {
+    const payload = {
+      secret,
+      token: secret,
+      key: secret,
+      to,
+      email: to,
+      subject,
+      html,
+      text: text || subject,
+      senderName,
+    };
+    const resp = await axios.post(webhookUrl, payload, {
+      timeout: 15000,
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "x-webhook-secret": secret, Authorization: `Bearer ${secret}` } : {}),
+      },
+    });
+    if (resp && resp.data && typeof resp.data === "object" && resp.data.success === false) {
+      throw new Error(resp.data.message || resp.data.error || "Webhook returned success:false");
+    }
+    return resp.data;
+  }
+
+  const smtpUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
+  const smtpPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
+  if (!smtpUser || !smtpPass) {
+    const missingErr = new Error("Missing WEBHOOK_MAIL_URL and SMTP credentials");
+    missingErr.code = "MISSING_MAIL_CONFIG";
     throw missingErr;
   }
+
+  return await mailer.sendMail({
+    from: `"${senderName}" <${smtpUser}>`,
+    to,
+    subject,
+    html,
+  });
+}
+
+async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_password", meta = {}) {
   const tpl = buildPurposeOtpTemplate(purpose, otpCode, username, meta);
   const html = `
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
@@ -1077,11 +1132,11 @@ async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_
       <p style="margin:16px 0 0;font-size:13px;color:#66756b;">${tpl.footer}</p>
     </div>`;
 
-  await mailer.sendMail({
-    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+  await sendViaWebhookOrSmtp({
     to: toEmail,
     subject: tpl.subject,
     html,
+    text: `${tpl.heading}\nKode OTP: ${otpCode}\n${tpl.footer}`,
   });
 }
 
@@ -1141,7 +1196,7 @@ async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
         { _id: user._id },
         { $unset: { passwordOtp: "", passwordOtpExpired: "", otpCode: "", otpCodeExpired: "" } }
       );
-      return res.status(500).json({ success: false, message: smtpErrorMessage(mailErr) });
+      return res.status(500).json({ success: false, message: mailTransportErrorMessage(mailErr) });
     }
 
     return res.json({ success: true, message: tpl.toastMessage, purpose });
@@ -1174,10 +1229,10 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
     if (!toEmail) {
       return res.status(400).json({ success: false, message: "Email tujuan tidak tersedia" });
     }
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    if (!hasWebhookConfig() && !hasSmtpConfig()) {
       return res.status(500).json({
         success: false,
-        message: "Email server belum diatur: isi GMAIL_USER dan GMAIL_APP_PASSWORD di Railway",
+        message: "Email server belum diatur: isi WEBHOOK_MAIL_URL & WEBHOOK_MAIL_SECRET atau EMAIL_USER & EMAIL_PASS",
       });
     }
     const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
@@ -1188,16 +1243,16 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
         <pre style="white-space:pre-wrap;font-family:'Segoe UI',Arial,sans-serif;margin:0;font-size:13px;color:#14231a;">${escapeHtml(rawText)}</pre>
       </div>`;
 
-    await mailer.sendMail({
-      from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+    await sendViaWebhookOrSmtp({
       to: toEmail,
       subject,
       html,
+      text: `${subject}\n\n${rawText}`,
     });
     return res.json({ success: true, message: "Notifikasi berhasil dikirim ke Gmail" });
   } catch (err) {
     console.error("Error send-notification-email:", err);
-    return res.status(500).json({ success: false, message: smtpErrorMessage(err) });
+    return res.status(500).json({ success: false, message: mailTransportErrorMessage(err) });
   }
 });
 
@@ -1310,11 +1365,11 @@ async function sendVerificationEmail(toEmail, otpCode, username) {
       <p style="margin:16px 0 0;font-size:13px;color:#66756b;">Kode berlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.</p>
     </div>`;
 
-  await mailer.sendMail({
-    from: `"Felix TopUp" <${process.env.GMAIL_USER}>`,
+  await sendViaWebhookOrSmtp({
     to: toEmail,
     subject: "Kode Verifikasi Email - Felix TopUp",
     html,
+    text: `Verifikasi Email\nKode OTP: ${otpCode}\nKode berlaku 5 menit.`,
   });
 }
 
@@ -1359,7 +1414,7 @@ app.post("/profile/send-verification-otp", requireLogin, async (req, res) => {
       );
       return res.status(500).json({
         success: false,
-        message: smtpErrorMessage(mailErr),
+        message: mailTransportErrorMessage(mailErr),
       });
     }
     return res.json({
