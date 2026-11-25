@@ -48,7 +48,7 @@
       margin: 0 auto;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       padding: 12px;
     }
     .icon-btn {
@@ -61,19 +61,36 @@
       cursor: pointer;
       display: grid;
       place-items: center;
+      flex: 0 0 36px;
     }
     .icon-btn:hover { background: var(--soft); }
-    .top-title { font-weight: 600; font-size: 16px; flex: 1; }
+    .logout-btn {
+      background: #fff5f5;
+      border: 1.5px solid #fca5a5;
+      color: var(--danger);
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .logout-btn:hover { background: #fee2e2; }
+    .top-title { font-weight: 600; font-size: 16px; flex: 1; min-width: 0; }
     .saldo-pill {
       border: 1.5px solid var(--stroke);
       border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 13px;
+      padding: 6px 11px;
+      font-size: 12.5px;
       color: var(--green-dark);
       font-weight: 600;
       display: flex;
       gap: 6px;
       align-items: center;
+      white-space: nowrap;
     }
 
     /* ---------- Layout ---------- */
@@ -111,6 +128,13 @@
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 14px;
+    }
+    .card-head-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
     }
     .card-title {
       font-size: 15px;
@@ -242,7 +266,7 @@
     .step-sub { font-size: 10.5px; color: var(--muted); line-height: 1.4; }
     .note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
 
-    /* ---------- Forms ---------- */
+    /* ---------- Forms & Locked Edit Profile ---------- */
     .field { margin-bottom: 12px; }
     .field label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -258,7 +282,32 @@
     }
     .input:focus { border-color: var(--stroke); box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18); }
     .input::placeholder { color: #9aa89f; }
-    .input[readonly] { background: var(--soft); color: var(--text); }
+    .input[readonly],
+    .input.locked-field {
+      background: #f3f6f4;
+      color: #526057;
+      border-color: #dce6df;
+      cursor: not-allowed;
+      pointer-events: none;
+      user-select: none;
+    }
+    .lock-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--soft);
+      border: 1.5px solid var(--stroke-soft);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      color: var(--green-dark);
+    }
+    .lock-banner.unlocked {
+      background: #ecfdf5;
+      border-color: var(--stroke);
+    }
     .row { display: flex; gap: 8px; align-items: center; }
     .row .input { flex: 1; min-width: 0; }
     .btn {
@@ -276,7 +325,8 @@
       color: var(--green-dark);
       background: var(--card);
     }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-sm { padding: 8px 12px; font-size: 12.5px; border-radius: 9px; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
     .btn-primary { background: var(--btn); }
     .btn-ghost { background: var(--card); border-color: var(--stroke-soft); color: var(--muted); }
     .btn-block { width: 100%; }
@@ -401,6 +451,7 @@
     @media (max-width: 380px) {
       .tab { font-size: 12px; }
       .grid2 { grid-template-columns: 1fr; }
+      .logout-btn span { display: none; }
     }
   </style>
 </head>
@@ -416,6 +467,9 @@
         <i class="fas fa-wallet"></i>
         <span id="saldoPill">Rp 0</span>
       </div>
+      <button class="logout-btn" id="logoutBtn" aria-label="Logout" type="button">
+        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+      </button>
     </div>
   </header>
 
@@ -471,32 +525,43 @@
         <p class="note"><i class="fas fa-lock"></i> Nama sudah tidak dapat diubah (batas 1x terpakai).</p>
       </div>
 
-
       <div class="card">
-        <h3 class="card-title"><i class="fas fa-pen"></i> Edit Profil</h3>
-        <p class="muted">Perbarui informasi akun Anda.</p>
+        <div class="card-head-row">
+          <div>
+            <h3 class="card-title" style="margin-bottom:2px"><i class="fas fa-pen"></i> Edit Profil</h3>
+            <p class="muted" style="margin-bottom:0">Kolom terkunci. Klik tombol <b>Edit</b> untuk membuka semua kolom.</p>
+          </div>
+          <button class="btn btn-sm" id="unlockEditBtn" type="button">
+            <i class="fas fa-lock-open"></i> Edit
+          </button>
+        </div>
+
+        <div class="lock-banner" id="editLockBanner" style="margin-top:12px">
+          <span><i class="fas fa-lock"></i> Mode Edit Terkunci — kolom tidak dapat diklik atau diubah.</span>
+        </div>
+
         <form id="profileForm" autocomplete="off">
           <div class="grid2">
             <div class="field">
               <label for="firstName">Nama Depan</label>
-              <input class="input" id="firstName" type="text" placeholder="Nama depan"/>
+              <input class="input locked-field" id="firstName" type="text" placeholder="Nama depan" readonly tabindex="-1" aria-disabled="true"/>
             </div>
             <div class="field">
               <label for="lastName">Nama Belakang</label>
-              <input class="input" id="lastName" type="text" placeholder="Nama belakang"/>
+              <input class="input locked-field" id="lastName" type="text" placeholder="Nama belakang" readonly tabindex="-1" aria-disabled="true"/>
             </div>
           </div>
           <div class="field">
             <label for="username">Username</label>
-            <input class="input" id="username" type="text" placeholder="Username"/>
+            <input class="input locked-field" id="username" type="text" placeholder="Username" readonly tabindex="-1" aria-disabled="true"/>
           </div>
           <div class="field">
             <label for="email">Email</label>
-            <input class="input" id="email" type="email" placeholder="Email"/>
+            <input class="input locked-field" id="email" type="email" placeholder="Email" readonly tabindex="-1" aria-disabled="true"/>
           </div>
           <div class="field">
             <label for="phone">Nomor Telepon</label>
-            <input class="input" id="phone" type="text" inputmode="numeric" placeholder="Nomor telepon"/>
+            <input class="input locked-field" id="phone" type="text" inputmode="numeric" placeholder="Nomor telepon" readonly tabindex="-1" aria-disabled="true"/>
           </div>
 
           <div class="box-panel hidden" id="phoneOtpBox">
@@ -516,8 +581,8 @@
             </div>
           </div>
 
-          <button class="btn btn-primary btn-block" id="saveProfileBtn" type="submit" style="margin-top:14px">
-            <i class="fas fa-save"></i> Simpan Perubahan
+          <button class="btn btn-primary btn-block" id="saveProfileBtn" type="submit" style="margin-top:14px" disabled>
+            <i class="fas fa-paper-plane"></i> Simpan &amp; Kirim Notif Gmail
           </button>
         </form>
       </div>
@@ -600,6 +665,55 @@
     let user = null;
     let pendingPhone = null;
     let ipList = [];
+    let isProfileEditUnlocked = false;
+
+    const EDITABLE_INPUT_IDS = ["firstName", "lastName", "username", "email", "phone"];
+
+    function setProfileFormUnlocked(unlocked) {
+      isProfileEditUnlocked = Boolean(unlocked);
+      EDITABLE_INPUT_IDS.forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        if (isProfileEditUnlocked) {
+          el.readOnly = false;
+          el.classList.remove("locked-field");
+          el.removeAttribute("tabindex");
+          el.removeAttribute("aria-disabled");
+        } else {
+          el.readOnly = true;
+          el.classList.add("locked-field");
+          el.setAttribute("tabindex", "-1");
+          el.setAttribute("aria-disabled", "true");
+          el.blur();
+        }
+      });
+
+      const unlockBtn = $("unlockEditBtn");
+      const banner = $("editLockBanner");
+      const saveBtn = $("saveProfileBtn");
+
+      if (isProfileEditUnlocked) {
+        if (unlockBtn) {
+          unlockBtn.innerHTML = '<i class="fas fa-lock"></i> Kunci';
+          unlockBtn.classList.add("btn-ghost");
+        }
+        if (banner) {
+          banner.classList.add("unlocked");
+          banner.innerHTML = '<span><i class="fas fa-lock-open"></i> Mode Edit Terbuka — semua kolom siap diedit.</span>';
+        }
+        if (saveBtn) saveBtn.disabled = false;
+      } else {
+        if (unlockBtn) {
+          unlockBtn.innerHTML = '<i class="fas fa-lock-open"></i> Edit';
+          unlockBtn.classList.remove("btn-ghost");
+        }
+        if (banner) {
+          banner.classList.remove("unlocked");
+          banner.innerHTML = '<span><i class="fas fa-lock"></i> Mode Edit Terkunci — kolom tidak dapat diklik atau diubah.</span>';
+        }
+        if (saveBtn) saveBtn.disabled = true;
+      }
+    }
 
     /* ---------- Helpers ---------- */
     function formatRp(n) {
@@ -622,7 +736,6 @@
       toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
     }
 
-    // Baca respons sebagai teks dulu; batas 20 detik supaya tombol tidak loading selamanya
     async function api(url, options = {}) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 35000);
@@ -703,7 +816,7 @@
     }
     const phoneOtp = setupOtp($("phoneOtp"));
 
-    /* ---------- Tabs ---------- */
+    /* ---------- Tabs & Header Actions ---------- */
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", b === btn ? "true" : "false"));
@@ -712,6 +825,17 @@
     });
 
     $("backBtn").addEventListener("click", () => (window.location.href = "/dashboard"));
+
+    $("logoutBtn").addEventListener("click", async () => {
+      if (!confirm("Yakin ingin keluar (logout) dari akun ini?")) return;
+      const btn = $("logoutBtn");
+      setLoading(btn, true);
+      try {
+        await fetch("/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+      } finally {
+        window.location.href = "/auth/logout";
+      }
+    });
 
     /* ---------- Tier ---------- */
     function renderTier(dep) {
@@ -782,7 +906,6 @@
       });
     }
 
-    // Kirim IP ke server. IP baru otomatis menggantikan IP yang lama.
     async function saveIps(nextList) {
       const payload = nextList;
       const d = await postJson("/profile/whitelist-ip/set", { ips: payload });
@@ -913,6 +1036,7 @@
       pendingPhone = null;
       $("phoneOtpBox").classList.add("hidden");
       phoneOtp.clear(false);
+      setProfileFormUnlocked(false);
 
       $("apiKey").value = u.apiKey || "Tidak ada API Key";
 
@@ -956,9 +1080,75 @@
       }
     });
 
-    /* ---------- Edit profil ---------- */
+    /* ---------- Tombol Edit & Kirim Notif Gmail Saat Simpan ---------- */
+    $("unlockEditBtn").addEventListener("click", () => {
+      if (!isProfileEditUnlocked) {
+        setProfileFormUnlocked(true);
+        toast("Semua kolom edit profil dibuka", "info");
+        setTimeout(() => $("firstName").focus(), 50);
+      } else {
+        if (user) {
+          const fullname = user.fullname && user.fullname !== "N/A" ? user.fullname : "";
+          const parts = fullname ? fullname.split(" ") : [];
+          $("firstName").value = parts[0] || "";
+          $("lastName").value = parts.slice(1).join(" ");
+          $("username").value = user.username || "";
+          $("email").value = user.email || "";
+          $("phone").value = user.nomor || "";
+        }
+        pendingPhone = null;
+        $("phoneOtpBox").classList.add("hidden");
+        phoneOtp.clear(false);
+        setProfileFormUnlocked(false);
+        toast("Mode edit profil dikunci kembali", "info");
+      }
+    });
+
+    EDITABLE_INPUT_IDS.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("mousedown", (e) => {
+        if (!isProfileEditUnlocked) {
+          e.preventDefault();
+          toast("Klik tombol Edit terlebih dahulu untuk membuka kolom", "info");
+        }
+      });
+      el.addEventListener("focus", () => {
+        if (!isProfileEditUnlocked) el.blur();
+      });
+    });
+
+    async function sendGmailProfileNotification(changesSummary, targetEmail) {
+      const recipient = targetEmail || user?.email;
+      if (!recipient) return { sent: false, message: "Email tujuan tidak tersedia" };
+      const subject = "[FelixTopUp] Notifikasi Perubahan Profil Akun";
+      const text =
+        `Halo ${user?.fullname || user?.username || "Pengguna"},\n\n` +
+        `Data profil akun Anda baru saja disimpan/diperbarui:\n` +
+        changesSummary.map((item) => `- ${item}`).join("\n") +
+        `\n\nWaktu: ${new Date().toLocaleString("id-ID")}\n` +
+        `Jika Anda tidak merasa melakukan perubahan ini, segera hubungi admin.`;
+
+      const d = await postJson("/profile/send-notification-email", {
+        email: recipient,
+        subject,
+        text,
+        changes: changesSummary,
+      });
+
+      if (d.success) {
+        return { sent: true, message: d.message || "Notifikasi berhasil dikirim ke Gmail" };
+      }
+      return { sent: false, message: d.message || "Endpoint notif Gmail belum aktif di server" };
+    }
+
     $("profileForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (!isProfileEditUnlocked) {
+        toast("Kolom masih terkunci. Klik tombol Edit terlebih dahulu.", "error");
+        return;
+      }
+
       const btn = $("saveProfileBtn");
       setLoading(btn, true);
       try {
@@ -979,9 +1169,15 @@
           }
           const d = await postJson("/auth/change-number", { nomorLama: oldPhone, otp, nomorBaru: phoneNew });
           if (d.success) {
-            toast("Nomor telepon berhasil diubah", "success");
             pendingPhone = null;
             $("phoneOtpBox").classList.add("hidden");
+            const notif = await sendGmailProfileNotification([`Nomor telepon diubah menjadi ${phoneNew}`], cur.email);
+            toast(
+              notif.sent
+                ? "Nomor telepon diubah & notif terkirim ke Gmail"
+                : "Nomor telepon diubah (notif Gmail: " + notif.message + ")",
+              notif.sent ? "success" : "info"
+            );
             await loadUser();
           } else {
             $("phoneOtpErr").textContent = d.message || "OTP tidak valid atau kadaluarsa";
@@ -1013,29 +1209,42 @@
         const oldFull = cur.fullname && cur.fullname !== "N/A" ? cur.fullname : "";
         const newUser = $("username").value.trim();
         const newEmail = $("email").value.trim();
-        let changed = false;
+        const changesSummary = [];
 
         if (newFull && newFull !== oldFull) {
           const d = await postJson("/profile/change-fullname", { newFullname: newFull });
           if (!d.success) throw new Error(d.message || "Gagal mengubah nama lengkap");
-          changed = true;
+          changesSummary.push(`Nama lengkap: ${newFull}`);
         }
         if (newUser && newUser !== cur.username) {
           const d = await postJson("/profile/change-username", { newUsername: newUser });
           if (!d.success) throw new Error(d.message || "Gagal mengubah username");
-          changed = true;
+          changesSummary.push(`Username: ${newUser}`);
         }
         if (newEmail && newEmail !== cur.email) {
           const d = await postJson("/profile/request-email-change", { newEmail });
           if (!d.success) throw new Error(d.message || "Gagal mengubah email");
-          changed = true;
+          changesSummary.push(`Email: ${newEmail}`);
         }
 
-        if (changed) {
-          toast("Profil berhasil diperbarui", "success");
+        if (changesSummary.length > 0) {
+          const notif = await sendGmailProfileNotification(changesSummary, newEmail || cur.email);
+          toast(
+            notif.sent
+              ? "Profil disimpan & notifikasi terkirim ke Gmail"
+              : "Profil disimpan (notif Gmail: " + notif.message + ")",
+            notif.sent ? "success" : "info"
+          );
           await loadUser();
         } else {
-          toast("Tidak ada perubahan", "info");
+          const notif = await sendGmailProfileNotification(["Konfirmasi simpan data profil (tidak ada perubahan field)"], cur.email);
+          toast(
+            notif.sent
+              ? "Notifikasi profil telah dikirim ke Gmail"
+              : "Tidak ada perubahan (notif Gmail: " + notif.message + ")",
+            notif.sent ? "success" : "info"
+          );
+          setProfileFormUnlocked(false);
         }
       } catch (err) {
         toast(err.message || "Gagal memperbarui profil", "error");
@@ -1188,6 +1397,7 @@
     });
 
     /* ---------- Init ---------- */
+    setProfileFormUnlocked(false);
     loadUser();
   </script>
 </body>
