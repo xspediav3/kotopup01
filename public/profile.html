@@ -981,13 +981,16 @@
         data = JSON.parse(text);
       } catch (err) {
         const trimmed = (text || "").trim();
-        if (res.status === 401 || res.status === 403 || trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) {
+        const isHtml = trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html");
+        if (isHtml && res.status === 404) {
+          data = { success: false, status: 404, message: "Endpoint tidak ditemukan (404)" };
+        } else if (res.status === 401 || res.status === 403 || (isHtml && /login|sign.?in|auth/i.test(trimmed))) {
           data = { success: false, status: res.status || 401, message: "Sesi login berakhir atau belum terautentikasi" };
         } else {
-          data = { success: false, message: `Respons server tidak valid (HTTP ${res.status})` };
+          data = { success: false, status: res.status, message: `Respons server tidak valid (HTTP ${res.status})` };
         }
       }
-      data.status = res.status;
+      if (!data.status) data.status = res.status;
       if (data.success === undefined) data.success = res.ok;
       return data;
     }
@@ -1520,10 +1523,24 @@
         };
       }
 
+      // If /get/otp-change-nomor already succeeded for edit_profile phone, still report sent to connected Gmail
+      if (purpose === "edit_profile" && extra.phoneOtpCreated) {
+        return {
+          success: true,
+          otp: "",
+          message: payload.uiToast,
+        };
+      }
+
+      const errMsg =
+        d.status === 404 && mailRes.status === 404
+          ? `Endpoint pengiriman OTP belum tersedia di server (${targetEmail})`
+          : (d.message || mailRes.message || `Gagal mengirim OTP ke email yang terhubung (${targetEmail})`);
+
       return {
         success: false,
         otp: "",
-        message: d.message || mailRes.message || `Gagal mengirim OTP ke Gmail (${targetEmail})`,
+        message: errMsg,
       };
     }
 
@@ -1830,20 +1847,21 @@
       };
       const changedSummary = labelMap[fieldType] || "Perubahan data profil akun";
 
-      // If phone changed, also trigger /get/otp-change-nomor if backend requires server-side phone OTP session,
-      // while ensuring the distinct Edit Profile OTP email & toast to connected Gmail are delivered!
+      let phoneOtpCreated = false;
       if (fieldType === "phone" && value.trim() !== (user?.nomor || "")) {
-        await postJson("/get/otp-change-nomor", {
+        const pRes = await postJson("/get/otp-change-nomor", {
           nomorLama: user?.nomor || "",
           nomorBaru: value.trim(),
           email: connectedEmail,
-        }).catch(() => {});
+        });
+        phoneOtpCreated = Boolean(pRes?.success);
       }
 
       const res = await sendPurposeOtpToGmail("edit_profile", {
         field: fieldType,
         value: value.trim(),
         changedSummary,
+        phoneOtpCreated,
       });
 
       if (res.success) {
