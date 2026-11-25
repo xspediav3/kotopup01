@@ -19,6 +19,8 @@
       --green-dark: #166534;
       --btn: linear-gradient(135deg, #bbf7d0 0%, #4ade80 100%);
       --danger: #dc2626;
+      --danger-soft: #fff5f5;
+      --danger-border: #fca5a5;
     }
     * { box-sizing: border-box; }
     body {
@@ -65,8 +67,8 @@
     }
     .icon-btn:hover { background: var(--soft); }
     .logout-btn {
-      background: #fff5f5;
-      border: 1.5px solid #fca5a5;
+      background: var(--danger-soft);
+      border: 1.5px solid var(--danger-border);
       color: var(--danger);
       border-radius: 10px;
       padding: 7px 11px;
@@ -282,6 +284,10 @@
     }
     .input:focus { border-color: var(--stroke); box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18); }
     .input::placeholder { color: #9aa89f; }
+    .input.input-error {
+      border-color: var(--danger);
+      background: #fffafa;
+    }
     .input[readonly],
     .input.locked-field {
       background: #f3f6f4;
@@ -291,6 +297,55 @@
       pointer-events: none;
       user-select: none;
     }
+
+    /* Password eye toggle wrapper */
+    .pass-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .pass-wrap .input {
+      padding-right: 42px;
+    }
+    .eye-toggle-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 0;
+      color: var(--muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .eye-toggle-btn:hover {
+      color: var(--green-dark);
+      background: var(--soft);
+    }
+
+    .db-status-msg {
+      font-size: 12px;
+      margin-top: 5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .db-status-msg.exists-error {
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .db-status-msg.available-ok {
+      color: var(--green-dark);
+    }
+    .db-status-msg.checking {
+      color: var(--muted);
+    }
+
     .lock-banner {
       display: flex;
       align-items: center;
@@ -332,7 +387,7 @@
     .btn-block { width: 100%; }
     .btn-danger {
       background: var(--card);
-      border: 1.5px solid #fca5a5;
+      border: 1.5px solid var(--danger-border);
       color: var(--danger);
       border-radius: 10px;
       padding: 9px 14px;
@@ -365,9 +420,9 @@
     }
     .otp-group input:focus { border-color: var(--stroke); }
     .otp-group input.err { border-color: var(--danger); }
-    .err-text { color: var(--danger); font-size: 12px; margin: 6px 0 0; }
+    .err-text { color: var(--danger); font-size: 12px; margin: 6px 0 0; font-weight: 600; }
 
-    /* ---------- Log login & Device OTP Modal ---------- */
+    /* ---------- Riwayat login & Device OTP Modal ---------- */
     .table-wrap { overflow-x: auto; }
     .log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     .log th {
@@ -382,10 +437,25 @@
     .log td { padding: 10px 6px; border-bottom: 1px solid var(--stroke-soft); vertical-align: middle; }
     .log td.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
     .who-name { font-weight: 600; color: var(--text); font-size: 12.5px; }
-    .who-meta { font-size: 11px; color: var(--muted); }
+    .ip-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 3px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 11px;
+      color: var(--green-dark);
+      background: var(--soft);
+      border: 1px solid var(--stroke-soft);
+      border-radius: 6px;
+      padding: 2px 7px;
+      word-break: break-all;
+    }
+    .who-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .badge-cur {
       display: inline-block;
-      margin-top: 3px;
+      margin-top: 4px;
+      margin-left: 4px;
       font-size: 10.5px;
       font-weight: 600;
       color: var(--green-dark);
@@ -436,17 +506,9 @@
       font-size: 13px;
       word-break: break-all;
     }
-    .ip-row button {
-      background: none;
-      border: 0;
-      color: var(--danger);
-      cursor: pointer;
-      padding: 2px 6px;
-      font-size: 14px;
-    }
     .trash-btn {
       background: none;
-      border: 1.5px solid #fca5a5;
+      border: 1.5px solid var(--danger-border);
       color: var(--danger);
       border-radius: 8px;
       width: 32px;
@@ -455,7 +517,7 @@
       display: grid;
       place-items: center;
     }
-    .trash-btn:hover { background: #fff5f5; }
+    .trash-btn:hover { background: var(--danger-soft); }
     code {
       font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 12px;
@@ -484,7 +546,7 @@
     }
     .toast.show { opacity: 1; }
     .toast.success { border-color: var(--stroke); color: var(--green-dark); background: var(--soft); }
-    .toast.error { border-color: #fca5a5; color: var(--danger); background: #fff5f5; }
+    .toast.error { border-color: var(--danger-border); color: var(--danger); background: var(--danger-soft); }
     .toast.info { border-color: var(--stroke-soft); color: var(--text); }
 
     @media (max-width: 380px) {
@@ -568,7 +630,7 @@
         <div class="card-head-row">
           <div>
             <h3 class="card-title" style="margin-bottom:2px"><i class="fas fa-pen"></i> Edit Profil</h3>
-            <p class="muted" style="margin-bottom:0">Kolom terkunci. Klik tombol <b>Edit</b> untuk membuka semua kolom.</p>
+            <p class="muted" style="margin-bottom:0">Klik <b>Edit</b> untuk membuka kolom. Jika data baru belum ada di DB, kode otomatis dikirim; jika sudah ada, muncul teks merah.</p>
           </div>
           <button class="btn btn-sm" id="unlockEditBtn" type="button">
             <i class="fas fa-lock-open"></i> Edit
@@ -584,27 +646,32 @@
             <div class="field">
               <label for="firstName">Nama Depan</label>
               <input class="input locked-field" id="firstName" type="text" placeholder="Nama depan" readonly tabindex="-1" aria-disabled="true"/>
+              <div class="db-status-msg hidden" id="firstNameDbStatus"></div>
             </div>
             <div class="field">
               <label for="lastName">Nama Belakang</label>
               <input class="input locked-field" id="lastName" type="text" placeholder="Nama belakang" readonly tabindex="-1" aria-disabled="true"/>
+              <div class="db-status-msg hidden" id="lastNameDbStatus"></div>
             </div>
           </div>
           <div class="field">
             <label for="username">Username</label>
             <input class="input locked-field" id="username" type="text" placeholder="Username" readonly tabindex="-1" aria-disabled="true"/>
+            <div class="db-status-msg hidden" id="usernameDbStatus"></div>
           </div>
           <div class="field">
-            <label for="email">Email</label>
+            <label for="email">Email (Gmail)</label>
             <input class="input locked-field" id="email" type="email" placeholder="Email" readonly tabindex="-1" aria-disabled="true"/>
+            <div class="db-status-msg hidden" id="emailDbStatus"></div>
           </div>
           <div class="field">
             <label for="phone">Nomor Telepon</label>
             <input class="input locked-field" id="phone" type="text" inputmode="numeric" placeholder="Nomor telepon" readonly tabindex="-1" aria-disabled="true"/>
+            <div class="db-status-msg hidden" id="phoneDbStatus"></div>
           </div>
 
           <div class="box-panel hidden" id="phoneOtpBox">
-            <p class="muted" style="margin-bottom:0">Kami mengirim OTP ke nomor telepon lama Anda. Masukkan kode untuk mengonfirmasi perubahan.</p>
+            <p class="muted" id="phoneOtpHint" style="margin-bottom:0">Kode OTP telah dikirim otomatis karena belum terdaftar di DB. Masukkan 6 digit kode untuk konfirmasi.</p>
             <div class="otp-group" id="phoneOtp">
               <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"/>
               <input type="text" maxlength="1" inputmode="numeric"/>
@@ -616,7 +683,7 @@
             <p class="err-text hidden" id="phoneOtpErr"></p>
             <div class="row" style="justify-content:space-between">
               <button type="button" class="btn btn-ghost" id="phoneCancel">Batal</button>
-              <button type="button" class="btn btn-ghost" id="phoneResend">Kirim Ulang OTP</button>
+              <button type="button" class="btn btn-ghost" id="phoneResend">Kirim Ulang Kode</button>
             </div>
           </div>
 
@@ -634,10 +701,20 @@
         <p class="muted">Isi password lama dan password baru (min. 6 karakter) terlebih dahulu untuk mengaktifkan tombol Kirim Kode OTP ke email Anda.</p>
         <form id="passwordForm" autocomplete="off">
           <div class="field">
-            <input class="input" id="oldPass" type="password" placeholder="Password lama" autocomplete="current-password" required/>
+            <div class="pass-wrap">
+              <input class="input" id="oldPass" type="password" placeholder="Password lama" autocomplete="current-password" required/>
+              <button type="button" class="eye-toggle-btn" data-target="oldPass" aria-label="Tampilkan atau sembunyikan password lama" title="Lihat/Sembunyikan password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
           </div>
           <div class="field">
-            <input class="input" id="newPass" type="password" placeholder="Password baru (min 6)" autocomplete="new-password" minlength="6" required/>
+            <div class="pass-wrap">
+              <input class="input" id="newPass" type="password" placeholder="Password baru (min 6)" autocomplete="new-password" minlength="6" required/>
+              <button type="button" class="eye-toggle-btn" data-target="newPass" aria-label="Tampilkan atau sembunyikan password baru" title="Lihat/Sembunyikan password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
           </div>
           <div class="row">
             <input class="input" id="pwOtp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Kode OTP 6 digit" autocomplete="one-time-code" required/>
@@ -648,12 +725,12 @@
       </div>
 
       <div class="card">
-        <h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Aktivitas Login</h3>
-        <p class="muted">Menampilkan siapa yang login, alamat IP/perangkat, dan waktu login. Klik ikon tong sampah untuk mengeluarkan device setelah konfirmasi kode OTP dari Gmail terdaftar.</p>
+        <h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Riwayat Login</h3>
+        <p class="muted">Menampilkan siapa yang login, alamat IP, dan waktu login. Klik tombol tong sampah untuk kirim kode OTP ke Gmail terdaftar lalu keluarkan device.</p>
         <div class="table-wrap">
           <table class="log">
             <thead>
-              <tr><th>Siapa &amp; IP</th><th>Waktu Login</th><th>Aksi</th></tr>
+              <tr><th>Siapa, IP &amp; Perangkat</th><th>Waktu Login</th><th>Aksi</th></tr>
             </thead>
             <tbody id="logBody"></tbody>
           </table>
@@ -710,7 +787,6 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const DEFAULT_IP = "0.0.0.0";
 
     const TIERS = [
       { label: "User",     name: "USER",     min: 0,       disc: 0, icon: "fa-user" },
@@ -720,11 +796,78 @@
 
     let user = null;
     let pendingPhone = null;
+    let autoSentKey = "";
     let ipList = [];
     let isProfileEditUnlocked = false;
     let pendingDeviceToRemove = null;
+    let fallbackLoginLogs = [];
+
+    const dbAvailability = {
+      firstName: { exists: false, checked: true },
+      lastName: { exists: false, checked: true },
+      username: { exists: false, checked: true },
+      email: { exists: false, checked: true },
+      phone: { exists: false, checked: true },
+    };
 
     const EDITABLE_INPUT_IDS = ["firstName", "lastName", "username", "email", "phone"];
+
+    /* ---------- Password Eye Toggle ---------- */
+    document.querySelectorAll(".eye-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        const inp = $(targetId);
+        if (!inp) return;
+        const willShow = inp.type === "password";
+        inp.type = willShow ? "text" : "password";
+        const icon = btn.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("fa-eye", !willShow);
+          icon.classList.toggle("fa-eye-slash", willShow);
+        }
+      });
+    });
+
+    function clearDbFieldStatuses() {
+      Object.keys(dbAvailability).forEach((k) => {
+        dbAvailability[k] = { exists: false, checked: true };
+        const el = $(k);
+        const statusEl = $(k + "DbStatus");
+        if (el) el.classList.remove("input-error");
+        if (statusEl) {
+          statusEl.textContent = "";
+          statusEl.className = "db-status-msg hidden";
+        }
+      });
+    }
+
+    function setDbFieldStatus(fieldId, state, message) {
+      const el = $(fieldId);
+      const statusEl = $(fieldId + "DbStatus");
+      if (!statusEl) return;
+
+      if (!message) {
+        statusEl.textContent = "";
+        statusEl.className = "db-status-msg hidden";
+        if (el) el.classList.remove("input-error");
+        return;
+      }
+
+      statusEl.classList.remove("hidden", "exists-error", "available-ok", "checking");
+      if (state === "exists") {
+        statusEl.classList.add("exists-error");
+        statusEl.innerHTML = `<i class="fas fa-circle-xmark"></i> ${message}`;
+        if (el) el.classList.add("input-error");
+      } else if (state === "available") {
+        statusEl.classList.add("available-ok");
+        statusEl.innerHTML = `<i class="fas fa-circle-check"></i> ${message}`;
+        if (el) el.classList.remove("input-error");
+      } else {
+        statusEl.classList.add("checking");
+        statusEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
+        if (el) el.classList.remove("input-error");
+      }
+    }
 
     function setProfileFormUnlocked(unlocked) {
       isProfileEditUnlocked = Boolean(unlocked);
@@ -756,7 +899,7 @@
         }
         if (banner) {
           banner.classList.add("unlocked");
-          banner.innerHTML = '<span><i class="fas fa-lock-open"></i> Mode Edit Terbuka — semua kolom siap diedit.</span>';
+          banner.innerHTML = '<span><i class="fas fa-lock-open"></i> Mode Edit Terbuka — cek DB otomatis berjalan saat mengisi data baru.</span>';
         }
         if (saveBtn) saveBtn.disabled = false;
       } else {
@@ -769,6 +912,7 @@
           banner.innerHTML = '<span><i class="fas fa-lock"></i> Mode Edit Terkunci — kolom tidak dapat diklik atau diubah.</span>';
         }
         if (saveBtn) saveBtn.disabled = true;
+        clearDbFieldStatuses();
       }
     }
 
@@ -790,7 +934,7 @@
       t.textContent = msg;
       t.className = `toast ${type} show`;
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
+      toastTimer = setTimeout(() => t.classList.remove("show"), 3800);
     }
 
     async function api(url, options = {}) {
@@ -804,7 +948,7 @@
         const msg = err.name === "AbortError"
           ? "Server terlalu lama merespons, coba lagi"
           : "Tidak dapat terhubung ke server";
-        return { success: false, message: msg };
+        return { success: false, status: 0, message: msg };
       } finally {
         clearTimeout(timer);
       }
@@ -814,6 +958,7 @@
       } catch (err) {
         data = { success: false, message: `Respons server tidak valid (HTTP ${res.status})` };
       }
+      data.status = res.status;
       if (data.success === undefined) data.success = res.ok;
       return data;
     }
@@ -824,6 +969,17 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+    }
+
+    // Try endpoints sequentially when a route may return 404 on some deployments
+    async function postJsonFallback(endpoints, body) {
+      let lastRes = { success: false, status: 404, message: "Endpoint tidak ditemukan (404)" };
+      for (const ep of endpoints) {
+        const res = await postJson(ep, body);
+        if (res.status !== 404) return res;
+        lastRes = res;
+      }
+      return lastRes;
     }
 
     function setLoading(btn, on) {
@@ -1002,20 +1158,29 @@
       if (e.key === "Enter") { e.preventDefault(); addIp(); }
     });
 
-    /* ---------- Aktivitas Login + OTP Gmail untuk Tong Sampah Device ---------- */
-    function resolveWhoLoggedIn(logItem) {
+    /* ---------- Riwayat Login (Tampilkan IP + Perbaiki 404 Saat Keluarkan Device) ---------- */
+    function resolveWhoAndIp(logItem) {
       const who =
         logItem?.who ||
         logItem?.user ||
         logItem?.username ||
         logItem?.fullname ||
         logItem?.email ||
+        logItem?.deviceName ||
         logItem?.device ||
         user?.fullname ||
         user?.username ||
         "Akun Pengguna";
-      const ip = logItem?.ip || "-";
-      const ua = logItem?.userAgent || logItem?.deviceName || "";
+
+      const ip =
+        logItem?.ip ||
+        logItem?.ipAddress ||
+        logItem?.clientIp ||
+        logItem?.remoteAddress ||
+        user?.currentIp ||
+        "-";
+
+      const ua = logItem?.userAgent || logItem?.device || "";
       return { who, ip, ua };
     }
 
@@ -1023,27 +1188,25 @@
       const tb = $("logBody");
       tb.innerHTML = "";
       if (!Array.isArray(logs) || !logs.length) {
-        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data aktivitas login</td></tr>';
+        tb.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:14px">Belum ada data riwayat login</td></tr>';
         return;
       }
       logs.forEach((l, idx) => {
-        const { who, ip, ua } = resolveWhoLoggedIn(l);
-        const logId = l._id || l.id || String(idx);
+        const { who, ip, ua } = resolveWhoAndIp(l);
+        const logId = String(l._id || l.id || l.sessionId || `log-${idx}`);
 
         const tr = document.createElement("tr");
 
         const whoTd = document.createElement("td");
         const nameEl = document.createElement("div");
         nameEl.className = "who-name";
-        nameEl.textContent = `${who} • ${ip}`;
+        nameEl.textContent = who;
         whoTd.appendChild(nameEl);
 
-        if (ua) {
-          const uaEl = document.createElement("div");
-          uaEl.className = "who-meta";
-          uaEl.textContent = ua;
-          whoTd.appendChild(uaEl);
-        }
+        const ipEl = document.createElement("div");
+        ipEl.className = "ip-chip";
+        ipEl.innerHTML = `<i class="fas fa-network-wired"></i> IP: ${ip}`;
+        whoTd.appendChild(ipEl);
 
         if (l.current) {
           const curBadge = document.createElement("span");
@@ -1052,8 +1215,15 @@
           whoTd.appendChild(curBadge);
         }
 
+        if (ua && ua !== who) {
+          const uaEl = document.createElement("div");
+          uaEl.className = "who-meta";
+          uaEl.textContent = ua;
+          whoTd.appendChild(uaEl);
+        }
+
         const timeTd = document.createElement("td");
-        timeTd.textContent = formatDate(l.time || l.loginAt || l.createdAt);
+        timeTd.textContent = formatDate(l.time || l.loginAt || l.createdAt || l.timestamp);
 
         const actTd = document.createElement("td");
         const btn = document.createElement("button");
@@ -1062,7 +1232,7 @@
         btn.dataset.id = logId;
         btn.dataset.who = who;
         btn.dataset.ip = ip;
-        btn.dataset.time = l.time || l.loginAt || l.createdAt || "";
+        btn.dataset.time = l.time || l.loginAt || l.createdAt || l.timestamp || "";
         btn.dataset.current = l.current ? "1" : "0";
         btn.setAttribute("aria-label", `Keluarkan device ${who} (${ip})`);
         btn.title = "Kirim kode OTP Gmail & keluarkan device";
@@ -1078,13 +1248,22 @@
       if (triggerBtn) setLoading(triggerBtn, true);
       try {
         const targetEmail = user?.email || "";
-        const d = await postJson("/profile/request-remove-device-otp", {
-          logId: deviceInfo.logId,
-          who: deviceInfo.who,
-          ip: deviceInfo.ip,
-          loginTime: deviceInfo.time,
-          email: targetEmail,
-        });
+        const d = await postJsonFallback(
+          [
+            "/profile/request-remove-device-otp",
+            "/profile/login-log/request-otp",
+            "/profile/send-device-otp",
+            "/auth/request-remove-device-otp",
+          ],
+          {
+            logId: deviceInfo.logId,
+            who: deviceInfo.who,
+            ip: deviceInfo.ip,
+            loginTime: deviceInfo.time,
+            email: targetEmail,
+          }
+        );
+
         if (d.success) {
           toast(
             d.message || `Kode OTP 6 digit telah dikirim ke Gmail terdaftar (${targetEmail || "akun Anda"})`,
@@ -1092,7 +1271,12 @@
           );
           return true;
         }
-        toast(d.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
+
+        if (d.status === 404) {
+          toast("Endpoint OTP device belum terdaftar di backend (404). Cek route /profile/request-remove-device-otp di index.js.", "error");
+        } else {
+          toast(d.message || "Gagal mengirim kode OTP ke Gmail terdaftar", "error");
+        }
         return false;
       } finally {
         if (triggerBtn) setLoading(triggerBtn, false);
@@ -1113,7 +1297,8 @@
 
       pendingDeviceToRemove = deviceInfo;
       $("deviceTargetInfo").innerHTML =
-        `Device terpilih: <b>${deviceInfo.who}</b> (IP: <code>${deviceInfo.ip}</code>)` +
+        `Device terpilih: <b>${deviceInfo.who}</b><br>` +
+        `Alamat IP: <code>${deviceInfo.ip}</code>` +
         (deviceInfo.time ? `<br>Waktu login: <b>${formatDate(deviceInfo.time)}</b>` : "") +
         (deviceInfo.isCurrent ? `<br><span style="color:var(--danger);font-weight:600">Perangkat ini (akan logout setelah konfirmasi)</span>` : "");
       $("deviceOtpInput").value = "";
@@ -1152,10 +1337,20 @@
       const btn = $("confirmRemoveDeviceBtn");
       setLoading(btn, true);
       try {
-        const d = await postJson("/profile/login-log/delete", {
-          logId: pendingDeviceToRemove.logId,
-          otp,
-        });
+        const d = await postJsonFallback(
+          [
+            "/profile/login-log/delete",
+            "/profile/remove-device",
+            "/profile/logout-device",
+            "/auth/remove-device",
+          ],
+          {
+            logId: pendingDeviceToRemove.logId,
+            ip: pendingDeviceToRemove.ip,
+            otp,
+          }
+        );
+
         if (d.loggedOut) {
           toast("Device dikonfirmasi & dikeluarkan. Mengarahkan ke halaman login...", "success");
           setTimeout(() => { window.location.href = "/auth/login"; }, 800);
@@ -1163,10 +1358,16 @@
         }
         if (d.success) {
           toast(d.message || "Device berhasil dikeluarkan setelah konfirmasi OTP", "success");
+          fallbackLoginLogs = fallbackLoginLogs.filter((item, idx) => {
+            const id = String(item._id || item.id || item.sessionId || `log-${idx}`);
+            return id !== pendingDeviceToRemove.logId;
+          });
           pendingDeviceToRemove = null;
           $("deviceOtpInput").value = "";
           $("deviceOtpPanel").classList.add("hidden");
           await loadUser();
+        } else if (d.status === 404) {
+          toast("Route keluarkan device mengembalikan 404. Pastikan endpoint POST /profile/login-log/delete ada di server.", "error");
         } else {
           toast(d.message || "Kode OTP tidak valid atau gagal mengeluarkan device", "error");
         }
@@ -1212,6 +1413,7 @@
       $("email").value = u.email || "";
       $("phone").value = u.nomor || "";
       pendingPhone = null;
+      autoSentKey = "";
       $("phoneOtpBox").classList.add("hidden");
       phoneOtp.clear(false);
       setProfileFormUnlocked(false);
@@ -1234,6 +1436,7 @@
             time: u.lastLogin,
             current: true,
           }] : []);
+      fallbackLoginLogs = rawLogs;
       renderLogs(rawLogs);
     }
 
@@ -1267,6 +1470,145 @@
       }
     });
 
+    /* ---------- Cek DB Otomatis + Kirim Kode Jika Belum Ada di DB ---------- */
+    async function checkFieldInDb(fieldType, value) {
+      const trimmed = value.trim();
+      if (!trimmed) return { exists: false, message: "" };
+
+      const d = await postJsonFallback(
+        [
+          "/profile/check-availability",
+          "/auth/check-availability",
+          "/profile/check-duplicate",
+        ],
+        { field: fieldType, value: trimmed }
+      );
+
+      if (d.success) {
+        const exists = Boolean(d.exists ?? d.taken ?? d.registered ?? d.isRegistered);
+        return {
+          exists,
+          message: d.message || (exists ? `${fieldType} sudah terdaftar di database` : `${fieldType} tersedia (belum ada di DB)`),
+        };
+      }
+
+      // Fallback heuristic if check endpoint returns 404: compare against current user fields
+      if (d.status === 404 && user) {
+        const curFull = (user.fullname && user.fullname !== "N/A" ? user.fullname : "").toLowerCase();
+        const curUser = (user.username || "").toLowerCase();
+        const curEmail = (user.email || "").toLowerCase();
+        const curPhone = String(user.nomor || "").trim();
+        const low = trimmed.toLowerCase();
+
+        let matchedOwn = false;
+        if (fieldType === "username" && low === curUser) matchedOwn = true;
+        if (fieldType === "email" && low === curEmail) matchedOwn = true;
+        if (fieldType === "phone" && trimmed === curPhone) matchedOwn = true;
+        if ((fieldType === "firstName" || fieldType === "lastName") && curFull && curFull.includes(low)) matchedOwn = true;
+
+        return {
+          exists: matchedOwn,
+          message: matchedOwn ? "Data ini sudah terdaftar di akun/database" : "Belum terdaftar di DB — kode dapat dikirim otomatis",
+        };
+      }
+
+      return { exists: false, message: d.message || "" };
+    }
+
+    async function autoSendCodeForNewField(fieldType, value) {
+      const sendKey = `${fieldType}:${value.trim()}`;
+      if (autoSentKey === sendKey) return;
+      autoSentKey = sendKey;
+
+      const d = await postJsonFallback(
+        [
+          "/profile/send-verification-code",
+          "/get/otp-change-nomor",
+          "/profile/request-email-otp",
+        ],
+        {
+          field: fieldType,
+          value: value.trim(),
+          nomorLama: user?.nomor || "",
+          email: fieldType === "email" ? value.trim() : (user?.email || ""),
+        }
+      );
+
+      if (d.success) {
+        if (fieldType === "phone") {
+          pendingPhone = value.trim();
+          $("phoneOtpErr").classList.add("hidden");
+          $("phoneOtpBox").classList.remove("hidden");
+          phoneOtp.clear(false);
+        }
+        toast(d.message || `Data belum ada di DB — kode verifikasi otomatis dikirim`, "success");
+      } else {
+        toast(d.message || `Data belum ada di DB, namun gagal mengirim kode otomatis`, "info");
+      }
+    }
+
+    const dbCheckTimers = {};
+    function scheduleDbCheck(fieldId, fieldType) {
+      const inp = $(fieldId);
+      if (!inp) return;
+      inp.addEventListener("input", () => {
+        if (!isProfileEditUnlocked) return;
+        const val = inp.value.trim();
+
+        const originalVal = (() => {
+          const fullname = user?.fullname && user.fullname !== "N/A" ? user.fullname : "";
+          const parts = fullname ? fullname.split(" ") : [];
+          if (fieldId === "firstName") return parts[0] || "";
+          if (fieldId === "lastName") return parts.slice(1).join(" ");
+          if (fieldId === "username") return user?.username || "";
+          if (fieldId === "email") return user?.email || "";
+          if (fieldId === "phone") return user?.nomor || "";
+          return "";
+        })();
+
+        if (!val || val === originalVal) {
+          dbAvailability[fieldId] = { exists: false, checked: true };
+          setDbFieldStatus(fieldId, "", "");
+          return;
+        }
+
+        if (fieldId === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+          setDbFieldStatus(fieldId, "exists", "Format email tidak valid");
+          dbAvailability[fieldId] = { exists: true, checked: true };
+          return;
+        }
+        if (fieldId === "phone" && !/^[0-9]{10,15}$/.test(val)) {
+          setDbFieldStatus(fieldId, "exists", "Nomor telepon harus 10–15 digit angka");
+          dbAvailability[fieldId] = { exists: true, checked: true };
+          return;
+        }
+
+        clearTimeout(dbCheckTimers[fieldId]);
+        setDbFieldStatus(fieldId, "checking", "Mengecek ketersediaan di database...");
+
+        dbCheckTimers[fieldId] = setTimeout(async () => {
+          const latestVal = inp.value.trim();
+          if (!latestVal || latestVal === originalVal) return;
+
+          const res = await checkFieldInDb(fieldType, latestVal);
+          dbAvailability[fieldId] = { exists: res.exists, checked: true };
+
+          if (res.exists) {
+            setDbFieldStatus(fieldId, "exists", res.message || "Sudah terdaftar di database");
+          } else {
+            setDbFieldStatus(fieldId, "available", res.message || "Belum ada di DB — mengirim kode otomatis...");
+            await autoSendCodeForNewField(fieldType, latestVal);
+          }
+        }, 550);
+      });
+    }
+
+    scheduleDbCheck("firstName", "firstName");
+    scheduleDbCheck("lastName", "lastName");
+    scheduleDbCheck("username", "username");
+    scheduleDbCheck("email", "email");
+    scheduleDbCheck("phone", "phone");
+
     /* ---------- Tombol Edit & Kirim Notif Gmail Saat Simpan ---------- */
     $("unlockEditBtn").addEventListener("click", () => {
       if (!isProfileEditUnlocked) {
@@ -1284,6 +1626,7 @@
           $("phone").value = user.nomor || "";
         }
         pendingPhone = null;
+        autoSentKey = "";
         $("phoneOtpBox").classList.add("hidden");
         phoneOtp.clear(false);
         setProfileFormUnlocked(false);
@@ -1310,10 +1653,17 @@
       if (!recipient) return { sent: false, message: "Email tujuan tidak tersedia" };
       const subject = "[FelixTopUp] Notifikasi Perubahan Profil Akun";
       const text =
-        `Halo ${user?.fullname || user?.username || "Pengguna"},\n\n` +
-        `Data profil akun Anda baru saja disimpan/diperbarui:\n` +
-        changesSummary.map((item) => `- ${item}`).join("\n") +
-        `\n\nWaktu: ${new Date().toLocaleString("id-ID")}\n` +
+        `Halo ${user?.fullname || user?.username || "Pengguna"},
+
+` +
+        `Data profil akun Anda baru saja disimpan/diperbarui:
+` +
+        changesSummary.map((item) => `- ${item}`).join("
+") +
+        `
+
+Waktu: ${new Date().toLocaleString("id-ID")}
+` +
         `Jika Anda tidak merasa melakukan perubahan ini, segera hubungi admin.`;
 
       const d = await postJson("/profile/send-notification-email", {
@@ -1333,6 +1683,12 @@
       e.preventDefault();
       if (!isProfileEditUnlocked) {
         toast("Kolom masih terkunci. Klik tombol Edit terlebih dahulu.", "error");
+        return;
+      }
+
+      const blockedFields = Object.entries(dbAvailability).filter(([, st]) => st.exists);
+      if (blockedFields.length > 0) {
+        toast("Ada data yang sudah terdaftar di DB (lihat teks merah). Ganti terlebih dahulu.", "error");
         return;
       }
 
@@ -1379,16 +1735,13 @@
             toast("Nomor telepon harus 10–15 digit angka", "error");
             return;
           }
-          const d = await postJson("/get/otp-change-nomor", { nomorLama: oldPhone });
-          if (d.success) {
-            pendingPhone = phoneNew;
-            $("phoneOtpErr").classList.add("hidden");
-            $("phoneOtpBox").classList.remove("hidden");
-            phoneOtp.clear();
-            toast("OTP dikirim ke nomor lama Anda", "success");
-          } else {
-            toast(d.message || "Gagal meminta OTP perubahan nomor", "error");
+          const check = await checkFieldInDb("phone", phoneNew);
+          if (check.exists) {
+            setDbFieldStatus("phone", "exists", check.message || "Nomor telepon sudah terdaftar di DB");
+            toast("Nomor telepon sudah terdaftar di database", "error");
+            return;
           }
+          await autoSendCodeForNewField("phone", phoneNew);
           return;
         }
 
@@ -1404,11 +1757,21 @@
           changesSummary.push(`Nama lengkap: ${newFull}`);
         }
         if (newUser && newUser !== cur.username) {
+          const check = await checkFieldInDb("username", newUser);
+          if (check.exists) {
+            setDbFieldStatus("username", "exists", check.message || "Username sudah terdaftar di DB");
+            throw new Error("Username sudah terdaftar di database");
+          }
           const d = await postJson("/profile/change-username", { newUsername: newUser });
           if (!d.success) throw new Error(d.message || "Gagal mengubah username");
           changesSummary.push(`Username: ${newUser}`);
         }
         if (newEmail && newEmail !== cur.email) {
+          const check = await checkFieldInDb("email", newEmail);
+          if (check.exists) {
+            setDbFieldStatus("email", "exists", check.message || "Email sudah terdaftar di DB");
+            throw new Error("Email sudah terdaftar di database");
+          }
           const d = await postJson("/profile/request-email-change", { newEmail });
           if (!d.success) throw new Error(d.message || "Gagal mengubah email");
           changesSummary.push(`Email: ${newEmail}`);
@@ -1442,18 +1805,17 @@
 
     $("phoneCancel").addEventListener("click", () => {
       pendingPhone = null;
+      autoSentKey = "";
       $("phoneOtpBox").classList.add("hidden");
       $("phone").value = user?.nomor || "";
+      setDbFieldStatus("phone", "", "");
     });
 
     $("phoneResend").addEventListener("click", async () => {
-      const d = await postJson("/get/otp-change-nomor", { nomorLama: user?.nomor || "" });
-      if (d.success) {
-        phoneOtp.clear();
-        toast("OTP baru dikirim ke nomor lama Anda", "success");
-      } else {
-        toast(d.message || "Gagal mengirim ulang OTP", "error");
-      }
+      const targetPhone = pendingPhone || $("phone").value.trim() || user?.nomor || "";
+      autoSentKey = "";
+      await autoSendCodeForNewField("phone", targetPhone);
+      phoneOtp.clear();
     });
 
     /* ---------- Keamanan ---------- */
