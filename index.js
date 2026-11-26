@@ -989,7 +989,7 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// ===== Email OTP & Notifikasi (Prioritas Webhook Apps Script, fallback ke Gmail SMTP) =====
+// ===== Email OTP & Notifikasi (Gaya Komik + Maskot Chibi SVG) =====
 const mailer = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -1033,45 +1033,191 @@ function mailTransportErrorMessage(err) {
   return "Gagal mengirim email: " + (code || status || text || "error tidak diketahui");
 }
 
+function formatWibTime(dateObj = new Date()) {
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      timeZone: "Asia/Jakarta",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }).format(dateObj) + " WIB";
+  } catch (_) {
+    return dateObj.toISOString();
+  }
+}
+
+function buildChibiMascotSvg(accentColor = "#22c55e") {
+  return `
+<svg width="78" height="78" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Maskot Chibi Felix TopUp">
+  <ellipse cx="42" cy="77" rx="22" ry="4.5" fill="#14231a" fill-opacity="0.18"/>
+  <!-- Telinga / Cap -->
+  <path d="M22 33C22 18.64 31.4 9 42 9C52.6 9 62 18.64 62 33H22Z" fill="${escapeHtml(accentColor)}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M40 16L45 24H37L42 32" stroke="#fef08a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Wajah Chibi -->
+  <rect x="20" y="29" width="44" height="34" rx="17" fill="#fffbeb" stroke="#111827" stroke-width="3"/>
+  <!-- Pipi merona -->
+  <ellipse cx="28" cy="48" rx="4.5" ry="2.6" fill="#fda4af"/>
+  <ellipse cx="56" cy="48" rx="4.5" ry="2.6" fill="#fda4af"/>
+  <!-- Mata -->
+  <circle cx="33" cy="43" r="4.2" fill="#111827"/>
+  <circle cx="31.7" cy="41.5" r="1.5" fill="#ffffff"/>
+  <circle cx="51" cy="43" r="4.2" fill="#111827"/>
+  <circle cx="49.7" cy="41.5" r="1.5" fill="#ffffff"/>
+  <!-- Senyum -->
+  <path d="M37.5 49.5C39.2 52 44.8 52 46.5 49.5" stroke="#111827" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Badan & tangan -->
+  <path d="M28 63H56L59 74H25L28 63Z" fill="#fef08a" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M26 65L16 58" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="15" cy="57" r="4" fill="#fffbeb" stroke="#111827" stroke-width="2.5"/>
+  <path d="M58 65L68 58" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="69" cy="57" r="4" fill="#fffbeb" stroke="#111827" stroke-width="2.5"/>
+</svg>`;
+}
+
+function renderComicEmailCard({
+  badge = "PANEL OTP",
+  title,
+  greeting,
+  message,
+  metaRows = [],
+  otpCode = "",
+  footerNote,
+  accentColor = "#22c55e",
+  badgeBg = "#fef08a",
+}) {
+  const safeBadge = escapeHtml(badge);
+  const safeTitle = escapeHtml(title);
+  const safeGreeting = escapeHtml(greeting);
+  const safeMessage = escapeHtml(message);
+  const safeFooter = escapeHtml(footerNote);
+  const mascotSvg = buildChibiMascotSvg(accentColor);
+
+  const metaHtml =
+    Array.isArray(metaRows) && metaRows.length > 0
+      ? `<div style="background:#f8fafc;border:2.5px solid #111827;border-radius:10px;padding:10px 12px;margin:12px 0;font-size:13px;line-height:1.55;color:#111827;">
+          ${metaRows
+            .map(
+              (r) =>
+                `<div><span style="font-weight:700;">${escapeHtml(r.label)}:</span> ${escapeHtml(r.value)}</div>`
+            )
+            .join("")}
+        </div>`
+      : "";
+
+  const otpHtml = otpCode
+    ? `<div style="margin:16px 0;padding:14px 12px;background:#f0fdf4;border:3px solid #111827;box-shadow:4px 4px 0 #111827;border-radius:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#166534;margin-bottom:6px;">KODE OTP RAHASIA</div>
+        <div style="font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:900;letter-spacing:8px;color:#111827;">${escapeHtml(otpCode)}</div>
+      </div>`
+    : "";
+
+  return `
+<div style="background:#eef2ff;padding:20px 12px;font-family:'Trebuchet MS','Segoe UI',Arial,sans-serif;color:#111827;">
+  <div style="max-width:500px;margin:0 auto;background:#ffffff;border:3px solid #111827;box-shadow:6px 6px 0 #111827;border-radius:16px;overflow:hidden;">
+    <!-- Header Komik -->
+    <div style="background:${escapeHtml(accentColor)};border-bottom:3px solid #111827;padding:12px 16px;">
+      <span style="display:inline-block;background:${escapeHtml(badgeBg)};color:#111827;border:2px solid #111827;box-shadow:2px 2px 0 #111827;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;">${safeBadge}</span>
+      <div style="font-size:20px;font-weight:900;color:#111827;margin-top:6px;letter-spacing:0.2px;">${safeTitle}</div>
+    </div>
+
+    <!-- Isi + Maskot Chibi -->
+    <div style="padding:18px 18px 14px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:10px;">
+        <tr>
+          <td valign="top" style="padding-right:12px;">
+            <div style="font-weight:800;font-size:15px;color:#111827;margin-bottom:6px;">${safeGreeting}</div>
+            <div style="font-size:14px;line-height:1.55;color:#1f2937;">${safeMessage}</div>
+          </td>
+          <td valign="top" align="center" width="84" style="background:#fef9c3;border:2.5px solid #111827;box-shadow:3px 3px 0 #111827;border-radius:12px;padding:4px;">
+            ${mascotSvg}
+            <div style="font-size:10px;font-weight:800;color:#111827;margin-top:2px;">FELIX BOT</div>
+          </td>
+        </tr>
+      </table>
+
+      ${metaHtml}
+      ${otpHtml}
+
+      <div style="margin-top:14px;padding-top:10px;border-top:2px dashed #9ca3af;font-size:12px;line-height:1.5;color:#4b5563;">
+        ${safeFooter}
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
 function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
-  const safeName = escapeHtml(username || "Pengguna");
+  const safeUser = username || "Pengguna";
+  const waktuReq = formatWibTime(new Date());
 
   if (purpose === "logout_device") {
-    const safeWho = escapeHtml(meta.who || username || "Perangkat");
-    const safeIp = escapeHtml(meta.ip || "-");
+    const who = meta.who || safeUser;
+    const ip = meta.ip || "-";
     return {
       subject: "Kode OTP Keluarkan Perangkat - Felix TopUp",
-      heading: "Konfirmasi Keluarkan Perangkat",
-      intro: `Halo ${safeName}, kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun Anda:`,
-      detailHtml: `
-        <div style="background:#f7fdf9;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#14231a;">
-          <div><strong>Perangkat / Akun:</strong> ${safeWho}</div>
-          <div><strong>Alamat IP:</strong> ${safeIp}</div>
-        </div>`,
-      footer: "Kode berlaku 5 menit. Jika Anda tidak meminta mengeluarkan perangkat ini, segera ganti password akun Anda.",
       toastMessage: "Kode OTP Keluarkan Perangkat sudah dikirim ke email Anda",
+      text: `Konfirmasi Keluarkan Perangkat\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nPerangkat/Akun: ${who}\nIP: ${ip}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
+      html: renderComicEmailCard({
+        badge: "KEAMANAN SESI",
+        title: "Konfirmasi Keluarkan Perangkat",
+        greeting: `Halo ${safeUser}!`,
+        message: "Kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun Felix TopUp Anda.",
+        metaRows: [
+          { label: "Perangkat / Akun", value: who },
+          { label: "Alamat IP", value: ip },
+          { label: "Waktu Permintaan", value: waktuReq },
+        ],
+        otpCode,
+        footerNote: "Kode berlaku selama 5 menit. Jika Anda tidak meminta tindakan ini, segera ganti password akun Anda.",
+        accentColor: "#fde047",
+        badgeBg: "#ffffff",
+      }),
     };
   }
 
   if (purpose === "edit_profile") {
-    const safeFieldInfo = escapeHtml(meta.changedSummary || meta.value || meta.field || "Perubahan data profil");
+    const detailPerubahan =
+      meta.changedSummary ||
+      (meta.field && meta.value ? `${meta.field}: ${meta.value}` : meta.field || meta.value || "Perubahan data profil");
     return {
       subject: "Kode OTP Ubah Profil - Felix TopUp",
-      heading: "Verifikasi Ubah Profil",
-      intro: `Halo ${safeName}, gunakan kode berikut untuk mengonfirmasi perubahan data profil (${safeFieldInfo}) pada akun Anda:`,
-      detailHtml: "",
-      footer: "Kode berlaku 5 menit. Jika Anda tidak mengajukan perubahan profil, abaikan email ini dan amankan akun Anda.",
       toastMessage: "Kode OTP Ubah Profil sudah dikirim ke email Anda",
+      text: `Verifikasi Ubah Profil\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nDetail: ${detailPerubahan}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
+      html: renderComicEmailCard({
+        badge: "VERIFIKASI PROFIL",
+        title: "Verifikasi Ubah Profil",
+        greeting: `Halo ${safeUser}!`,
+        message: "Gunakan kode OTP di bawah ini untuk mengonfirmasi perubahan data profil pada akun Felix TopUp Anda.",
+        metaRows: [
+          { label: "Detail Perubahan", value: detailPerubahan },
+          { label: "Waktu Permintaan", value: waktuReq },
+        ],
+        otpCode,
+        footerNote: "Kode berlaku selama 5 menit. Jangan bagikan kode ini kepada siapa pun. Jika Anda tidak merasa mengajukan perubahan, abaikan email ini.",
+        accentColor: "#4ade80",
+        badgeBg: "#fef08a",
+      }),
     };
   }
 
   return {
     subject: "Kode Ganti Password - Felix TopUp",
-    heading: "Ganti Password",
-    intro: `Halo ${safeName}, gunakan kode berikut untuk mengganti password akun Anda:`,
-    detailHtml: "",
-    footer: "Kode berlaku 5 menit. Jika Anda tidak meminta ini, abaikan email ini dan segera ganti password Anda.",
     toastMessage: "Kode OTP Ganti Password sudah dikirim ke email Anda",
+    text: `Ganti Password\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
+    html: renderComicEmailCard({
+      badge: "GANTI PASSWORD",
+      title: "Verifikasi Ganti Password",
+      greeting: `Halo ${safeUser}!`,
+      message: "Gunakan kode OTP di bawah ini untuk melanjutkan proses penggantian password akun Felix TopUp Anda.",
+      metaRows: [{ label: "Waktu Permintaan", value: waktuReq }],
+      otpCode,
+      footerNote: "Kode berlaku selama 5 menit. Jika Anda tidak meminta penggantian password, segera amankan akun Anda.",
+      accentColor: "#86efac",
+      badgeBg: "#fef08a",
+    }),
   };
 }
 
@@ -1123,20 +1269,11 @@ async function sendViaWebhookOrSmtp({ to, subject, html, text }) {
 
 async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_password", meta = {}) {
   const tpl = buildPurposeOtpTemplate(purpose, otpCode, username, meta);
-  const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-      <h2 style="color:#166534;margin:0 0 8px;">${tpl.heading}</h2>
-      <p style="margin:0 0 14px;">${tpl.intro}</p>
-      ${tpl.detailHtml}
-      <div style="font-size:30px;font-weight:700;letter-spacing:8px;text-align:center;padding:16px;border:1.5px solid #bbf7d0;border-radius:10px;color:#166534;">${escapeHtml(otpCode)}</div>
-      <p style="margin:16px 0 0;font-size:13px;color:#66756b;">${tpl.footer}</p>
-    </div>`;
-
   await sendViaWebhookOrSmtp({
     to: toEmail,
     subject: tpl.subject,
-    html,
-    text: `${tpl.heading}\nKode OTP: ${otpCode}\n${tpl.footer}`,
+    html: tpl.html,
+    text: tpl.text,
   });
 }
 
@@ -1237,11 +1374,17 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
     }
     const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
     const rawText = String(req.body?.text || "Ada aktivitas pada akun Anda.");
-    const html = `
-      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1.5px solid #4ade80;border-radius:12px;background:#ffffff;color:#14231a;">
-        <h2 style="color:#166534;margin:0 0 8px;">${escapeHtml(subject)}</h2>
-        <pre style="white-space:pre-wrap;font-family:'Segoe UI',Arial,sans-serif;margin:0;font-size:13px;color:#14231a;">${escapeHtml(rawText)}</pre>
-      </div>`;
+    const html = renderComicEmailCard({
+      badge: "INFO AKTIVITAS",
+      title: subject,
+      greeting: `Halo ${user?.username || "Pengguna"}!`,
+      message: rawText,
+      metaRows: [{ label: "Waktu Tercatat", value: formatWibTime(new Date()) }],
+      otpCode: "",
+      footerNote: "Notifikasi otomatis dari sistem Felix TopUp.",
+      accentColor: "#93c5fd",
+      badgeBg: "#fef08a",
+    });
 
     await sendViaWebhookOrSmtp({
       to: toEmail,
