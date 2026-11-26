@@ -8,7 +8,7 @@
     <meta name="keywords" content="riwayat order, histori order, mutasi pembelian, transaksi">
     <meta name="author" content="Riky Shop">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#EC4899">
+    <meta name="theme-color" content="#16A34A">
     <title>Riwayat Order - Riky Shop | Platform Topup Terpercaya</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -20,11 +20,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/media/banner.png">
     <style>
         :root {
-            --primary-hue: 335;
-            --vp-primary: hsl(var(--primary-hue), 85%, 60%);
-            --vp-primary-rgb: 240, 56, 131;
-            --vp-primary-light: hsl(var(--primary-hue), 85%, 96%);
-            --vp-primary-dark: hsl(var(--primary-hue), 85%, 50%);
+            --primary-hue: 145;
+            --vp-primary: #22c55e;
+            --vp-primary-rgb: 34, 197, 94;
+            --vp-primary-light: #ecfdf3;
+            --vp-primary-dark: #15803d;
             --vp-secondary: #6c757d;
             --vp-secondary-rgb: 108, 117, 125;
             --vp-success: #198754;
@@ -36,10 +36,10 @@
             --vp-danger-rgb: 220, 53, 69;
             --vp-light: #f8f9fa;
             --vp-dark: #212529;
-            --vp-body-bg: hsl(var(--primary-hue), 20%, 98%);
+            --vp-body-bg: #f2fbf4;
             --vp-card-bg: #ffffff;
-            --vp-text-muted: hsl(var(--primary-hue), 10%, 45%);
-            --vp-border-color: hsl(var(--primary-hue), 20%, 92%);
+            --vp-text-muted: #66776b;
+            --vp-border-color: #dcefe1;
             --vp-font-main: 'Manrope', sans-serif;
             --vp-font-heading: 'Poppins', sans-serif;
             --vp-transition: 0.2s ease-in-out;
@@ -56,20 +56,20 @@
         }
 
         [data-theme="dark"] {
-            --vp-primary: hsl(325, 90%, 70%);
-            --vp-primary-rgb: 245, 102, 203;
-            --vp-primary-light: rgba(var(--vp-primary-rgb), 0.15);
-            --vp-primary-dark: hsl(325, 90%, 60%);
-            --vp-body-bg: #1a161d;
-            --vp-card-bg: #251f28;
-            --vp-text-muted: #9e92a8;
-            --vp-border-color: #3c3240;
-            --vp-dark: #f0e6fc;
-            --vp-light: #21262d;
+            --vp-primary: #4ade80;
+            --vp-primary-rgb: 74, 222, 128;
+            --vp-primary-light: rgba(74, 222, 128, 0.15);
+            --vp-primary-dark: #22c55e;
+            --vp-body-bg: #101b14;
+            --vp-card-bg: #17251b;
+            --vp-text-muted: #a4b8a8;
+            --vp-border-color: #2b4432;
+            --vp-dark: #eaf5ec;
+            --vp-light: #213328;
             --vp-shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --vp-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
             --vp-shadow-lg: 0 8px 25px rgba(0,0,0,0.5);
-            --vp-header-bg-dark-transparent: rgba(37, 31, 40, 0.5);
+            --vp-header-bg-dark-transparent: rgba(23, 37, 27, 0.78);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -371,6 +371,469 @@
         }
         .btn-vp-primary:disabled { background-color: var(--vp-secondary); border-color: var(--vp-secondary); opacity: 0.65; }
 
+    
+
+        /* ===== Green dashboard theme: stable layout + light comic accents ===== */
+        body {
+            background: linear-gradient(180deg, #effcf2 0%, #f8fff9 42%, #ffffff 100%);
+        }
+        [data-theme="dark"] body,
+        body[data-theme="dark"] {
+            background: linear-gradient(180deg, #101b14 0%, #14251a 48%, #101b14 100%);
+        }
+        .vp-wrapper { width: 100%; min-height: 100vh; }
+        .vp-main-container { min-width: 0; }
+        .vp-content-wrapper { min-width: 0; align-items: stretch; }
+        .vp-main-content { width: 100%; min-width: 0; }
+        .vp-topbar {
+            background: rgba(255, 255, 255, .88);
+            border-color: #dcefe1;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(22, 101, 52, .055);
+        }
+        [data-theme="dark"] .vp-topbar {
+            background: rgba(23, 37, 27, .88);
+            border-color: var(--vp-border-color);
+        }
+        .vp-theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            color: #248448;
+            border-radius: 50%;
+        }
+        .vp-theme-toggle:hover { background: #e7f8ec; color: #166534; }
+        [data-theme="dark"] .vp-theme-toggle { color: #86efac; }
+        .vp-profile-dropdown img { border-color: rgba(34, 197, 94, .22); }
+
+        .vp-section {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            border: 1px solid rgba(34, 197, 94, .14);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(22, 101, 52, .05);
+        }
+        .vp-section::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: -25px;
+            right: -18px;
+            width: 155px;
+            height: 125px;
+            opacity: .23;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(34, 197, 94, .55) 1.35px, transparent 1.45px);
+            background-size: 10px 10px;
+            mask-image: linear-gradient(135deg, #000 0%, transparent 82%);
+        }
+        [data-theme="dark"] .vp-section { border-color: rgba(74, 222, 128, .18); }
+        .vp-section > h3 {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .65rem;
+            position: relative;
+            padding-bottom: .85rem;
+            margin-bottom: 1.15rem !important;
+            border-bottom: 1px solid var(--vp-border-color);
+            letter-spacing: -.35px;
+        }
+        .vp-section > h3::before {
+            content: "";
+            display: inline-block;
+            flex: 0 0 5px;
+            width: 5px;
+            height: 1.3em;
+            border-radius: 6px;
+            background: linear-gradient(180deg, #4ade80, #15803d);
+            box-shadow: 3px 0 0 rgba(34, 197, 94, .15);
+        }
+        .vp-section > h3::after {
+            content: "REKAP!";
+            display: inline-flex;
+            align-items: center;
+            margin-left: auto;
+            padding: .2rem .55rem;
+            border: 2px solid #166534;
+            border-radius: 7px 4px 7px 4px;
+            background: #dcfce7;
+            color: #166534;
+            box-shadow: 2px 2px 0 #166534;
+            font-family: var(--vp-font-heading);
+            font-size: .62rem;
+            font-weight: 800;
+            letter-spacing: .8px;
+            line-height: 1.25;
+            transform: rotate(-2deg);
+        }
+        [data-theme="dark"] .vp-section > h3::after {
+            background: #1d3826;
+            border-color: #86efac;
+            color: #bbf7d0;
+            box-shadow: 2px 2px 0 #86efac;
+        }
+        .filter-controls { row-gap: .75rem; }
+        .form-control, .form-select { min-height: 44px; }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--vp-primary);
+            box-shadow: 0 0 0 .2rem rgba(var(--vp-primary-rgb), .14);
+        }
+        .btn-primary, .btn-vp-primary, .vp-history-table .btn-primary {
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+            border-color: #22c55e;
+            color: #fff;
+            font-weight: 700;
+        }
+        .btn-primary:hover, .btn-vp-primary:hover, .vp-history-table .btn-primary:hover {
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+            border-color: #15803d;
+            color: #fff;
+        }
+        .btn-outline-primary {
+            color: #16803d;
+            border-color: #22a052;
+            font-weight: 700;
+        }
+        .btn-outline-primary:hover {
+            background: #16a34a;
+            border-color: #16a34a;
+            color: #fff;
+        }
+        [data-theme="dark"] .btn-outline-primary { color: #86efac; border-color: #4ade80; }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #86c99b transparent;
+        }
+        .vp-history-table {
+            width: 100%;
+            min-width: 790px;
+            border-spacing: 0;
+        }
+        .vp-history-table thead { background: linear-gradient(90deg, #e7f8ec, #f1fbf4); }
+        .vp-history-table thead th {
+            color: #16803d;
+            padding-top: .95rem;
+            padding-bottom: .95rem;
+            white-space: nowrap;
+        }
+        .vp-history-table tbody tr { transition: background-color .18s ease, box-shadow .18s ease; }
+        .vp-history-table tbody tr:hover {
+            background: #f3fff6;
+            transform: none;
+            box-shadow: inset 3px 0 0 #22c55e;
+        }
+        [data-theme="dark"] .vp-history-table thead { background: rgba(74, 222, 128, .11); }
+        [data-theme="dark"] .vp-history-table thead th { color: #86efac; }
+        [data-theme="dark"] .vp-history-table tbody tr:hover { background: rgba(74, 222, 128, .07); }
+        .vp-history-table td { overflow-wrap: anywhere; }
+        .vp-history-table .action-buttons { flex-wrap: wrap; }
+        .vp-loading-shimmer { min-height: 42px; }
+
+        /* ===== Dashboard-style footer ===== */
+        footer.dashboard-footer {
+            display: grid;
+            grid-template-columns: minmax(220px, .9fr) minmax(0, 1.8fr);
+            align-items: stretch;
+            gap: 1rem;
+            margin: 0 8px 8px;
+            padding: 1rem;
+            width: calc(100% - 16px);
+            min-width: 0;
+            border: 1px solid var(--vp-border-color);
+            border-radius: 22px;
+            background: linear-gradient(145deg, #fff 0%, #f5fff7 100%);
+            box-shadow: 0 10px 28px rgba(22, 101, 52, .07);
+            color: var(--vp-dark);
+        }
+        [data-theme="dark"] footer.dashboard-footer {
+            background: linear-gradient(145deg, #17251b 0%, #1b3022 100%);
+            border-color: var(--vp-border-color);
+        }
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            padding: 1rem;
+            border: 1px solid rgba(34, 197, 94, .15);
+            border-radius: 17px;
+            background: linear-gradient(145deg, #edfff2 0%, #f8fff9 100%);
+        }
+        [data-theme="dark"] .footer-brand {
+            background: linear-gradient(145deg, #1d3826 0%, #192a20 100%);
+            border-color: var(--vp-border-color);
+        }
+        .footer-brand-top { display: flex; align-items: center; gap: .7rem; }
+        .footer-brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%);
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 12px rgba(22, 163, 74, .2);
+        }
+        .footer-brand-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: .08rem;
+            min-width: 0;
+        }
+        .footer-brand-copy .footer-logo-name { margin: 0; }
+        .footer-brand-copy .footer-logo-name-text {
+            color: #166534;
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        [data-theme="dark"] .footer-brand-copy .footer-logo-name-text { color: #86efac; }
+        .footer-brand-kicker {
+            color: #3f8a59;
+            font-size: .57rem;
+            font-weight: 800;
+            letter-spacing: 1.05px;
+        }
+        .footer-brand .footer-description {
+            max-width: none;
+            margin: 1rem 0;
+            color: var(--vp-text-muted);
+            font-size: .79rem;
+            line-height: 1.7;
+        }
+        .footer-brand .footer-copyright {
+            width: 100%;
+            margin: 0;
+            padding-top: .7rem;
+            border-top: 1px solid rgba(34, 197, 94, .16);
+            color: var(--vp-text-muted);
+            font-size: .66rem;
+            line-height: 1.5;
+        }
+        .footer-links-section {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-content: stretch;
+            gap: .65rem;
+            min-width: 0;
+        }
+        .footer-link-card {
+            min-width: 0;
+            padding: .95rem .8rem;
+            border: 1px solid var(--vp-border-color);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .82);
+        }
+        [data-theme="dark"] .footer-link-card { background: rgba(255, 255, 255, .035); }
+        .footer-link-card .footer-section-title {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0 0 .7rem;
+            color: #16803d;
+            font-size: .74rem;
+            font-weight: 800;
+        }
+        [data-theme="dark"] .footer-link-card .footer-section-title { color: #86efac; }
+        .footer-link-card .footer-section-title i { font-size: .85rem; }
+        .footer-link-card ul {
+            display: grid;
+            gap: .48rem;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .footer-link-card li {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0;
+            color: var(--vp-text-muted);
+            font-size: .75rem;
+            line-height: 1.4;
+            min-width: 0;
+        }
+        .footer-link-card li > i {
+            flex: 0 0 14px;
+            color: #22a052;
+            font-size: .78rem;
+        }
+        .footer-link-card li a {
+            color: var(--vp-text-muted);
+            font-size: .73rem;
+            overflow-wrap: anywhere;
+            text-decoration: none;
+            transition: color .2s ease, transform .2s ease;
+        }
+        .footer-link-card li a:hover {
+            color: var(--vp-primary-dark);
+            transform: translateX(2px);
+        }
+        .footer-community {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+            padding: .75rem .25rem 0;
+            border-top: 1px solid var(--vp-border-color);
+        }
+        .footer-community-label {
+            color: var(--vp-text-muted);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+        .footer-social-links { display: flex; align-items: center; gap: .5rem; }
+        .footer-social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin: 0;
+            border: 1px solid rgba(34, 197, 94, .18);
+            border-radius: 12px;
+            background: var(--vp-card-bg);
+            color: #16803d;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform .2s ease, background .2s ease;
+        }
+        .footer-social-links a:hover {
+            transform: translateY(-2px);
+            background: var(--vp-primary-light);
+            color: var(--vp-primary-dark);
+        }
+        [data-theme="dark"] .footer-social-links a { color: #86efac; }
+
+        @media (max-width: 991.98px) {
+            .vp-main-container { width: 100%; padding-left: 0; }
+            .vp-content-wrapper { padding: .75rem; }
+            footer.dashboard-footer {
+                grid-template-columns: 1fr;
+                gap: .75rem;
+                margin: 0 6px 8px;
+                padding: .75rem;
+                width: calc(100% - 12px);
+                border-radius: 20px;
+            }
+            .footer-links-section {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: .6rem;
+                width: 100%;
+            }
+            .footer-link-card { padding: .85rem .75rem; }
+            .footer-link-card:nth-child(3) { grid-column: 1 / -1; }
+            .footer-link-card:nth-child(3) ul {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: .5rem;
+            }
+            .footer-link-card:nth-child(3) li { flex-wrap: wrap; }
+            .vp-content-wrapper { flex: 1 0 auto; }
+        }
+        @media (max-width: 767.98px) {
+            .vp-topbar, footer.dashboard-footer {
+                margin-left: 6px;
+                margin-right: 6px;
+                width: calc(100% - 12px);
+            }
+            .vp-content-wrapper { padding: .6rem; }
+            .vp-section { padding: 1rem; }
+            .vp-section > h3 { font-size: 1.2rem; }
+            .vp-section > h3::after { font-size: .57rem; }
+            .filter-controls .form-select,
+            .filter-controls .form-control { margin-bottom: .35rem; }
+            .table-responsive { overflow: visible; border-radius: 0; }
+            .vp-history-table {
+                min-width: 100%;
+                width: 100%;
+                table-layout: fixed;
+                border: 0;
+                border-radius: 0;
+            }
+            .vp-history-table thead { display: none; }
+            .vp-history-table tbody { display: block; width: 100%; }
+            .vp-history-table tbody tr {
+                display: block;
+                width: 100%;
+                margin: 0 0 .85rem;
+                padding: .75rem .85rem;
+                border: 1px solid var(--vp-border-color);
+                border-radius: 15px;
+                background: var(--vp-card-bg);
+                box-shadow: 0 5px 16px rgba(22, 101, 52, .045);
+            }
+            .vp-history-table tbody tr:hover { transform: none; }
+            .vp-history-table tbody td {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: .8rem;
+                width: 100%;
+                padding: .55rem 0;
+                border: 0;
+                border-bottom: 1px dashed var(--vp-border-color);
+                text-align: right !important;
+                font-size: .82rem;
+                overflow-wrap: anywhere;
+            }
+            .vp-history-table tbody td::before {
+                content: attr(data-label);
+                display: block;
+                flex: 0 0 37%;
+                float: none;
+                margin: 0 auto 0 0;
+                color: var(--vp-text-muted);
+                font-size: .72rem;
+                font-weight: 800;
+                line-height: 1.5;
+                text-align: left;
+            }
+            .vp-history-table tbody td:last-child {
+                margin: .35rem 0 0;
+                padding-top: .8rem;
+                border-top: 1px solid var(--vp-border-color);
+                border-bottom: 0;
+            }
+            .vp-history-table tbody td[colspan] {
+                display: block;
+                text-align: center !important;
+            }
+            .vp-history-table tbody td[colspan]::before { display: none; }
+            .vp-history-table .action-buttons { justify-content: flex-end; }
+            .footer-brand { padding: .9rem; }
+            .footer-brand .footer-description { margin: .8rem 0; }
+        }
+        @media (max-width: 575.98px) {
+            .vp-history-table tbody tr { padding: .7rem .75rem; }
+            .vp-history-table .action-buttons { flex-direction: column; gap: .4rem; width: 100%; }
+            .vp-history-table .action-buttons .btn { width: 100%; text-align: center; }
+            .footer-link-card { padding: .78rem .62rem; }
+            .footer-link-card .footer-section-title { font-size: .7rem; }
+            .footer-link-card li a { font-size: .68rem; }
+        }
+        @media (max-width: 390px) {
+            .vp-topbar-brand-text { font-size: 1rem; }
+            .vp-topbar-logo { height: 22px; }
+            .footer-community { align-items: flex-start; flex-direction: column; }
+            .footer-link-card:nth-child(3) ul { grid-template-columns: 1fr; }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -413,7 +876,7 @@
                     <button class="vp-theme-toggle" id="themeToggle" title="Toggle Theme"><i class="bi bi-moon-fill" id="themeIcon"></i></button>
                     <div class="dropdown vp-profile-dropdown">
                         <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://via.placeholder.com/150/EC4899/FFFFFF?Text=C" alt="User" id="userProfileImageNav">
+                            <img src="https://via.placeholder.com/150/16A34A/FFFFFF?Text=C" alt="User" id="userProfileImageNav">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <li><h6 class="dropdown-header" id="userFullnameNavDropdown">Nama Pengguna</h6></li>
@@ -487,56 +950,63 @@
                 </main>
             </div>
             
-            <footer>
-                <div class="footer-left">
-                    <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">Riky Shop</span>
-                    </a>
-                    <div class="footer-description">
-                        <i class="bi bi-info-circle-fill"></i>
-                        Riky Shop adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        <footer class="dashboard-footer">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-brand-top">
+                            <span class="footer-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <div class="footer-brand-copy">
+                                <a href="/dashboard" class="footer-logo-name">
+                                    <span class="footer-logo-name-text">Riky Shop</span>
+                                </a>
+                                <span class="footer-brand-kicker">PLATFORM LAYANAN DIGITAL</span>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            Riky Shop adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        </p>
                     </div>
                     <div class="footer-copyright">
                         Riky Shop © <span id="currentYear"></span>. All Rights Reserved.
                     </div>
                 </div>
-                
+
                 <div class="footer-links-section">
-                    <div>
-                        <span class="footer-section-title">Navigasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-compass-fill"></i> Navigasi</span>
                         <ul>
-                            <li><a href="/dashboard">Beranda</a></li>
-                            <li><a href="/deposit">Deposit</a></li>
-                            <li><a href="/order">Pesanan</a></li>
-                            <li><a href="/price-list">Daftar Harga</a></li>
+                            <li><i class="bi bi-house-door-fill"></i><a href="/dashboard">Beranda</a></li>
+                            <li><i class="bi bi-wallet2"></i><a href="/deposit">Deposit</a></li>
+                            <li><i class="bi bi-cart-check-fill"></i><a href="/order">Pesanan</a></li>
+                            <li><i class="bi bi-tags-fill"></i><a href="/price-list">Daftar Harga</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Informasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-grid-1x2-fill"></i> Informasi</span>
                         <ul>
-                            <li><a href="/profile">Profil Pengguna</a></li>
-                            <li><a href="/api-key-page">API Key</a></li>
-                            <li><a href="/docs">Dokumentasi API</a></li>
-                            <li><a href="#">Syarat & Ketentuan</a></li>
-                            <li><a href="#">Kebijakan Privasi</a></li>
+                            <li><i class="bi bi-person-fill"></i><a href="/profile">Profil Pengguna</a></li>
+                            <li><i class="bi bi-key-fill"></i><a href="/api-key-page">API Key</a></li>
+                            <li><i class="bi bi-code-slash"></i><a href="/docs">Dokumentasi API</a></li>
+                            <li><i class="bi bi-file-earmark-text"></i><a href="#">Syarat &amp; Ketentuan</a></li>
+                            <li><i class="bi bi-shield-check"></i><a href="#">Kebijakan Privasi</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Kontak Kami</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="astrapterodactyl@gmail.com">Email Support</a></li>
-                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                            <li><i class="bi bi-whatsapp"></i><a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i><a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
+                            <li><i class="bi bi-telegram"></i><a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
                 </div>
-                
-                <div class="footer-right">
+
+                <div class="footer-community">
+                    <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
-                        <a href="#" aria-label="Saluran"><i class="bi bi-whatsapp"></i></a>
-                        <a href="#" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-                        <a href="#" aria-label="Group"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:astrapterodactyl@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </footer>
