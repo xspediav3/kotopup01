@@ -3,49 +3,41 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
-    <title>Riky Shop - Layanan TopUp & PPOB Terpercaya</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <title>XS-Pedia - Layanan TopUp & PPOB Terpercaya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="icon" href="/media/banner.png" type="image/png">
 
-    <meta name="description" content="Riky Shop: Platform topup terdepan di Indonesia. Layanan cepat, aman, dan terpercaya untuk pulsa, data, game, e-wallet, dan pembayaran digital.">
-    <meta name="keywords" content="Riky Shop, topup, pulsa, paket data, game online, e-wallet, pembayaran digital, PPOB">
-    <meta name="author" content="Riky Shop">
-    <meta property="og:title" content="Riky Shop - Solusi TopUp Cepat & Terpercaya">
-    <meta property="og:description" content="Platform topup terbaru di Indonesia. Layanan cepat, aman, dan terpercaya.">
+    <meta name="description" content="XS-Pedia: Platform topup & PPOB bergaya modern di Indonesia. Layanan cepat, aman, dan terpercaya untuk pulsa, data, game, e-wallet, dan pembayaran digital.">
+    <meta name="keywords" content="XS-Pedia, topup, pulsa, paket data, game online, e-wallet, pembayaran digital, PPOB">
+    <meta name="author" content="XS-Pedia">
+    <meta property="og:title" content="XS-Pedia - Solusi TopUp Cepat & Terpercaya">
+    <meta property="og:description" content="Platform topup terdepan di Indonesia. Layanan cepat, aman, dan terpercaya.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="#">
     <meta property="og:image" content="/media/banner.png">
-    <meta property="og:image:alt" content="Riky Shop">
-    <meta property="og:site_name" content="Riky Shop">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Riky Shop - Solusi TopUp Cepat & Terpercaya">
-    <meta name="twitter:description" content="Platform topup terbaru di Indonesia. Layanan cepat, aman, dan terpercaya.">
-    <meta name="twitter:image" content="/media/banner.png">
+    <meta property="og:site_name" content="XS-Pedia">
 
   <style>
     :root {
-      --primary-hue: 335;
-      --secondary-hue: 305;
-      --primary-color: hsl(var(--primary-hue), 85%, 60%);
-      --primary-color-dark: hsl(var(--primary-hue), 85%, 50%);
-      --primary-color-light: hsl(var(--primary-hue), 85%, 96%);
-      --secondary-color: hsl(var(--secondary-hue), 75%, 65%);
-      --secondary-color-light: hsl(var(--secondary-hue), 75%, 96%);
-      --text-dark: hsl(var(--primary-hue), 15%, 15%);
-      --text-light: hsl(var(--primary-hue), 15%, 45%);
-      --text-white: hsl(0, 0%, 100%);
-      --bg-light: hsl(var(--primary-hue), 20%, 98%);
-      --bg-white: hsl(0, 0%, 100%);
-      --bg-dark: hsl(var(--primary-hue), 20%, 10%);
-      --border-color: hsl(var(--primary-hue), 20%, 90%);
-      --shadow: 0 10px 30px hsla(var(--primary-hue), 40%, 60%, 0.15);
-      --shadow-sm: 0 5px 15px hsla(var(--primary-hue), 40%, 60%, 0.08);
-      --border-radius-md: 12px;
-      --border-radius-lg: 16px;
-      --transition-cubic: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      --font-family: 'Inter', sans-serif;
+      --comic-ink: #111827;
+      --comic-bg: #f4f7fb;
+      --comic-paper: #ffffff;
+      --comic-blue: #2563eb;
+      --comic-blue-dark: #1d4ed8;
+      --comic-sky: #38bdf8;
+      --comic-sky-light: #e0f2fe;
+      --comic-yellow: #facc15;
+      --comic-yellow-light: #fef9c3;
+      --comic-green: #16a34a;
+      --comic-green-light: #dcfce7;
+      --comic-orange: #f97316;
+      --text-dark: #111827;
+      --text-muted: #4b5563;
+      --border-comic: 3px solid #111827;
+      --shadow-comic: 6px 6px 0px #111827;
+      --shadow-comic-sm: 4px 4px 0px #111827;
+      --font-body: 'Space Grotesk', sans-serif;
+      --font-comic: 'Bangers', cursive;
     }
 
     * {
@@ -60,21 +52,21 @@
     }
 
     body {
-      font-family: var(--font-family);
-      background-color: var(--bg-light);
+      font-family: var(--font-body);
+      background-color: var(--comic-bg);
+      background-image: radial-gradient(#cbd5e1 1.4px, transparent 1.4px);
+      background-size: 20px 20px;
       color: var(--text-dark);
-      line-height: 1.7;
+      line-height: 1.65;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     ::selection {
-      background-color: var(--primary-color);
-      color: var(--text-white);
+      background-color: var(--comic-yellow);
+      color: var(--comic-ink);
     }
 
     img {
@@ -99,134 +91,127 @@
     }
 
     .section {
-      padding: 6rem 0;
+      padding: 5.5rem 0;
+    }
+
+    .comic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--comic-yellow);
+      color: var(--comic-ink);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      border-radius: 999px;
+      padding: 0.3rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 1rem;
     }
 
     .section-title {
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 3.5rem;
     }
 
     .section-title h2 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 1rem;
-      position: relative;
-      display: inline-block;
-      line-height: 1.2;
-    }
-
-    .section-title h2::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70px;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      border-radius: 2px;
+      font-family: var(--font-comic);
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      letter-spacing: 1.5px;
+      color: var(--comic-ink);
+      margin-bottom: 0.75rem;
+      line-height: 1.1;
+      text-shadow: 2px 2px 0px var(--comic-yellow);
     }
 
     .section-title p {
-      color: var(--text-light);
-      max-width: 650px;
+      color: var(--text-muted);
+      max-width: 640px;
       margin: 0 auto;
-      font-size: 1.125rem;
+      font-size: 1.05rem;
+      font-weight: 500;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 0.875rem 1.75rem;
-      border-radius: var(--border-radius-md);
-      font-weight: 600;
+      gap: 0.55rem;
+      padding: 0.85rem 1.65rem;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-weight: 700;
       cursor: pointer;
-      transition: var(--transition-cubic);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
       text-align: center;
-      border: none;
-      outline: none;
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic-sm);
       white-space: nowrap;
-      font-size: 1rem;
+      font-size: 0.98rem;
     }
 
-    .btn i {
-      font-size: 1.1em;
+    .btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px var(--comic-ink);
+    }
+
+    .btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--comic-ink);
     }
 
     .btn-primary {
-      background-color: var(--primary-color);
-      color: var(--text-white);
-      box-shadow: 0 4px 15px hsla(var(--primary-hue), 85%, 60%, 0.3);
+      background-color: var(--comic-blue);
+      color: #ffffff;
     }
 
     .btn-primary:hover {
-      background-color: var(--primary-color-dark);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px hsla(var(--primary-hue), 85%, 50%, 0.4);
+      background-color: var(--comic-blue-dark);
+    }
+
+    .btn-yellow {
+      background-color: var(--comic-yellow);
+      color: var(--comic-ink);
+    }
+
+    .btn-yellow:hover {
+      background-color: #eab308;
     }
 
     .btn-secondary {
-      background-color: var(--bg-white);
-      color: var(--primary-color);
-      border: 2px solid var(--primary-color);
+      background-color: var(--comic-paper);
+      color: var(--comic-ink);
     }
 
     .btn-secondary:hover {
-      background-color: var(--primary-color-light);
-      transform: translateY(-3px);
-    }
-    
-    .btn-outline {
-      background-color: transparent;
-      color: var(--primary-color);
-      border: 2px solid var(--primary-color);
-    }
-    .btn-outline:hover {
-      background-color: var(--primary-color);
-      color: var(--text-white);
+      background-color: var(--comic-sky-light);
     }
 
-    .btn-primary-improved {
-      background-color: var(--primary-color);
-      color: var(--text-white);
-      border: 2px solid var(--primary-color);
-      box-shadow: 0 4px 15px hsla(var(--primary-hue), 85%, 60%, 0.3);
-      position: relative;
-      overflow: hidden;
+    .btn-sm {
+      padding: 0.55rem 1.1rem;
+      font-size: 0.88rem;
+      border-width: 2.5px;
+      box-shadow: 3px 3px 0px var(--comic-ink);
     }
 
-    .btn-primary-improved:hover {
-      background-color: var(--primary-color-dark);
-      border-color: var(--primary-color-dark);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px hsla(var(--primary-hue), 85%, 50%, 0.4);
-    }
-
-    .btn-primary-improved:active {
-      transform: translateY(-1px);
-    }
-
+    /* Header */
     header {
-      background-color: var(--bg-white);
-      box-shadow: var(--shadow-sm);
+      background-color: var(--comic-paper);
+      border-bottom: var(--border-comic);
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       z-index: 1000;
-      transition: var(--transition-cubic);
-      padding: 1rem 0;
+      padding: 0.9rem 0;
+      transition: padding 0.2s ease;
     }
 
     header.scrolled {
-      box-shadow: var(--shadow);
-      padding: 0.75rem 0;
-      background-color: hsla(0, 0%, 100%, 0.95);
-      backdrop-filter: blur(10px);
+      padding: 0.65rem 0;
+      box-shadow: 0 4px 0px var(--comic-ink);
     }
 
     .header-container {
@@ -242,887 +227,851 @@
     }
 
     .logo img {
-      height: 40px;
-      transition: transform 0.3s ease;
-    }
-    .logo:hover img {
-      transform: rotate(-7deg) scale(1.05);
+      height: 42px;
+      width: 42px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 2px 2px 0px var(--comic-ink);
     }
 
     .logo-text {
-      font-weight: 800;
-      font-size: 1.75rem;
-      color: var(--primary-color);
+      font-family: var(--font-comic);
+      font-size: 1.95rem;
+      letter-spacing: 1.5px;
+      color: var(--comic-blue);
+      text-shadow: 2px 2px 0px var(--comic-yellow);
     }
-    
+
     nav {
       display: flex;
       align-items: center;
-      gap: 1.5rem; 
+      gap: 1.5rem;
     }
 
     .nav-links {
       display: flex;
-      gap: 2rem;
+      gap: 1.5rem;
+      align-items: center;
     }
 
     .nav-links a {
-      color: var(--text-dark);
-      font-weight: 500;
-      position: relative;
-      padding: 0.5rem 0;
-      transition: color 0.3s ease;
+      color: var(--comic-ink);
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
     }
 
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background-color: var(--primary-color);
-      transition: width 0.3s ease;
+    .nav-links a:hover,
+    .nav-links a.active {
+      background-color: var(--comic-yellow);
+      border-color: var(--comic-ink);
+      box-shadow: 2px 2px 0px var(--comic-ink);
     }
 
-    .nav-links a:hover, .nav-links a.active {
-      color: var(--primary-color);
-    }
-
-    .nav-links a:hover::after, .nav-links a.active::after {
-      width: 100%;
-    }
-
-    .auth-buttons { 
+    .auth-buttons {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
     }
+
     .auth-buttons .btn {
-      padding: 0.6rem 1.2rem;
+      padding: 0.55rem 1.15rem;
       font-size: 0.9rem;
     }
-    
-    .auth-buttons .btn-outline { 
-      background-color: var(--bg-white);
-      color: var(--text-dark);
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-    }
-    .auth-buttons .btn-outline:hover {
-      background-color: var(--primary-color-light);
-      color: var(--primary-color-dark);
-      border-color: var(--primary-color);
-      transform: translateY(-2px);
-    }
-    
-    .auth-buttons-mobile { 
-      display: none; 
+
+    .auth-buttons-mobile {
+      display: none;
       flex-direction: column;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border-color);
-    }
-    .auth-buttons-mobile .btn {
-      width: 100%; 
-      justify-content: center; 
-    }
-    .auth-buttons-mobile .btn i {
-       font-size: 1em; 
+      gap: 0.85rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 2px dashed var(--comic-ink);
     }
 
     .mobile-menu-btn {
       display: none;
-      background: none;
-      border: none;
-      font-size: 1.75rem;
-      color: var(--text-dark);
+      background: var(--comic-yellow);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      border-radius: 10px;
+      font-size: 1.35rem;
+      color: var(--comic-ink);
       cursor: pointer;
-      padding: 0.5rem;
+      padding: 0.45rem 0.75rem;
     }
 
+    /* Hero */
     .hero {
-      background: linear-gradient(135deg, var(--primary-color-light) 0%, var(--secondary-color-light) 100%);
-      padding-top: 8rem; 
-      padding-bottom: 6rem;
-      overflow: hidden;
+      padding-top: 8.5rem;
+      padding-bottom: 5.5rem;
+      background: linear-gradient(180deg, #e0f2fe 0%, #f4f7fb 100%);
+      border-bottom: var(--border-comic);
       position: relative;
     }
-    .hero::before, .hero::after {
-        content: '';
-        position: absolute;
-        border-radius: 50%;
-        opacity: 0.1;
-        pointer-events: none;
-    }
-    .hero::before {
-        width: 50vw;
-        height: 50vw;
-        background-color: var(--primary-color);
-        top: -10vw;
-        left: -10vw;
-        animation: pulse 8s infinite ease-in-out;
-    }
-    .hero::after {
-        width: 40vw;
-        height: 40vw;
-        background-color: var(--secondary-color);
-        bottom: -15vw;
-        right: -15vw;
-        animation: pulse 10s infinite ease-in-out reverse;
-    }
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.1; }
-        50% { transform: scale(1.2); opacity: 0.15; }
-    }
-
 
     .hero-container {
       display: flex;
       align-items: center;
-      gap: 4rem;
-      position: relative;
-      z-index: 1;
+      gap: 3.5rem;
     }
 
     .hero-content {
-      flex: 1;
+      flex: 1.1;
     }
 
     .hero-title {
-      font-size: clamp(2.5rem, 5vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 1.5rem;
-      color: var(--text-dark);
+      font-family: var(--font-comic);
+      font-size: clamp(2.8rem, 5.5vw, 4.2rem);
+      letter-spacing: 1.5px;
+      line-height: 1.08;
+      margin-bottom: 1.25rem;
+      color: var(--comic-ink);
     }
 
     .hero-title span {
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      background: var(--comic-yellow);
+      color: var(--comic-ink);
+      padding: 0.05em 0.35em;
+      border: var(--border-comic);
+      box-shadow: 4px 4px 0px var(--comic-ink);
+      border-radius: 10px;
+      transform: rotate(-1.5deg);
     }
 
     .hero-subtitle {
-      font-size: 1.125rem;
-      color: var(--text-light);
-      margin-bottom: 2.5rem;
-      max-width: 550px;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 2rem;
+      max-width: 560px;
+      background: var(--comic-paper);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 4px 4px 0px var(--comic-ink);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
     }
 
     .hero-buttons {
       display: flex;
       gap: 1rem;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
       flex-wrap: wrap;
     }
 
     .hero-stats {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
       gap: 1rem;
     }
 
+    .stat-item {
+      background: var(--comic-paper);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 4px 4px 0px var(--comic-ink);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
     .stat-icon {
-      font-size: 2rem;
-      color: var(--primary-color);
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--comic-sky-light);
+      border: 2px solid var(--comic-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--comic-blue);
+      flex-shrink: 0;
     }
+
     .stat-number {
-      font-size: 1.75rem;
-      font-weight: 700;
+      font-family: var(--font-comic);
+      font-size: 1.65rem;
+      letter-spacing: 1px;
+      line-height: 1.1;
     }
+
     .stat-label {
-      font-size: 0.9rem;
-      color: var(--text-light);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
     .hero-image-wrapper {
-      flex: 1;
+      flex: 0.9;
       display: flex;
       justify-content: center;
-      align-items: center;
+    }
+
+    .comic-hero-panel {
+      background: var(--comic-paper);
+      border: var(--border-comic);
+      box-shadow: 10px 10px 0px var(--comic-ink);
+      border-radius: 20px;
+      padding: 1rem;
       position: relative;
-    }
-    .hero-image-wrapper img {
-        border-radius: var(--border-radius-lg);
-        box-shadow: 0 20px 50px hsla(var(--primary-hue), 50%, 60%, 0.2);
-        animation: float-hero 6s ease-in-out infinite;
-        max-height: 450px;
-        object-fit: cover;
-    }
-    @keyframes float-hero {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-      100% { transform: translateY(0px); }
+      max-width: 470px;
+      width: 100%;
     }
 
+    .comic-hero-tag {
+      position: absolute;
+      top: -16px;
+      right: 18px;
+      background: var(--comic-green);
+      color: #ffffff;
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      border-radius: 999px;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
 
+    .comic-hero-panel img {
+      border-radius: 12px;
+      border: 2.5px solid var(--comic-ink);
+      width: 100%;
+      object-fit: cover;
+    }
+
+    /* Services */
     .services-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.75rem;
     }
 
     .service-card {
-      background-color: var(--bg-white);
-      border-radius: var(--border-radius-lg);
-      padding: 2.5rem 2rem;
-      transition: var(--transition-cubic);
-      border: 1px solid var(--border-color);
-      position: relative;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      background-color: var(--comic-paper);
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic);
+      border-radius: 18px;
+      padding: 2rem 1.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
+
     .service-card:hover {
-      transform: translateY(-10px);
-      box-shadow: var(--shadow);
-      border-color: var(--primary-color);
-    }
-    .service-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-    .service-card:hover::before {
-        transform: scaleX(1);
+      transform: translate(-3px, -3px);
+      box-shadow: 9px 9px 0px var(--comic-ink);
     }
 
     .service-icon {
-      font-size: 3rem;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-      color: var(--primary-color);
-      padding: 1rem;
-      background-color: var(--primary-color-light);
-      border-radius: 50%;
-      line-height: 1;
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background-color: var(--comic-yellow);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      color: var(--comic-ink);
+      margin-bottom: 1.25rem;
     }
+
+    .service-card:nth-child(2) .service-icon { background-color: var(--comic-sky); }
+    .service-card:nth-child(3) .service-icon { background-color: var(--comic-green-light); }
+    .service-card:nth-child(4) .service-icon { background-color: #fed7aa; }
+
     .service-title {
-      font-size: 1.375rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
+
     .service-description {
-      color: var(--text-light);
+      color: var(--text-muted);
       margin-bottom: 1.5rem;
       font-size: 0.95rem;
+      flex-grow: 1;
     }
+
     .service-link {
-      color: var(--primary-color);
-      font-weight: 600;
+      color: var(--comic-blue);
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
-      transition: gap 0.3s ease;
-    }
-    .service-link:hover {
-      gap: 0.6rem;
-    }
-    .service-link i {
-      transition: transform 0.3s ease;
-    }
-    .service-link:hover i {
-      transform: translateX(3px);
+      gap: 0.4rem;
     }
 
-
+    /* E-Wallet */
     .ewallet {
-      background-color: var(--bg-white);
+      background-color: var(--comic-paper);
+      border-top: var(--border-comic);
+      border-bottom: var(--border-comic);
     }
+
     .ewallet-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
       flex-wrap: wrap;
       gap: 1rem;
     }
+
     .ewallet-title h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-family: var(--font-comic);
+      font-size: 2.3rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.35rem;
     }
+
     .ewallet-title p {
-      color: var(--text-light);
-      max-width: 500px;
+      color: var(--text-muted);
+      max-width: 520px;
     }
+
     .ewallet-controls {
       display: flex;
       gap: 0.75rem;
     }
+
     .ewallet-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background-color: var(--bg-white);
-      border: 1px solid var(--border-color);
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background-color: var(--comic-yellow);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: var(--transition-cubic);
-      color: var(--primary-color);
+      color: var(--comic-ink);
       font-size: 1.1rem;
+      transition: transform 0.15s ease;
     }
+
     .ewallet-btn:hover {
-      background-color: var(--primary-color);
-      color: var(--text-white);
-      border-color: var(--primary-color);
-      transform: scale(1.1);
+      transform: translate(-2px, -2px);
     }
+
     .ewallet-slider {
       display: flex;
       gap: 1.5rem;
       overflow-x: auto;
-      padding: 1rem 0.5rem;
+      padding: 0.75rem 0.5rem 1.25rem;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
     }
     .ewallet-slider::-webkit-scrollbar { display: none; }
 
     .ewallet-card {
-      min-width: 200px;
-      max-width: 200px;
-      background-color: var(--bg-white);
-      border-radius: var(--border-radius-lg);
-      padding: 2rem 1.5rem;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition-cubic);
+      min-width: 215px;
+      max-width: 215px;
+      background-color: var(--comic-bg);
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic-sm);
+      border-radius: 16px;
+      padding: 1.75rem 1.25rem;
       scroll-snap-align: start;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease;
     }
+
     .ewallet-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow);
-      border-color: var(--primary-color);
+      transform: translateY(-5px);
+      background-color: var(--comic-sky-light);
     }
+
     .ewallet-logo {
-      width: 70px;
-      height: 70px;
-      object-fit: contain;
-      margin-bottom: 1.25rem;
-      transition: transform 0.3s ease;
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 2.5px solid var(--comic-ink);
+      margin-bottom: 1rem;
+      background: #fff;
     }
-    .ewallet-card:hover .ewallet-logo {
-      transform: scale(1.1);
-    }
+
     .ewallet-name {
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin-bottom: 0.4rem;
     }
+
     .ewallet-desc {
-      font-size: 0.875rem;
-      color: var(--text-light);
+      font-size: 0.88rem;
+      color: var(--text-muted);
       margin-bottom: 1.25rem;
       flex-grow: 1;
     }
-    .ewallet-link {
-      font-size: 0.9rem;
-    }
 
-
+    /* Features */
     .feature-tabs {
       display: flex;
       justify-content: center;
-      gap: 1rem;
-      margin-bottom: 3.5rem;
+      gap: 0.85rem;
+      margin-bottom: 3rem;
       flex-wrap: wrap;
-      background-color: var(--primary-color-light);
-      padding: 0.5rem;
-      border-radius: var(--border-radius-lg);
     }
+
     .tab-btn {
-      padding: 0.75rem 1.75rem;
-      background-color: transparent;
-      border: none;
-      border-radius: var(--border-radius-md);
-      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--comic-paper);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-weight: 700;
       cursor: pointer;
-      transition: var(--transition-cubic);
-      color: var(--text-light);
-      font-size: 1rem;
+      color: var(--comic-ink);
+      font-size: 0.95rem;
+      transition: all 0.15s ease;
     }
+
     .tab-btn.active {
-      background-color: var(--primary-color);
-      color: var(--text-white);
-      box-shadow: 0 4px 10px hsla(var(--primary-hue), 85%, 60%, 0.25);
+      background-color: var(--comic-blue);
+      color: #ffffff;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px var(--comic-ink);
     }
-    .tab-content { display: none; animation: fadeInContent 0.5s ease; }
-    .tab-content.active { display: block; }
-    @keyframes fadeInContent {
-      from { opacity: 0; transform: translateY(15px); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: popIn 0.3s ease; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
+      gap: 1.75rem;
     }
+
     .feature-item {
-      background-color: var(--bg-white);
-      border-radius: var(--border-radius-lg);
-      padding: 2rem;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition-cubic);
-      border-left: 4px solid transparent;
+      background-color: var(--comic-paper);
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic-sm);
+      border-radius: 16px;
+      padding: 1.85rem;
     }
-    .feature-item:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow);
-      border-left-color: var(--primary-color);
-    }
+
     .feature-item h3 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-weight: 700;
     }
+
     .feature-item h3 i {
-      color: var(--primary-color);
-      font-size: 1.3em;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--comic-yellow);
+      border: 2px solid var(--comic-ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--comic-ink);
+      font-size: 1rem;
+      flex-shrink: 0;
     }
+
     .feature-item p {
-      color: var(--text-light);
+      color: var(--text-muted);
       font-size: 0.95rem;
     }
 
+    /* Pricing */
+    .pricing {
+      background-color: var(--comic-paper);
+      border-top: var(--border-comic);
+      border-bottom: var(--border-comic);
+    }
 
-    .pricing { background-color: var(--bg-white); }
     .pricing-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
       gap: 2rem;
-      align-items: stretch; 
+      align-items: stretch;
     }
+
     .pricing-card {
-      background-color: var(--bg-white);
-      border-radius: var(--border-radius-lg);
-      padding: 2.5rem;
+      background-color: var(--comic-bg);
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic);
+      border-radius: 18px;
+      padding: 2.25rem 2rem;
       text-align: center;
-      border: 1px solid var(--border-color);
-      transition: var(--transition-cubic);
       position: relative;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: var(--shadow-sm);
     }
-    .pricing-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: var(--shadow);
-      border-color: var(--primary-color);
-    }
+
     .pricing-card.popular {
-      border: 2px solid var(--primary-color);
-      transform: scale(1.05);
+      background-color: var(--comic-yellow-light);
+      transform: translateY(-6px);
     }
-    .pricing-card.popular:hover {
-      transform: translateY(-10px) scale(1.07);
-    }
+
     .popular-badge {
       position: absolute;
-      top: 20px;
-      right: -35px;
-      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-      color: var(--text-white);
-      padding: 0.35rem 2.5rem;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--comic-blue);
+      color: #ffffff;
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 3px 3px 0px var(--comic-ink);
+      padding: 0.25rem 1.25rem;
+      border-radius: 999px;
       font-size: 0.8rem;
       font-weight: 700;
-      transform: rotate(45deg);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
+
     .pricing-title {
-      font-size: 1.375rem;
+      font-size: 1.35rem;
       font-weight: 700;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
+
     .pricing-price {
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--primary-color);
-      margin-bottom: 1.75rem;
+      font-family: var(--font-comic);
+      font-size: 3.1rem;
+      letter-spacing: 1px;
+      color: var(--comic-blue);
+      margin-bottom: 1.5rem;
       line-height: 1;
     }
+
     .pricing-price span {
-      font-size: 1rem;
-      color: var(--text-light);
-      font-weight: 500;
-      margin-left: 0.25rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-left: 0.2rem;
     }
+
     .pricing-features {
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       text-align: left;
-      flex-grow: 1; 
+      flex-grow: 1;
     }
+
     .pricing-features li {
-      margin-bottom: 0.875rem;
-      color: var(--text-light);
+      margin-bottom: 0.8rem;
+      color: var(--text-dark);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.7rem;
       font-size: 0.95rem;
-    }
-    .pricing-features li i {
-      color: var(--primary-color);
-      font-size: 1.1em;
-    }
-    .pricing-card .btn {
-      margin-top: auto; 
+      font-weight: 500;
     }
 
+    .pricing-features li i.fa-check-circle { color: var(--comic-green); }
+    .pricing-features li i.fa-times-circle { color: #dc2626; }
 
-    .testimonials { background-color: var(--primary-color-light); }
+    /* Testimonials */
+    .testimonials {
+      background-color: var(--comic-sky-light);
+      border-bottom: var(--border-comic);
+    }
+
     .testimonial-slider {
-      display: flex;
-      gap: 2rem;
-      overflow-x: auto;
-      padding: 1rem 0.5rem 2rem;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.5rem;
     }
-    .testimonial-slider::-webkit-scrollbar { height: 8px; }
-    .testimonial-slider::-webkit-scrollbar-track { background: hsl(var(--primary-hue), 20%, 85%); border-radius: 10px; }
-    .testimonial-slider::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
-    
+
     .testimonial-card {
-      min-width: 340px;
-      max-width: 360px;
-      background-color: var(--bg-white);
-      border-radius: var(--border-radius-lg);
-      padding: 2.5rem 2rem;
-      box-shadow: var(--shadow-sm);
-      scroll-snap-align: start;
-      transition: var(--transition-cubic);
-      border: 1px solid var(--border-color);
+      background-color: var(--comic-paper);
+      border: var(--border-comic);
+      box-shadow: var(--shadow-comic-sm);
+      border-radius: 16px;
+      padding: 1.85rem;
+      display: flex;
+      flex-direction: column;
     }
-    .testimonial-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow);
-    }
+
     .testimonial-rating {
-      color: hsl(45, 100%, 50%);
-      margin-bottom: 1.25rem;
-      font-size: 1.1rem;
-    }
-    .testimonial-text {
-      font-style: italic;
-      color: var(--text-light);
-      margin-bottom: 1.75rem;
-      position: relative;
-      padding-left: 2rem;
+      color: #f59e0b;
+      margin-bottom: 1rem;
       font-size: 1rem;
     }
-    .testimonial-text::before {
-      content: '\f10d'; 
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      position: absolute;
-      top: -5px;
-      left: 0;
-      font-size: 1.5rem;
-      color: var(--primary-color);
-      opacity: 0.8;
+
+    .testimonial-text {
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      flex-grow: 1;
     }
+
     .testimonial-author {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.9rem;
+      padding-top: 1rem;
+      border-top: 2px dashed #cbd5e1;
     }
+
     .author-avatar {
-      width: 55px;
-      height: 55px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid var(--primary-color-light);
+      border: 2.5px solid var(--comic-ink);
     }
+
     .author-info h4 {
       font-weight: 700;
-      margin-bottom: 0.1rem;
+      font-size: 0.98rem;
     }
+
     .author-info p {
-      font-size: 0.875rem;
-      color: var(--text-light);
+      font-size: 0.82rem;
+      color: var(--text-muted);
     }
 
+    /* FAQ */
+    .faq-item {
+      margin-bottom: 1rem;
+      border-radius: 14px;
+      overflow: hidden;
+      background-color: var(--comic-paper);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 4px 4px 0px var(--comic-ink);
+    }
 
+    .faq-question {
+      padding: 1.15rem 1.5rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 1.02rem;
+    }
+
+    .faq-question:hover {
+      background-color: var(--comic-yellow-light);
+    }
+
+    .faq-question i {
+      transition: transform 0.25s ease;
+      color: var(--comic-blue);
+    }
+
+    .faq-item.active .faq-question {
+      background-color: var(--comic-yellow);
+      border-bottom: 2.5px solid var(--comic-ink);
+    }
+
+    .faq-item.active .faq-question i {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 1.5rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .faq-item.active .faq-answer {
+      padding: 1rem 1.5rem 1.35rem;
+      max-height: 400px;
+    }
+
+    /* CTA */
     .cta {
       padding: 5rem 0;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
-      color: var(--text-white);
+      background-color: var(--comic-blue);
+      border-top: var(--border-comic);
+      color: #ffffff;
       text-align: center;
-      position: relative;
-      overflow: hidden;
     }
-    .cta .container { position: relative; z-index: 1; }
-    .cta::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 150%;
-        height: 150%;
-        background-image: radial-gradient(circle, hsla(0,0%,100%,.05) 1px, transparent 1px);
-        background-size: 20px 20px;
-        transform: translate(-50%,-50%);
-        animation: cta-pattern 60s linear infinite;
-    }
-    @keyframes cta-pattern{ 0%{ background-position: 0 0; } 100%{ background-position: 1200px 1200px; } }
 
     .cta h2 {
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      margin-bottom: 1.5rem;
-      font-weight: 700;
+      font-family: var(--font-comic);
+      font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+      letter-spacing: 1.5px;
+      margin-bottom: 1rem;
+      text-shadow: 3px 3px 0px var(--comic-ink);
     }
+
     .cta p {
-      margin-bottom: 2.5rem;
-      opacity: 0.9;
-      font-size: 1.125rem;
-      max-width: 600px;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      max-width: 620px;
       margin-left: auto;
       margin-right: auto;
     }
+
     .cta-buttons {
       display: flex;
       justify-content: center;
       gap: 1.25rem;
       flex-wrap: wrap;
     }
-    .btn-light-cta {
-      background-color: var(--bg-white);
-      color: var(--primary-color);
-      box-shadow: 0 4px 15px hsla(0, 0%, 0%, 0.1);
-    }
-    .btn-light-cta:hover {
-      background-color: var(--bg-light);
-      transform: translateY(-3px) scale(1.03);
-    }
-    .btn-outline-light-cta {
-      background-color: transparent;
-      color: var(--text-white);
-      border: 2px solid var(--text-white);
-    }
-    .btn-outline-light-cta:hover {
-      background-color: hsla(0, 0%, 100%, 0.1);
-      transform: translateY(-3px) scale(1.03);
-    }
 
-
-    .faq-item {
-      margin-bottom: 1rem;
-      border-radius: var(--border-radius-md);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      background-color: var(--bg-white);
-      border: 1px solid var(--border-color);
-    }
-    .faq-question {
-      padding: 1.25rem 1.75rem;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 1.05rem;
-    }
-    .faq-question:hover {
-      background-color: var(--primary-color-light);
-    }
-    .faq-question i {
-      transition: transform 0.3s ease;
-      color: var(--primary-color);
-      font-size: 1.1rem;
-    }
-    .faq-item.active .faq-question i {
-      transform: rotate(180deg);
-    }
-    .faq-answer {
-      padding: 0 1.75rem;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease-out, padding 0.4s ease-out;
-      color: var(--text-light);
-      font-size: 0.95rem;
-    }
-    .faq-item.active .faq-answer {
-      padding: 0.5rem 1.75rem 1.5rem;
-      max-height: 500px; 
-    }
-
-
+    /* Footer */
     footer {
-      background-color: var(--text-dark);
-      color: hsla(0, 0%, 100%, 0.7);
-      padding: 5rem 0 2rem;
+      background-color: var(--comic-ink);
+      color: #cbd5e1;
+      padding: 4.5rem 0 2rem;
+      border-top: var(--border-comic);
     }
+
     .footer-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 3rem;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 2.5rem;
     }
-    .footer-logo img { height: 35px; }
-    .footer-logo-text { font-size: 1.5rem; color: var(--text-white); }
-    .footer-about p { margin: 1.5rem 0; line-height: 1.8; font-size: 0.95rem; }
-    .footer-social { display: flex; gap: 1rem; }
+
+    .footer-logo-text {
+      font-family: var(--font-comic);
+      font-size: 1.8rem;
+      letter-spacing: 1.2px;
+      color: var(--comic-yellow);
+    }
+
+    .footer-about p {
+      margin: 1.25rem 0;
+      font-size: 0.93rem;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 0.75rem;
+    }
+
     .footer-social a {
-      color: var(--text-white);
-      font-size: 1.25rem;
-      transition: var(--transition-cubic);
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background-color: hsla(0, 0%, 100%, 0.1);
+      color: var(--comic-ink);
+      background-color: var(--comic-yellow);
+      border: 2px solid #ffffff;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 1.15rem;
+      transition: transform 0.2s ease;
     }
+
     .footer-social a:hover {
-      background-color: var(--primary-color);
-      transform: translateY(-4px) scale(1.1);
+      transform: translateY(-3px);
+      background-color: var(--comic-sky);
     }
-    .footer-links h3, .footer-contact h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-white);
-      margin-bottom: 1.75rem;
-      position: relative;
-      padding-bottom: 0.75rem;
+
+    .footer-links h3,
+    .footer-contact h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--comic-yellow);
+      display: inline-block;
     }
-    .footer-links h3::after, .footer-contact h3::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 50px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    }
-    .footer-links li { margin-bottom: 0.875rem; }
+
+    .footer-links li { margin-bottom: 0.75rem; }
+
     .footer-links a {
-      transition: color 0.3s ease, transform 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.95rem;
+      font-size: 0.93rem;
+      transition: color 0.2s ease;
     }
-    .footer-links a:hover {
-      color: var(--text-white);
-      transform: translateX(5px);
-    }
-    .footer-links a i { font-size: 0.8em; opacity: 0.7; }
+
+    .footer-links a:hover { color: var(--comic-yellow); }
+
     .contact-item {
       display: flex;
       align-items: flex-start;
-      gap: 0.875rem;
-      margin-bottom: 1.125rem;
-      font-size: 0.95rem;
+      gap: 0.75rem;
+      margin-bottom: 0.95rem;
+      font-size: 0.93rem;
     }
+
     .contact-item i {
       margin-top: 4px;
-      color: var(--primary-color);
-      font-size: 1.1em;
+      color: var(--comic-yellow);
     }
-    .contact-item a:hover { color: var(--text-white); }
-    .footer-bottom {
-      margin-top: 4rem;
-      padding-top: 2rem;
-      border-top: 1px solid hsla(0, 0%, 100%, 0.1);
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    .footer-bottom a { color: var(--primary-color-light); font-weight: 500; }
-    .footer-bottom a:hover { text-decoration: underline; }
 
+    .footer-bottom {
+      margin-top: 3.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #334155;
+      text-align: center;
+      font-size: 0.88rem;
+    }
+
+    .footer-bottom a { color: var(--comic-sky); font-weight: 600; }
 
     .back-to-top {
       position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      color: var(--text-white);
+      bottom: 1.75rem;
+      right: 1.75rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background-color: var(--comic-yellow);
+      color: var(--comic-ink);
+      border: 2.5px solid var(--comic-ink);
+      box-shadow: 4px 4px 0px var(--comic-ink);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       cursor: pointer;
       opacity: 0;
       visibility: hidden;
-      transition: var(--transition-cubic);
+      transition: all 0.2s ease;
       z-index: 999;
-      box-shadow: var(--shadow);
-    }
-    .back-to-top.visible { opacity: 1; visibility: visible; }
-    .back-to-top:hover {
-      background-color: var(--primary-color-dark);
-      transform: translateY(-5px) scale(1.05);
     }
 
+    .back-to-top.visible { opacity: 1; visibility: visible; }
+
     @media (max-width: 992px) {
-      nav {
-        gap: 0;
-      }
       .hero-container { flex-direction: column; text-align: center; }
-      .hero-content { margin-bottom: 3rem; }
-      .hero-buttons, .hero-stats { justify-content: center; }
+      .hero-subtitle { margin-left: auto; margin-right: auto; }
+      .hero-buttons { justify-content: center; }
+      .hero-stats { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
       .nav-links {
         position: fixed;
         top: 0;
         left: -100%;
-        width: 300px;
+        width: 290px;
         height: 100vh;
-        background-color: var(--bg-white);
-        padding: 6rem 2rem 2rem;
-        box-shadow: var(--shadow);
+        background-color: var(--comic-paper);
+        border-right: var(--border-comic);
+        padding: 5.5rem 1.75rem 2rem;
         flex-direction: column;
-        gap: 1.5rem; 
+        align-items: stretch;
+        gap: 0.85rem;
         z-index: 998;
-        transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        overflow-y: auto; 
+        transition: left 0.3s ease;
       }
       .nav-links.active { left: 0; }
-      .nav-links a { font-size: 1.1rem; }
-      
-      .header-container .auth-buttons { 
-         display: none;
-      }
-      .nav-links.active .auth-buttons-mobile { 
-        display: flex;
-      }
-      .mobile-menu-btn { display: flex; z-index: 999; }
-    }
-
-    @media (max-width: 768px) {
-      .section { padding: 4rem 0; }
-      .section-title h2 { font-size: 2rem; }
-      .section-title p { font-size: 1rem; }
-      .hero-title { font-size: clamp(2rem, 6vw, 2.8rem); }
-      .footer-container { grid-template-columns: 1fr; }
-    }
-    .animate__animated.animate__fadeInUp {
-        --animate-distance: 30px;
+      .header-container .auth-buttons { display: none; }
+      .nav-links.active .auth-buttons-mobile { display: flex; }
+      .mobile-menu-btn { display: inline-flex; z-index: 999; }
     }
   </style>
 </head>
@@ -1130,8 +1079,8 @@
   <header id="header">
     <div class="container header-container">
       <a href="/" class="logo">
-        <img src="/media/logo.png" alt="Riky Shop Logo">
-        <div class="logo-text">Riky Shop</div>
+        <img src="/media/logo.png" alt="XS-Pedia Logo">
+        <div class="logo-text">XS-Pedia</div>
       </a>
       
       <nav>
@@ -1140,26 +1089,26 @@
         </button>
         
         <div class="nav-links">
-          <a href="/" class="active">Beranda <i class="fas fa-home"></i></a>
-          <a href="#layanan">Layanan <i class="fas fa-box-open"></i></a>
-          <a href="#ewallet">E-Wallet <i class="fas fa-wallet"></i></a>
-          <a href="#fitur">Fitur <i class="fas fa-magic"></i></a>
-          <a href="#harga">Harga <i class="fas fa-money-bill-wave"></i></a>
-          <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">Kontak <i class="fas fa-phone"></i></a>
+          <a href="/" class="active"><i class="fas fa-home"></i> Beranda</a>
+          <a href="#layanan"><i class="fas fa-box-open"></i> Layanan</a>
+          <a href="#ewallet"><i class="fas fa-wallet"></i> E-Wallet</a>
+          <a href="#fitur"><i class="fas fa-bolt"></i> Fitur</a>
+          <a href="#harga"><i class="fas fa-tags"></i> Harga</a>
+          <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Kontak</a>
           
           <div class="auth-buttons-mobile">
-            <button class="btn btn-outline" onclick="window.location.href='/auth/login'">
+            <button class="btn btn-secondary" onclick="window.location.href='/auth/login'">
               <i class="fas fa-sign-in-alt"></i> Masuk
             </button>
-            <button class="btn btn-primary-improved" onclick="window.location.href='/auth/register'">
+            <button class="btn btn-primary" onclick="window.location.href='/auth/register'">
               <i class="fas fa-user-plus"></i> Daftar
             </button>
           </div>
         </div>
         
         <div class="auth-buttons">
-          <button class="btn btn-outline" onclick="window.location.href='/auth/login'">Masuk <i class="fas fa-sign-in-alt"></i></button>
-          <button class="btn btn-primary-improved" onclick="window.location.href='/auth/register'">Daftar <i class="fas fa-user-plus"></i></button>
+          <button class="btn btn-secondary" onclick="window.location.href='/auth/login'"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+          <button class="btn btn-primary" onclick="window.location.href='/auth/register'"><i class="fas fa-user-plus"></i> Daftar</button>
         </div>
       </nav>
     </div>
@@ -1168,82 +1117,83 @@
   <main>
     <section class="hero">
       <div class="container hero-container">
-        <div class="hero-content animate__animated animate__fadeInLeft">
+        <div class="hero-content">
+          <div class="comic-badge"><i class="fas fa-bolt"></i> PLATFORM H2H & TOPUP #1</div>
           <h1 class="hero-title">Solusi Topup & Pembayaran <span>Digital Termudah</span></h1>
           <p class="hero-subtitle">
-            Platform terdepan untuk layanan topup game, pulsa, paket data, e-wallet, dan pembayaran PPOB yang cepat, aman, dan mudah.
+            Platform terdepan di <strong>XS-Pedia</strong> untuk layanan topup game, pulsa, paket data, e-wallet, dan pembayaran PPOB yang super cepat, aman, dan otomatis 24/7.
           </p>
           <div class="hero-buttons">
-            <!-- TOMBOL YANG SUDAH DIPERBAIKI -->
-            <button class="btn btn-primary-improved animate__animated animate__fadeInUp" onclick="window.location.href='/auth/register'">
-              Mulai Sekarang <i class="fas fa-rocket"></i>
+            <button class="btn btn-primary" onclick="window.location.href='/auth/register'">
+              <i class="fas fa-rocket"></i> Mulai Sekarang
             </button>
-            <button class="btn btn-secondary animate__animated animate__fadeInUp" data-wow-delay="0.2s" onclick="window.location.href='#fitur'">
-              Pelajari Fitur <i class="fas fa-info-circle"></i>
+            <button class="btn btn-yellow" onclick="window.location.href='#fitur'">
+              <i class="fas fa-star"></i> Pelajari Fitur
             </button>
           </div>
           <div class="hero-stats">
-            <div class="stat-item animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+            <div class="stat-item">
               <div class="stat-icon"><i class="fas fa-users"></i></div>
               <div>
                 <div class="stat-number">10K+</div>
                 <div class="stat-label">Pengguna Aktif</div>
               </div>
             </div>
-            <div class="stat-item animate__animated animate__fadeInUp" data-wow-delay="0.4s">
+            <div class="stat-item">
               <div class="stat-icon"><i class="fas fa-sync-alt"></i></div>
               <div>
                 <div class="stat-number">500K+</div>
-                <div class="stat-label">Transaksi Berhasil</div>
+                <div class="stat-label">Transaksi Sukses</div>
               </div>
             </div>
-            <div class="stat-item animate__animated animate__fadeInUp" data-wow-delay="0.6s">
-              <div class="stat-icon"><i class="fas fa-cogs"></i></div>
+            <div class="stat-item">
+              <div class="stat-icon"><i class="fas fa-cubes"></i></div>
               <div>
                 <div class="stat-number">50+</div>
-                <div class="stat-label">Layanan Tersedia</div>
+                <div class="stat-label">Layanan Aktif</div>
               </div>
             </div>
           </div>
         </div>
-        <div class="hero-image-wrapper animate__animated animate__fadeInRight">
-            <picture>
-                <source srcset="https://placehold.co/600x450/ec4899/ffffff?text=Riky+Shop" type="image/png"> 
-                <img src="https://placehold.co/600x450/ec4899/ffffff?text=Riky+Shop" alt="Riky Shop Platform">
-            </picture>
+        <div class="hero-image-wrapper">
+          <div class="comic-hero-panel">
+            <span class="comic-hero-tag"><i class="fas fa-check-circle"></i> INSTAN 24 JAM</span>
+            <img src="https://placehold.co/600x450/2563eb/facc15?text=XS-PEDIA+TOPUP" alt="XS-Pedia Platform">
+          </div>
         </div>
       </div>
     </section>
 
     <section class="services section" id="layanan">
       <div class="container">
-        <div class="section-title animate__animated animate__fadeInUp">
+        <div class="section-title">
+          <div class="comic-badge"><i class="fas fa-layer-group"></i> KATALOG PRODUK</div>
           <h2>Layanan Terlengkap</h2>
-          <p>Kami menyediakan solusi komprehensif untuk semua kebutuhan transaksi digital Anda.</p>
+          <p>XS-Pedia menyediakan solusi komprehensif untuk semua kebutuhan transaksi digital pribadi maupun bisnis Anda.</p>
         </div>
         <div class="services-grid">
-          <div class="service-card animate__animated animate__fadeInUp" data-wow-delay="0.1s">
+          <div class="service-card">
             <div class="service-icon"><i class="fas fa-sim-card"></i></div>
             <h3 class="service-title">Topup Pulsa & Data</h3>
-            <p class="service-description">Isi ulang pulsa dan paket data semua operator dengan harga terbaik dan proses instan.</p>
+            <p class="service-description">Isi ulang pulsa dan paket data semua operator dengan harga terbaik dan proses otomatis dalam hitungan detik.</p>
             <a href="/auth/register" class="service-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
           </div>
-          <div class="service-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+          <div class="service-card">
             <div class="service-icon"><i class="fas fa-gamepad"></i></div>
             <h3 class="service-title">Topup Game Online</h3>
-            <p class="service-description">Lengkapi kebutuhan gaming Anda dengan topup berbagai game populer secara cepat dan aman.</p>
+            <p class="service-description">Lengkapi kebutuhan gaming Anda dengan topup berbagai game populer secara cepat, legal, dan aman.</p>
             <a href="/auth/register" class="service-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
           </div>
-          <div class="service-card animate__animated animate__fadeInUp" data-wow-delay="0.3s">
+          <div class="service-card">
             <div class="service-icon"><i class="fas fa-wallet"></i></div>
             <h3 class="service-title">Isi Saldo E-Wallet</h3>
-            <p class="service-description">Topup saldo dompet digital favoritmu seperti Dana, Gopay, OVO, dan lainnya dengan mudah.</p>
+            <p class="service-description">Topup saldo dompet digital favoritmu seperti Dana, Gopay, OVO, LinkAja, dan ShopeePay dengan mudah.</p>
             <a href="/auth/register" class="service-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
           </div>
-          <div class="service-card animate__animated animate__fadeInUp" data-wow-delay="0.4s">
+          <div class="service-card">
             <div class="service-icon"><i class="fas fa-credit-card"></i></div>
             <h3 class="service-title">Pembayaran PPOB</h3>
-            <p class="service-description">Solusi pembayaran tagihan, token listrik, dan berbagai kebutuhan digital lainnya dalam satu platform.</p>
+            <p class="service-description">Solusi pembayaran tagihan bulanan, token listrik PLN, dan berbagai kebutuhan digital lainnya dalam satu panel.</p>
             <a href="/auth/register" class="service-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
           </div>
         </div>
@@ -1254,8 +1204,9 @@
       <div class="container">
         <div class="ewallet-header">
           <div class="ewallet-title">
+            <div class="comic-badge"><i class="fas fa-wallet"></i> DOMPET DIGITAL</div>
             <h2>Isi Saldo E-Wallet Favoritmu</h2>
-            <p>Topup saldo e-wallet jadi lebih mudah, cepat, dan praktis dengan berbagai pilihan.</p>
+            <p>Topup saldo e-wallet jadi lebih mudah, cepat, dan praktis dengan dukungan berbagai penyedia.</p>
           </div>
           <div class="ewallet-controls">
             <button class="ewallet-btn" id="ewallet-prev" aria-label="Previous E-Wallet"><i class="fas fa-chevron-left"></i></button>
@@ -1267,31 +1218,31 @@
             <img src="https://i.pinimg.com/736x/94/3c/97/943c971903518e53ffd324dd51e46a90.jpg" alt="Gopay" class="ewallet-logo" loading="lazy">
             <h4 class="ewallet-name">Gopay</h4>
             <p class="ewallet-desc">Transaksi lebih gesit dengan saldo Gopay.</p>
-            <a href="/auth/register" class="btn btn-primary-improved btn-sm ewallet-link">Topup Sekarang</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm">Topup Sekarang</a>
           </div>
           <div class="ewallet-card">
             <img src="https://i.pinimg.com/736x/a3/cd/26/a3cd262b53fe602be31e0b0f1cfa597b.jpg" alt="OVO" class="ewallet-logo" loading="lazy">
             <h4 class="ewallet-name">OVO</h4>
             <p class="ewallet-desc">Nikmati kemudahan bayar pakai OVO.</p>
-            <a href="/auth/register" class="btn btn-primary-improved btn-sm ewallet-link">Topup Sekarang</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm">Topup Sekarang</a>
           </div>
           <div class="ewallet-card">
             <img src="https://i.pinimg.com/736x/f2/7d/e0/f27de0e4a01ba9dfe8607ac03a4f7aae.jpg" alt="Dana" class="ewallet-logo" loading="lazy">
             <h4 class="ewallet-name">Dana</h4>
             <p class="ewallet-desc">Dompet digital untuk semua kebutuhanmu.</p>
-            <a href="/auth/register" class="btn btn-primary-improved btn-sm ewallet-link">Topup Sekarang</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm">Topup Sekarang</a>
           </div>
           <div class="ewallet-card">
             <img src="https://i.pinimg.com/736x/d0/8f/b8/d08fb85716fa01b473b1ba63623ffd20.jpg" alt="LinkAja" class="ewallet-logo" loading="lazy">
             <h4 class="ewallet-name">LinkAja</h4>
             <p class="ewallet-desc">Solusi transaksi digital lengkap dari LinkAja.</p>
-            <a href="/auth/register" class="btn btn-primary-improved btn-sm ewallet-link">Topup Sekarang</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm">Topup Sekarang</a>
           </div>
           <div class="ewallet-card">
             <img src="https://i.pinimg.com/736x/a6/cb/e6/a6cbe6a3c5e9b03ef09ebfc0969323d2.jpg" alt="ShopeePay" class="ewallet-logo" loading="lazy">
             <h4 class="ewallet-name">ShopeePay</h4>
             <p class="ewallet-desc">Belanja lebih hemat dengan ShopeePay.</p>
-            <a href="/auth/register" class="btn btn-primary-improved btn-sm ewallet-link">Topup Sekarang</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm">Topup Sekarang</a>
           </div>
         </div>
       </div>
@@ -1299,8 +1250,9 @@
 
     <section class="features section" id="fitur">
       <div class="container">
-        <div class="section-title animate__animated animate__fadeInUp">
-          <h2>Kenapa Memilih Riky Shop?</h2>
+        <div class="section-title">
+          <div class="comic-badge"><i class="fas fa-award"></i> KEUNGGULAN PLATFORM</div>
+          <h2>Kenapa Memilih XS-Pedia?</h2>
           <p>Kami menawarkan fitur-fitur unggulan yang dirancang untuk memberikan pengalaman terbaik bagi Anda.</p>
         </div>
         <div class="feature-tabs">
@@ -1310,23 +1262,23 @@
         </div>
         <div class="tab-content active" id="tab1">
           <div class="feature-grid">
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-bolt"></i> Proses Transaksi Instan</h3><p>Semua transaksi diproses secara otomatis dan selesai dalam hitungan detik, memastikan kepuasan Anda.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-server"></i> Infrastruktur Andal</h3><p>Didukung oleh server berkinerja tinggi dengan uptime 99.9%, menjamin layanan selalu tersedia.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-tachometer-alt"></i> API Super Cepat</h3><p>API kami dirancang untuk responsivitas maksimal, memberikan waktu respons yang sangat singkat.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-bolt"></i> Proses Transaksi Instan</h3><p>Semua transaksi diproses secara otomatis dan selesai dalam hitungan detik, memastikan kepuasan pelanggan Anda.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-server"></i> Infrastruktur Andal</h3><p>Didukung oleh server berkinerja tinggi dengan uptime 99.9%, menjamin layanan selalu siap 24 jam.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-tachometer-alt"></i> API Super Cepat</h3><p>API XS-Pedia dirancang untuk responsivitas maksimal dengan waktu respons sangat singkat.</p></div>
           </div>
         </div>
         <div class="tab-content" id="tab2">
           <div class="feature-grid">
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-shield-alt"></i> Enkripsi Data End-to-End</h3><p>Data transaksi Anda diamankan dengan teknologi enkripsi standar industri terkini, dari awal hingga akhir.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-user-shield"></i> Proteksi Akun Ganda</h3><p>Fitur autentikasi dua faktor (2FA) untuk lapisan keamanan tambahan pada akun Anda.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-history"></i> Riwayat Transaksi</h3><p>Setiap aktivitas tercatat secara detail, memudahkan pelacakan dan memastikan transparansi.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-shield-alt"></i> Enkripsi Data End-to-End</h3><p>Data transaksi Anda diamankan dengan teknologi enkripsi standar industri terkini dari awal hingga akhir.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-envelope-open-text"></i> Verifikasi OTP Gmail</h3><p>Proteksi ekstra dengan kode OTP otomatis ke Gmail saat pendaftaran akun baru, ganti password, maupun reset sandi.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-history"></i> Riwayat Transaksi</h3><p>Setiap aktivitas tercatat secara detail dan transparan untuk memudahkan pelacakan mutasi saldo.</p></div>
           </div>
         </div>
         <div class="tab-content" id="tab3">
           <div class="feature-grid">
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-columns"></i> Dashboard Intuitif</h3><p>Kelola semua transaksi Anda dengan mudah melalui dashboard yang dirancang dengan baik dan ramah pengguna.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-book-open"></i> Dokumentasi Komprehensif</h3><p>Panduan API yang jelas dan lengkap, disertai contoh kode untuk berbagai bahasa pemrograman populer.</p></div>
-            <div class="feature-item"><h3 class="feature-title"><i class="fas fa-headset"></i> Dukungan Pelanggan 24/7</h3><p>Tim dukungan profesional kami siap membantu Anda kapan saja melalui berbagai saluran komunikasi.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-columns"></i> Dashboard Intuitif</h3><p>Kelola semua pesanan dan deposit dengan mudah melalui panel modern yang ramah pengguna.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-book-open"></i> Dokumentasi Komprehensif</h3><p>Panduan integrasi API H2H yang jelas dan lengkap untuk menghubungkan toko digital Anda.</p></div>
+            <div class="feature-item"><h3><i class="fas fa-headset"></i> Dukungan Pelanggan 24/7</h3><p>Tim dukungan profesional XS-Pedia siap membantu Anda kapan saja melalui WhatsApp dan tiket.</p></div>
           </div>
         </div>
       </div>
@@ -1334,12 +1286,13 @@
 
     <section class="pricing section" id="harga">
       <div class="container">
-        <div class="section-title animate__animated animate__fadeInUp">
+        <div class="section-title">
+          <div class="comic-badge"><i class="fas fa-tags"></i> LEVEL MEMBER</div>
           <h2>Paket Harga Fleksibel</h2>
-          <p>Pilih paket yang paling sesuai dengan skala dan kebutuhan bisnis Anda, tanpa biaya tersembunyi.</p>
+          <p>Pilih level akun yang paling sesuai dengan skala dan kebutuhan transaksi Anda tanpa biaya tersembunyi.</p>
         </div>
         <div class="pricing-grid">
-          <div class="pricing-card animate__animated animate__fadeInUp" data-wow-delay="0.1s">
+          <div class="pricing-card">
             <h3 class="pricing-title">Pengguna Biasa</h3>
             <div class="pricing-price">Gratis</div>
             <ul class="pricing-features">
@@ -1347,14 +1300,14 @@
               <li><i class="fas fa-check-circle"></i> Harga Pengguna Standar</li>
               <li><i class="fas fa-check-circle"></i> Riwayat Transaksi</li>
               <li><i class="fas fa-check-circle"></i> Dukungan Pelanggan</li>
-              <li><i class="fas fa-times-circle"></i> Akses API</li>
+              <li><i class="fas fa-times-circle"></i> Akses API H2H</li>
             </ul>
-            <button class="btn btn-primary-improved" onclick="window.location.href='/auth/register'">Mulai Gratis</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/auth/register'">Mulai Gratis</button>
           </div>
-          <div class="pricing-card popular animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+          <div class="pricing-card popular">
             <div class="popular-badge">POPULER</div>
             <h3 class="pricing-title">Reseller</h3>
-            <div class="pricing-price">Rp 25K<span>/bulan</span></div>
+            <div class="pricing-price">Rp 25K<span>/sekali</span></div>
             <ul class="pricing-features">
               <li><i class="fas fa-check-circle"></i> Semua Fitur Pengguna</li>
               <li><i class="fas fa-check-circle"></i> Harga Reseller Lebih Murah</li>
@@ -1362,9 +1315,9 @@
               <li><i class="fas fa-check-circle"></i> Akses API Terbatas</li>
               <li><i class="fas fa-check-circle"></i> Dukungan Prioritas</li>
             </ul>
-            <button class="btn btn-primary-improved" onclick="window.location.href='/auth/register'">Pilih Paket</button>
+            <button class="btn btn-primary" onclick="window.location.href='/auth/register'">Pilih Paket</button>
           </div>
-          <div class="pricing-card animate__animated animate__fadeInUp" data-wow-delay="0.3s">
+          <div class="pricing-card">
             <h3 class="pricing-title">Enterprise (H2H)</h3>
             <div class="pricing-price">Hubungi<span>Kami</span></div>
             <ul class="pricing-features">
@@ -1374,85 +1327,87 @@
               <li><i class="fas fa-check-circle"></i> Dokumentasi Lengkap</li>
               <li><i class="fas fa-check-circle"></i> Dukungan Premium</li>
             </ul>
-            <button class="btn btn-primary-improved" onclick="window.location.href='#'">Hubungi Sales</button>
+            <button class="btn btn-yellow" onclick="window.open('https://wa.me/6281380847521','_blank')">Hubungi Sales</button>
           </div>
         </div>
       </div>
     </section>
 
     <section class="testimonials section">
-        <div class="container">
-            <div class="section-title animate__animated animate__fadeInUp">
-                <h2>Apa Kata Pelanggan Kami?</h2>
-                <p>Dengarkan pengalaman nyata dari mereka yang telah mempercayakan transaksinya kepada Riky Shop.</p>
-            </div>
-            <div class="testimonial-slider">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">Platform yang sangat intuitif dan mudah digunakan. Proses topupnya cepat dan harganya murah. Sangat direkomendasikan!</p>
-                    <div class="testimonial-author">
-                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Author" class="author-avatar" loading="lazy">
-                        <div class="author-info"><h4>Andini Putri</h4><p>Pengguna Setia</p></div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <p class="testimonial-text">Layanan pelanggan Riky Shop luar biasa responsif. Setiap kendala selalu ditangani dengan cepat dan profesional. Harga juga sangat bersaing.</p>
-                    <div class="testimonial-author">
-                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Author" class="author-avatar" loading="lazy">
-                        <div class="author-info"><h4>Rina Setyawati</h4><p>Pemilik Konter Pulsa</p></div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">Kecepatan transaksi adalah kunci bisnis topup game, dan Riky Shop memberikan itu. Tidak pernah ada keluhan dari pelanggan saya terkait keterlambatan.</p>
-                    <div class="testimonial-author">
-                        <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="Author" class="author-avatar" loading="lazy">
-                        <div class="author-info"><h4>Bimo Nugroho</h4><p>Penjual Diamond Game</p></div>
-                    </div>
-                </div>
-                 <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">Sangat puas dengan fitur keamanan yang ditawarkan. Memberikan rasa aman lebih dalam bertransaksi dalam jumlah besar. CS nya juga ramah.</p>
-                    <div class="testimonial-author">
-                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Author" class="author-avatar" loading="lazy">
-                        <div class="author-info"><h4>Citra Lestari</h4><p>Agen PPOB</p></div>
-                    </div>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-title">
+          <div class="comic-badge"><i class="fas fa-comments"></i> REVIEW PENGGUNA</div>
+          <h2>Apa Kata Pelanggan Kami?</h2>
+          <p>Dengarkan pengalaman nyata dari mereka yang telah mempercayakan transaksinya kepada XS-Pedia.</p>
         </div>
+        <div class="testimonial-slider">
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Platform XS-Pedia sangat intuitif dan mudah digunakan. Proses topupnya cepat dan harganya bersaing. Sangat direkomendasikan!"</p>
+            <div class="testimonial-author">
+              <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Author" class="author-avatar" loading="lazy">
+              <div class="author-info"><h4>Andini Putri</h4><p>Pengguna Setia</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Layanan pelanggan XS-Pedia luar biasa responsif. Setiap kendala selalu ditangani dengan cepat dan profesional."</p>
+            <div class="testimonial-author">
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Author" class="author-avatar" loading="lazy">
+              <div class="author-info"><h4>Rina Setyawati</h4><p>Pemilik Konter Pulsa</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Kecepatan transaksi adalah kunci bisnis topup game, dan XS-Pedia memberikan itu. Pelanggan saya puas karena diamond langsung masuk."</p>
+            <div class="testimonial-author">
+              <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="Author" class="author-avatar" loading="lazy">
+              <div class="author-info"><h4>Bimo Nugroho</h4><p>Penjual Diamond Game</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Sangat puas dengan fitur keamanan OTP email yang ditawarkan XS-Pedia. Memberikan rasa aman lebih dalam mengelola saldo usaha."</p>
+            <div class="testimonial-author">
+              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Author" class="author-avatar" loading="lazy">
+              <div class="author-info"><h4>Citra Lestari</h4><p>Agen PPOB</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="faq section">
+    <section class="faq section" id="faq">
       <div class="container">
-        <div class="section-title animate__animated animate__fadeInUp">
+        <div class="section-title">
+          <div class="comic-badge"><i class="fas fa-question-circle"></i> BANTUAN</div>
           <h2>Pertanyaan yang Sering Diajukan</h2>
-          <p>Temukan jawaban cepat untuk pertanyaan umum seputar layanan Riky Shop.</p>
+          <p>Temukan jawaban cepat untuk pertanyaan umum seputar layanan XS-Pedia.</p>
         </div>
         <div class="faq-container" style="max-width:800px; margin: 0 auto;">
           <div class="faq-item">
-            <div class="faq-question"><span>Bagaimana cara mendaftar di Riky Shop?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer"><p>Klik tombol "Daftar" di pojok kanan atas, isi formulir dengan data valid, verifikasi email Anda, dan akun Anda siap digunakan!</p></div>
+            <div class="faq-question"><span>Bagaimana cara mendaftar di XS-Pedia?</span><i class="fas fa-chevron-down"></i></div>
+            <div class="faq-answer"><p>Klik tombol "Daftar" di pojok kanan atas, isi formulir pendaftaran, masukkan kode OTP yang dikirim otomatis ke Gmail Anda, dan akun langsung aktif!</p></div>
           </div>
           <div class="faq-item">
             <div class="faq-question"><span>Metode pembayaran apa saja yang diterima?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer"><p>Kami mendukung transfer bank (BCA, Mandiri, BRI, BNI), e-wallet (Gopay, OVO, Dana, LinkAja), QRIS, dan virtual account.</p></div>
+            <div class="faq-answer"><p>Kami mendukung transfer bank (BCA, Mandiri, BRI, BNI), e-wallet (Gopay, OVO, Dana, LinkAja), QRIS otomatis, dan virtual account.</p></div>
           </div>
           <div class="faq-item">
             <div class="faq-question"><span>Berapa lama proses transaksi topup?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer"><p>Mayoritas transaksi diproses instan (kurang dari 1 menit). Beberapa produk mungkin memerlukan waktu sedikit lebih lama tergantung kebijakan provider.</p></div>
+            <div class="faq-answer"><p>Mayoritas transaksi diproses instan (kurang dari 1 menit) oleh sistem otomatis XS-Pedia 24 jam non-stop.</p></div>
           </div>
           <div class="faq-item">
             <div class="faq-question"><span>Apakah ada biaya tersembunyi?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer"><p>Tidak, kami berkomitmen pada transparansi. Semua biaya (jika ada) akan ditampilkan dengan jelas sebelum Anda menyelesaikan transaksi.</p></div>
+            <div class="faq-answer"><p>Tidak ada biaya tersembunyi. Semua rincian harga produk dan biaya admin ditampilkan transparan sebelum transaksi diproses.</p></div>
           </div>
         </div>
       </div>
@@ -1460,14 +1415,14 @@
 
     <section class="cta">
       <div class="container">
-        <h2 class="animate__animated animate__fadeInUp">Siap Memulai Transaksi Mudah?</h2>
-        <p class="animate__animated animate__fadeInUp" data-wow-delay="0.2s">Bergabunglah dengan ribuan pengguna Riky Shop dan rasakan kemudahan transaksi digital dengan harga terbaik.</p>
-        <div class="cta-buttons animate__animated animate__fadeInUp" data-wow-delay="0.4s">
-          <button class="btn btn-light-cta" onclick="window.location.href='/auth/register'">
-            Daftar Sekarang Gratis <i class="fas fa-user-plus"></i>
+        <h2>Siap Memulai Transaksi Mudah di XS-Pedia?</h2>
+        <p>Bergabunglah dengan ribuan pengguna XS-Pedia dan rasakan kemudahan transaksi digital dengan harga terbaik.</p>
+        <div class="cta-buttons">
+          <button class="btn btn-yellow" onclick="window.location.href='/auth/register'">
+            <i class="fas fa-user-plus"></i> Daftar Sekarang Gratis
           </button>
-          <button class="btn btn-outline-light-cta" onclick="window.location.href='https://wa.me/6281380847521'" target="_blank" rel="noopener noreferrer">
-            Konsultasi via WhatsApp <i class="fab fa-whatsapp"></i>
+          <button class="btn btn-secondary" onclick="window.open('https://wa.me/6281380847521','_blank')">
+            <i class="fab fa-whatsapp"></i> Konsultasi via WhatsApp
           </button>
         </div>
       </div>
@@ -1478,14 +1433,14 @@
     <div class="container footer-container">
       <div class="footer-about">
         <a href="/" class="logo footer-logo">
-          <img src="/media/logo.png" alt="Riky Shop Logo" loading="lazy">
-          <div class="footer-logo-text">Riky Shop</div>
+          <img src="/media/logo.png" alt="XS-Pedia Logo" loading="lazy">
+          <div class="footer-logo-text">XS-Pedia</div>
         </a>
         <p>Platform terdepan yang menyediakan solusi topup dan pembayaran digital dengan teknologi canggih, aman, dan terpercaya untuk Anda.</p>
         <div class="footer-social">
           <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
           <a href="#" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
           <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
@@ -1511,15 +1466,15 @@
       </div>
       <div class="footer-contact">
         <h3>Hubungi Kami</h3>
-        <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Jakarta, Indonesia</span></div>
+        <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Tangerang & Jakarta, Indonesia</span></div>
         <div class="contact-item"><i class="fas fa-phone-alt"></i><a href="tel:+6281380847521">+62 813-8084-7521</a></div>
-        <div class="contact-item"><i class="fas fa-envelope"></i><a href="astrapterodactyl@gmail.com">astrapterodactyl@gmail.com</a></div>
+        <div class="contact-item"><i class="fas fa-envelope"></i><a href="mailto:astrapterodactyl@gmail.com">astrapterodactyl@gmail.com</a></div>
         <div class="contact-item"><i class="fas fa-headset"></i><span>Dukungan: Setiap Hari, 24 Jam</span></div>
       </div>
     </div>
     <div class="container footer-bottom">
-      © <span id="currentYear"></span> Riky Shop. Hak Cipta Dilindungi. Dibuat dengan <i class="fas fa-heart" style="color: var(--secondary-color);"></i> oleh <a href="#" target="_blank" rel="noopener noreferrer">Riky Shop</a>.
-      <br><a href="#">Syarat & Ketentuan</a> | <a href="#">Kebijakan Privasi</a>
+      © <span id="currentYear"></span> XS-Pedia. Hak Cipta Dilindungi. Dibuat dengan semangat oleh <a href="/">XS-Pedia</a>.
+      <br><a href="/terms">Syarat & Ketentuan</a> | <a href="/privacy">Kebijakan Privasi</a>
     </div>
   </footer>
 
@@ -1545,55 +1500,15 @@
       });
 
       document.querySelectorAll('.nav-links a, .auth-buttons-mobile .btn').forEach(link => {
-        link.addEventListener('click', (e) => {
-          if (link.getAttribute('href') && link.getAttribute('href').startsWith('#')) {
-          } else {
-          }
-
-          if ((link.tagName === 'A' && (link.getAttribute('href').startsWith('#') || link.getAttribute('href') === '/')) || 
-              (e.currentTarget.classList.contains('btn') && e.currentTarget.closest('.auth-buttons-mobile'))) {
-              if (navLinks.classList.contains('active')) {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                document.body.style.overflow = '';
-              }
-          }
-          
-          if (link.tagName === 'A' && (link.getAttribute('href').startsWith('#') || link.getAttribute('href') === '/')) {
-            document.querySelectorAll('.nav-links a').forEach(navLink => navLink.classList.remove('active'));
-            if(link.closest('.auth-buttons-mobile') === null){ 
-                 link.classList.add('active');
-            }
+        link.addEventListener('click', () => {
+          if (navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+            mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+            document.body.style.overflow = '';
           }
         });
       });
-      
-      const setActiveNavLink = () => {
-          let scrollY = window.pageYOffset;
-          document.querySelectorAll('section').forEach(current => {
-              const sectionHeight = current.offsetHeight;
-              const sectionTop = current.offsetTop - 150; 
-              let sectionId = current.getAttribute('id');
-
-              if (sectionId) {
-                const navLink = document.querySelector('.nav-links a[href*="#' + sectionId + '"]');
-                if(navLink) { 
-                    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                        document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-                        navLink.classList.add('active');
-                    }
-                }
-              }
-          });
-          
-          if (scrollY < (document.getElementById('layanan')?.offsetTop - 150 || 300) ) {
-             document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-             const berandaLink = document.querySelector('.nav-links a[href="/"]');
-             if(berandaLink) berandaLink.classList.add('active');
-          }
-      };
-
 
       const tabBtns = document.querySelectorAll('.tab-btn');
       const tabContents = document.querySelectorAll('.tab-content');
@@ -1602,15 +1517,13 @@
           tabBtns.forEach(b => b.classList.remove('active'));
           tabContents.forEach(c => c.classList.remove('active'));
           btn.classList.add('active');
-          const tabId = btn.getAttribute('data-tab');
-          document.getElementById(tabId).classList.add('active');
+          document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
         });
       });
 
       const faqItems = document.querySelectorAll('.faq-item');
       faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question');
-        question.addEventListener('click', () => {
+        item.querySelector('.faq-question').addEventListener('click', () => {
           const isActive = item.classList.contains('active');
           faqItems.forEach(otherItem => otherItem.classList.remove('active'));
           if (!isActive) item.classList.add('active');
@@ -1619,40 +1532,22 @@
 
       const ewalletSlider = document.getElementById('ewallet-slider');
       if (ewalletSlider) {
-          const ewalletPrev = document.getElementById('ewallet-prev');
-          const ewalletNext = document.getElementById('ewallet-next');
-          const ewalletCard = ewalletSlider.querySelector('.ewallet-card');
-          const scrollAmount = ewalletCard ? ewalletCard.offsetWidth + parseFloat(getComputedStyle(ewalletSlider).gap || '0px') : 220;
-          
-          ewalletPrev.addEventListener('click', () => ewalletSlider.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
-          ewalletNext.addEventListener('click', () => ewalletSlider.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
+        const ewalletPrev = document.getElementById('ewallet-prev');
+        const ewalletNext = document.getElementById('ewallet-next');
+        const scrollAmount = 240;
+        ewalletPrev.addEventListener('click', () => ewalletSlider.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
+        ewalletNext.addEventListener('click', () => ewalletSlider.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
       }
-
 
       window.addEventListener('scroll', () => {
         if (window.pageYOffset > 50) header.classList.add('scrolled');
         else header.classList.remove('scrolled');
-
         if (window.pageYOffset > 300) backToTopBtn.classList.add('visible');
         else backToTopBtn.classList.remove('visible');
-        
-        setActiveNavLink();
       });
-      setActiveNavLink(); 
 
       backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-      if (typeof WOW === 'function') {
-          new WOW({
-              boxClass: 'animate__animated',
-              animateClass: 'animate__animated',
-              offset: 50,
-              mobile: true,
-              live: true
-          }).init();
-      }
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
 </body>
 </html>
