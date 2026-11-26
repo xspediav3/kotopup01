@@ -50,397 +50,186 @@ async function getAtlanticDepositMethods() {
   }
 }
 
-// ================= HELPER DITZNESIA DEPOSIT =================
-const DITZ_DEPOSIT_BG_URL = "https://files.catbox.moe/mbhgwo.png";
-
-function resolveDitzApiKey() {
-  return (
-    process.env.DITZ_API_KEY ||
-    process.env.DITZNESIA_API_KEY ||
-    "6985b717a060a0906af01d335034b40f"
-  );
-}
-
-function resolveDitzBaseUrl() {
-  return (
-    process.env.DITZ_BASE_URL ||
-    process.env.DITZNESIA_BASE_URL ||
-    "https://www.ditznesia.com/api/dev"
-  ).replace(/\/+$/, "");
-}
-
-function extractDitzDepositData(raw) {
-  if (!raw || typeof raw !== "object") return {};
-  if (raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)) {
-    return raw.data;
-  }
-  if (raw.deposit && typeof raw.deposit === "object") {
-    return raw.deposit;
-  }
-  return raw;
-}
-
-function normalizeDepositStatus(rawStatus, fallback = "pending") {
-  const s = String(rawStatus || fallback).toLowerCase().trim();
-  if (["success", "paid", "completed", "berhasil", "lunas"].includes(s)) {
-    return "success";
-  }
-  if (["failed", "gagal"].includes(s)) {
-    return "failed";
-  }
-  if (["expired", "kadaluarsa"].includes(s)) {
-    return "expired";
-  }
-  if (["cancel", "cancelled", "canceled", "batal", "dibatalkan"].includes(s)) {
-    return "cancel";
-  }
-  return s || fallback;
-}
-
-function parseDepositDate(val) {
-  if (!val) return null;
-  if (typeof val === "number") {
-    const ms = val < 1e12 ? val * 1000 : val;
-    const d = new Date(ms);
-    return Number.isNaN(d.getTime()) ? null : d.toISOString();
-  }
-  const d = new Date(String(val));
-  return Number.isNaN(d.getTime()) ? null : d.toISOString();
-}
-
-function calcDepositAdminAndBalance({ nominal, kodeUnik = 0, apiData = {}, role = "user" }) {
-  const cleanNominal = Math.max(0, parseInt(nominal, 10) || 0);
-  const cleanKodeUnik = Math.max(0, parseInt(kodeUnik, 10) || 0);
-
-  // Admin / fee yang dikembalikan oleh API Ditznesia
-  const apiFee = Math.max(
-    0,
-    parseInt(apiData.fee ?? apiData.fee_amount ?? apiData.biaya_admin ?? 0, 10) || 0
-  );
-
-  // Admin tambahan dari sistem/kode berdasarkan role
-  let appFee = 0;
-  if (role === "user") {
-    appFee = Math.ceil(cleanNominal * 0.002); // 0.2% (1000 -> 3)
-  } else if (role === "reseller") {
-    appFee = Math.ceil(cleanNominal * 0.001); // 0.1%
-  }
-
-  // Total biaya admin (gabungan admin API + admin kode)
-  const totalFee = apiFee + appFee;
-
-  // Total yang harus dibayar user
-  const rawApiTotalBayar = parseInt(
-    apiData.total_bayar ?? apiData.total_payment ?? 0,
-    10
-  );
-  const totalBayar =
-    rawApiTotalBayar > 0
-      ? rawApiTotalBayar
-      : cleanNominal + cleanKodeUnik + apiFee;
-
-  // Saldo diterima user (dipotong admin kode agar tidak melebihi nominal input)
-  const finalBalance = Math.max(0, cleanNominal - appFee);
-
-  return {
-    nominal: cleanNominal,
-    tambahan: cleanKodeUnik,
-    kode_unik: cleanKodeUnik,
-    fee_provider: apiFee,
-    fee_app: appFee,
-    fee: totalFee,
-    total_bayar: totalBayar,
-    total_amount: totalBayar,
-    get_balance: finalBalance
-  };
-}
-
-
-const axios = require("axios");
-
-// ================= HELPER PERHITUNGAN ADMIN DEPOSIT =================
-function getRoleFeePercent(role = "user") {
-  const normalizedRole = String(role || "user").toLowerCase();
-  if (normalizedRole === "user") return 1.5;
-  if (normalizedRole === "reseller") return 0.7;
-  return 0;
-}
-
-function calcDepositAdminAndBalance({ nominal = 0, kodeUnik = 0, apiData = {}, role = "user" }) {
-  const cleanNominal = Math.max(parseInt(nominal, 10) || 0, 0);
-  const cleanKodeUnik = Math.max(parseInt(kodeUnik, 10) || 0, 0);
-
-  const feePersen = getRoleFeePercent(role);
-  const feeApp = Math.round((cleanNominal * feePersen) / 100);
-  const feeProvider = Math.max(parseInt(apiData?.fee ?? 0, 10) || 0, 0);
-
-  // Total biaya admin yang tampil ke user
-  const totalFee = feeApp + feeProvider;
-
-  // Saldo diterima tetap sebesar nominal deposit murni
-  const getBalance = cleanNominal;
-
-  // Total bayar di UI: nominal + biaya admin (totalFee)
-  // Sementara total_bayar_provider menyimpan nominal + kodeUnik (atau total_bayar dari API)
-  const totalBayarProvider =
-    parseInt(apiData?.total_bayar, 10) || cleanNominal + cleanKodeUnik;
-  const totalAmount = cleanNominal + totalFee;
-
-  return {
-    nominal: cleanNominal,
-    tambahan: cleanKodeUnik,
-    kode_unik: cleanKodeUnik,
-    fee_persen: feePersen,
-    fee_app: feeApp,
-    fee_provider: feeProvider,
-    fee: totalFee,
-    get_balance: getBalance,
-    total_bayar: totalBayarProvider,
-    total_amount: totalAmount
-  };
-}
-
-// ================= LIST METODE DEPOSIT (DITZNESIA) =================
+// ================= DAFTAR METODE DEPOSIT =================
 router.post("/deposit/metode", requireLogin, async (req, res) => {
   try {
-    const { apiKey } = getDitznesiaConfig();
-    if (!apiKey) {
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
+    const role = req.session.role || "user";
+
+    let feePersen =
+      role === "reseller"
+        ? (process.env.FEE_PERCENT_RESELLER || "0.7")
+        : (process.env.FEE_PERCENT_USER || "1.5");
+
+    const metodeFormatted = [
+      {
+        metode: "qris",
+        type: "ewallet",
+        name: "QRIS All Payment (Otomatis)",
+        min: 1000,
+        max: 5000000,
+        fee: 0,
+        fee_persen: feePersen,
+        status: "aktif",
+        img_url: `${fullUrl}/media/metode/qrisfast.png`,
+      },
+    ];
+
+    return res.status(200).json({
+      success: true,
+      message: "Daftar metode deposit Ditznesia",
+      metode: metodeFormatted,
+    });
+  } catch (error) {
+    console.error("Error deposit/metode:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengambil metode.",
+    });
+  }
+});
+
+// ================= BUAT TRANSAKSI DEPOSIT (DITZNESIA) =================
+router.post("/deposit/create", requireLogin, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId);
+    const { nominal } = req.body;
+    const parsedNominal = parseInt(nominal, 10);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Sesi tidak valid."
+      });
+    }
+
+    if (!nominal || !Number.isFinite(parsedNominal) || parsedNominal < 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Minimal deposit Rp1.000"
+      });
+    }
+
+    const DITZ_BASE = process.env.DITZ_BASE_URL || "https://www.ditznesia.com/api/dev";
+    const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+    if (!DITZ_API_KEY) {
       return res.status(500).json({
         success: false,
         message: "API Key Ditznesia belum dikonfigurasi di server."
       });
     }
 
-    const role = req.session.role || "user";
-    const tambahanPersen = getRoleFeePercent(role);
+    const role = user.role || req.session.role || "user";
+    const feePersen = parseFloat(
+      role === "reseller"
+        ? (process.env.FEE_PERCENT_RESELLER || "0.7")
+        : (process.env.FEE_PERCENT_USER || "1.5")
+    ) || 0;
+    const feeAdmin = Math.round((parsedNominal * feePersen) / 100);
+    const kodeUnik = Math.floor(Math.random() * 250) + 1;
+    const totalBayarProvider = parsedNominal + kodeUnik;
+    const totalAmount = parsedNominal + feeAdmin;
+    const saldoDiterima = parsedNominal;
 
-    // Default metode QRIS Ditznesia (tetap kompatibel dengan format frontend sebelumnya)
-    let rawMethods = [
-      {
-        metode: "QRISFAST",
-        type: "ewallet",
-        name: "QRIS Otomatis (All Payment)",
-        min: 1000,
-        max: 5000000,
-        fee: 0,
-        fee_persen: 0,
-        status: "aktif"
-      }
-    ];
+    const createUrl = `${DITZ_BASE}/deposit/create?apikey=${encodeURIComponent(DITZ_API_KEY)}&nominal=${totalBayarProvider}`;
 
-    // Opsional: jika Ditznesia menyediakan endpoint /deposit/metode, ambil & gabungkan
+    let response;
     try {
-      const { ok, json } = await fetchDitznesiaGet("/deposit/metode", {}, 5000);
-      const listFromApi = Array.isArray(json?.data)
-        ? json.data
-        : Array.isArray(json?.metode)
-        ? json.metode
-        : null;
-
-      if (ok && listFromApi && listFromApi.length > 0) {
-        rawMethods = listFromApi;
-      }
-    } catch (_) {
-      // Gunakan fallback metode QRIS Ditznesia jika endpoint /deposit/metode tidak tersedia
-    }
-
-    const blacklist = ["OVO", "DANA", "MANDIRI", "PERMATA"];
-    const localImageMap = {
-      BCA: "/media/metode/bca.png",
-      BRI: "/media/metode/bri.png",
-      BNI: "/media/metode/bni.png",
-      SHOPEEPAY: "/media/metode/shopeepay.png",
-      LINKAJA: "/media/metode/linkaja.png",
-      QRIS: "/media/metode/qrisfast.png",
-      QRISFAST: "/media/metode/qrisfast.png"
-    };
-    const fullUrl = `${req.protocol}://${req.get("host")}`;
-
-    const metodeFormatted = rawMethods
-      .filter((item) => !blacklist.includes(String(item.metode || "").toUpperCase()))
-      .map((item) => {
-        const metodeUpper = String(item.metode || "QRISFAST").toUpperCase();
-        const baseFee = parseFloat(item.fee_persen) || 0;
-        const adjustedFee = (baseFee + tambahanPersen).toFixed(2);
-
-        return {
-          metode: item.metode || "QRISFAST",
-          type: item.type || "ewallet",
-          name: item.name || "QRIS Otomatis",
-          min: item.min || 1000,
-          max: item.max || 5000000,
-          fee: item.fee || 0,
-          fee_persen: adjustedFee,
-          status: item.status || "aktif",
-          img_url: localImageMap[metodeUpper]
-            ? `${fullUrl}${localImageMap[metodeUpper]}`
-            : `${fullUrl}/media/metode/default.png`
-        };
+      response = await fetch(createUrl, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "User-Agent": "Mozilla/5.0"
+        }
       });
-
-    return res.status(200).json({
-      success: true,
-      message: "Daftar metode deposit berhasil difilter",
-      metode: metodeFormatted
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil metode deposit",
-      error: error?.response?.data || error.message
-    });
-  }
-});
-
-
-// ================= BUAT TRANSAKSI DEPOSIT (DITZNESIA) =================
-router.post("/deposit/create", requireLogin, async (req, res) => {
-  console.log("🔔 [DEPOSIT] Endpoint /deposit/create dipanggil");
-  const user = await User.findById(req.session.userId);
-  if (!user) {
-    console.log("🚫 User tidak ditemukan atau sesi tidak valid. ID Session:", req.session.userId);
-    return res.status(401).json({
-      success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
-    });
-  }
-
-  const { nominal, metode: metodePilihanPengguna } = req.body;
-  console.log(`📥 Permintaan deposit oleh ${user.username || user.email || user._id}`);
-  console.log("🧾 Data diterima:", { nominal, metode: metodePilihanPengguna });
-
-  if (!nominal || isNaN(nominal)) {
-    console.log("❗ Nominal tidak valid:", nominal);
-    return res.status(400).json({
-      success: false,
-      message: "Nominal harus diisi dan berupa angka."
-    });
-  }
-
-  const parsedNominal = parseInt(nominal, 10);
-  let selectedMetodeCode = "QRISFAST";
-  let minDepositForMetode = 1000;
-
-  if (metodePilihanPengguna) {
-    const normalizedInput = String(metodePilihanPengguna).toUpperCase();
-    const supportedQris = ["QRIS", "QRISFAST", "QRISPAST"];
-    if (!supportedQris.includes(normalizedInput)) {
-      return res.status(400).json({
-        success: false,
-        message: `Metode pembayaran '${metodePilihanPengguna}' tidak ditemukan atau tidak aktif.`
-      });
-    }
-    selectedMetodeCode = normalizedInput === "QRIS" ? "QRISFAST" : normalizedInput;
-    minDepositForMetode = 1000;
-  }
-
-  if (parsedNominal < minDepositForMetode) {
-    return res.status(400).json({
-      success: false,
-      message: `Nominal minimal untuk metode ${selectedMetodeCode} adalah ${minDepositForMetode}. Nominal Anda: ${parsedNominal}.`
-    });
-  }
-
-  const apiKey = resolveDitzApiKey();
-  const baseUrl = resolveDitzBaseUrl();
-
-  if (!apiKey) {
-    return res.status(500).json({
-      success: false,
-      message: "API Key Ditznesia belum dikonfigurasi di server."
-    });
-  }
-
-  const kodeUnik = Math.floor(Math.random() * 250) + 1;
-  const totalBayarRequest = parsedNominal + kodeUnik;
-  const reff_id = generateReffId();
-
-  try {
-    const ditzResponse = await axios.get(`${baseUrl}/deposit/create`, {
-      params: {
-        apikey: apiKey,
-        nominal: totalBayarRequest
-      },
-      timeout: 15000
-    });
-
-    const resultFromDitz = ditzResponse.data || {};
-    const depositDetails = extractDitzDepositData(resultFromDitz);
-
-    const isApiSuccess =
-      resultFromDitz.success !== false &&
-      resultFromDitz.status !== false &&
-      Boolean(depositDetails?.id || depositDetails?.invoice_id || depositDetails?.trx_id);
-
-    if (!isApiSuccess) {
+    } catch (fetchError) {
+      console.error("Ditznesia Create Fetch Error:", fetchError);
       return res.status(502).json({
         success: false,
-        message:
-          resultFromDitz?.message ||
-          resultFromDitz?.error ||
-          depositDetails?.message ||
-          "Gagal membuat permintaan deposit ke provider.",
-        error: resultFromDitz
+        message: "Koneksi server ke Ditznesia gagal."
       });
     }
 
-    const trxId = String(
-      depositDetails.id || depositDetails.invoice_id || depositDetails.trx_id
-    );
-    const providerReffId = String(depositDetails.trx_id || depositDetails.reff_id || reff_id);
-    const initialStatus = normalizeDepositStatus(depositDetails.status, "pending");
+    const responseText = await response.text();
+    let result;
 
-    const calc = calcDepositAdminAndBalance({
-      nominal: parsedNominal,
-      kodeUnik,
-      apiData: depositDetails,
-      role: user.role || req.session.role || "user"
-    });
+    try {
+      result = JSON.parse(responseText);
+    } catch (jsonError) {
+      console.error("Ditznesia Create Invalid Response (Bukan JSON):", responseText.slice(0, 500));
+      return res.status(502).json({
+        success: false,
+        message: "Server Ditznesia mengembalikan respons yang bukan JSON."
+      });
+    }
 
-    const qrImage =
-      depositDetails.qr_link ||
-      depositDetails.qr_image ||
-      depositDetails.qris_url ||
-      depositDetails.url ||
-      null;
-    const qrisString =
-      depositDetails.qr_string ||
-      depositDetails.qris_string ||
-      depositDetails.qr_code ||
-      depositDetails.pay_url ||
-      "";
-    const expiresAt =
-      parseDepositDate(
-        depositDetails.expired_at ||
-          depositDetails.expires_at ||
-          depositDetails.expired_at_ms ||
-          depositDetails.expires_at_ms
-      ) || null;
+    const paymentData = result?.data || result?.deposit || result;
+    const isSuccess =
+      response.ok &&
+      result?.success !== false &&
+      result?.status !== false &&
+      Boolean(paymentData?.id || paymentData?.invoice_id || paymentData?.trx_id);
+
+    if (!isSuccess) {
+      return res.status(400).json({
+        success: false,
+        message: result?.message || result?.error || paymentData?.message || "Gagal membuat QRIS Ditznesia."
+      });
+    }
+
+    const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
+    const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
+    const providerPaymentId = String(paymentData.id || paymentData.invoice_id || paymentData.trx_id);
+    const localTrxId = providerPaymentId;
+    const reffId = String(paymentData.trx_id || paymentData.reff_id || localTrxId);
+
+    const rawCreatedAt = paymentData.created_at;
+    const providerCreatedAt = rawCreatedAt
+      ? new Date(typeof rawCreatedAt === "number" ? rawCreatedAt : rawCreatedAt).toISOString()
+      : new Date().toISOString();
+
+    const rawExpiresAt = paymentData.expired_at || paymentData.expires_at;
+    const providerExpiresAt = rawExpiresAt
+      ? new Date(typeof rawExpiresAt === "number" ? rawExpiresAt : rawExpiresAt).toISOString()
+      : null;
+
+    if (!rawQrImage && !qrisString || !providerPaymentId) {
+      return res.status(502).json({
+        success: false,
+        message: "Ditznesia tidak mengembalikan QRIS / ID lengkap."
+      });
+    }
+
+    const customBgUrl = "https://files.catbox.moe/mbhgwo.png";
 
     const historyDataForDb = {
-      id: trxId,
-      reff_id: providerReffId,
-      nominal: calc.nominal,
-      tambahan: calc.tambahan,
-      kode_unik: calc.kode_unik,
-      fee: calc.fee,
-      fee_provider: calc.fee_provider,
-      fee_app: calc.fee_app,
-      get_balance: calc.get_balance,
-      total_bayar: calc.total_bayar,
-      total_amount: calc.total_amount,
-      metode: selectedMetodeCode,
-      bank: depositDetails.bank || null,
-      tujuan: depositDetails.tujuan || depositDetails.nomor_va || null,
-      atas_nama: depositDetails.atas_nama || null,
-      status: initialStatus,
-      qr_image: qrImage,
+      id: localTrxId,
+      reff_id: reffId,
+      nominal: parsedNominal,
+      tambahan: kodeUnik,
+      kode_unik: kodeUnik,
+      fee: feeAdmin,
+      fee_persen: feePersen,
+      fee_provider: Number(paymentData.fee) || 0,
+      total_amount: totalAmount,
+      get_balance: saldoDiterima,
+      provider_amount: Number(paymentData.total_bayar || paymentData.amount) || totalBayarProvider,
+      provider: "ditznesia",
+      provider_id: providerPaymentId,
+      provider_reference_id: reffId,
+      provider_created_at: providerCreatedAt,
+      provider_expires_at: providerExpiresAt,
+      expires_in_ms: 15 * 60 * 1000,
+      provider_status: paymentData.status || "pending",
+      provider_time: null,
       qris_string: qrisString,
-      bg_image: DITZ_DEPOSIT_BG_URL,
-      expires_at: expiresAt,
-      created_at: parseDepositDate(depositDetails.created_at)
-        ? new Date(parseDepositDate(depositDetails.created_at))
-        : new Date()
+      metode: "QRIS",
+      status: "pending",
+      qr_image: rawQrImage || null,
+      bg_image: customBgUrl,
+      created_at: new Date()
     };
 
     await tambahHistoryDeposit(user._id, historyDataForDb);
@@ -448,109 +237,130 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        ...depositDetails,
-        id: trxId,
-        trx_id: trxId,
-        reff_id: providerReffId,
-        nominal: calc.nominal,
-        tambahan: calc.tambahan,
-        kode_unik: calc.kode_unik,
-        fee: calc.fee,
-        fee_provider: calc.fee_provider,
-        fee_app: calc.fee_app,
-        get_balance: calc.get_balance,
-        total_bayar: calc.total_bayar,
-        total_amount: calc.total_amount,
-        metode: selectedMetodeCode,
-        status: initialStatus,
-        qr_image: qrImage,
+        id: localTrxId,
+        trx_id: localTrxId,
+        reff_id: reffId,
+        metode: "QRIS",
+        nominal: parsedNominal,
+        kode_unik: kodeUnik,
+        tambahan: kodeUnik,
+        fee: feeAdmin,
+        fee_persen: feePersen,
+        fee_provider: Number(paymentData.fee) || 0,
+        total_amount: totalAmount,
+        get_balance: saldoDiterima,
+        qr_image: rawQrImage || null,
         qris_string: qrisString,
-        bg_image: DITZ_DEPOSIT_BG_URL,
-        expires_at: expiresAt
+        bg_image: customBgUrl,
+        status: paymentData.status || "pending",
+        expires_at: providerExpiresAt,
+        expires_in_ms: 15 * 60 * 1000
       }
     });
 
-    // ================= BACKGROUND POLLING DITZNESIA (TIAP 3 DETIK) =================
-    const POLL_INTERVAL_MS = 3000;
-    const MAX_POLL_DURATION_MS = 15 * 60 * 1000 + 30000;
-
+    // ================= BACKGROUND POLLING DITZNESIA =================
     const intervalId = setInterval(async () => {
       try {
-        const userToCheck = await User.findOne(
-          { _id: user._id, "historyDeposit.id": trxId },
-          { "historyDeposit.$": 1, saldo: 1 }
+        const latestHistory = await User.findOne(
+          { _id: user._id, "historyDeposit.id": localTrxId },
+          { "historyDeposit.$": 1 }
         );
 
-        const txInDb = userToCheck?.historyDeposit?.[0];
-        if (!txInDb) {
+        const latestDeposit = latestHistory?.historyDeposit?.[0];
+        const localStatus = String(latestDeposit?.status || "").toLowerCase();
+
+        if (!latestDeposit || !["pending", "processing"].includes(localStatus)) {
           clearInterval(intervalId);
           return;
         }
 
-        const dbStatusNormalized = normalizeDepositStatus(txInDb.status, "pending");
-        if (["success", "failed", "expired", "cancel"].includes(dbStatusNormalized)) {
-          clearInterval(intervalId);
-          return;
-        }
-
-        const checkStatusResponse = await axios.get(`${baseUrl}/deposit/status`, {
-          params: {
-            apikey: apiKey,
-            id: trxId
-          },
-          timeout: 10000
+        const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(localTrxId)}`;
+        const checkRes = await fetch(detailUrl, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0"
+          }
         });
 
-        const statusUpdateData = checkStatusResponse.data || {};
-        const latestPayload = extractDitzDepositData(statusUpdateData);
-        const currentTxStatus = normalizeDepositStatus(latestPayload?.status, "");
+        if (!checkRes.ok) return;
 
-        if (!currentTxStatus) return;
+        const checkData = await checkRes.json();
+        const providerTrx = checkData?.data || checkData?.deposit || checkData;
+        const rawProviderStatus = String(providerTrx?.status || "").toLowerCase();
+        const providerStatus = rawProviderStatus === "paid" || rawProviderStatus === "success" ? "success" : rawProviderStatus;
 
-        if (currentTxStatus !== txInDb.status) {
-          await editHistoryDeposit(user._id, trxId, currentTxStatus);
-        }
+        if (providerStatus === "success") {
+          let pTime = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
+          if (typeof pTime === "number") {
+            pTime = new Date(pTime).toISOString();
+          }
 
-        if (currentTxStatus === "success" && dbStatusNormalized !== "success") {
-          const creditAmount = parseInt(txInDb.get_balance, 10) || calc.get_balance;
-          const credited = await User.updateOne(
+          const updateResult = await User.updateOne(
             {
               _id: user._id,
               historyDeposit: {
                 $elemMatch: {
-                  id: trxId,
-                  status: { $ne: "success" }
+                  id: localTrxId,
+                  status: { $in: ["pending", "processing"] }
                 }
               }
             },
             {
-              $set: { "historyDeposit.$.status": "success" },
-              $inc: { saldo: creditAmount }
+              $set: {
+                "historyDeposit.$.status": "success",
+                "historyDeposit.$.provider_id": String(providerTrx.id || localTrxId),
+                "historyDeposit.$.provider_reference_id": String(providerTrx.trx_id || providerTrx.reff_id || localTrxId),
+                "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
+                "historyDeposit.$.provider_status": providerStatus,
+                "historyDeposit.$.provider_time": pTime
+              },
+              $inc: {
+                saldo: Number(latestDeposit.get_balance) || 0
+              }
             }
           );
 
-          if (credited.modifiedCount > 0) {
-            console.log(`✅ [DEPOSIT] Ditznesia SUCCESS +${creditAmount} untuk user ${user._id} (ID: ${trxId})`);
+          if (updateResult.modifiedCount > 0) {
+            console.log(`Deposit SUCCESS ${localTrxId}`);
           }
+          clearInterval(intervalId);
+          return;
         }
 
-        if (["success", "failed", "expired", "cancel"].includes(currentTxStatus)) {
+        if (["failed", "expired", "cancel", "cancelled"].includes(providerStatus)) {
+          await User.updateOne(
+            {
+              _id: user._id,
+              historyDeposit: {
+                $elemMatch: {
+                  id: localTrxId,
+                  status: { $in: ["pending", "processing"] }
+                }
+              }
+            },
+            {
+              $set: {
+                "historyDeposit.$.status": providerStatus,
+                "historyDeposit.$.provider_status": providerStatus
+              }
+            }
+          );
           clearInterval(intervalId);
         }
-      } catch (pollError) {
-        console.error(`Gagal cek status deposit Ditznesia (ID: ${trxId}):`, pollError?.response?.data || pollError.message);
+      } catch (e) {
+        console.error("Ditznesia Polling Error:", e.message);
       }
-    }, POLL_INTERVAL_MS);
+    }, 10000);
 
-    setTimeout(() => clearInterval(intervalId), MAX_POLL_DURATION_MS);
-  } catch (error) {
-    const apiError = error.response?.data;
-    console.error("❌ [DEPOSIT CREATE] Error:", apiError || error.message);
+    setTimeout(() => clearInterval(intervalId), 15 * 60 * 1000 + 60000);
+
+  } catch (err) {
+    console.error("Deposit Create Error:", err);
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
-        message: apiError?.message || "Terjadi kesalahan internal saat memproses deposit.",
-        error: apiError || error.message
+        message: err.message
       });
     }
   }
@@ -558,241 +368,343 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
 
 // ================= CEK STATUS DEPOSIT (DITZNESIA) =================
 router.post("/deposit/status", requireLogin, async (req, res) => {
-  const user = await User.findById(req.session.userId);
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
-    });
-  }
-
-  const { id } = req.body;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: "ID deposit harus diisi."
-    });
-  }
-
-  const apiKey = resolveDitzApiKey();
-  const baseUrl = resolveDitzBaseUrl();
-
-  if (!apiKey) {
-    return res.status(500).json({
-      success: false,
-      message: "API Key Ditznesia belum dikonfigurasi di server."
-    });
-  }
-
   try {
-    const userHistory = await User.findOne(
+    const user = await User.findById(req.session.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Sesi tidak valid."
+      });
+    }
+
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID diperlukan."
+      });
+    }
+
+    let userWithHistory = await User.findOne(
       { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
 
-    if (!userHistory || userHistory.historyDeposit.length === 0) {
+    if (!userWithHistory?.historyDeposit?.length) {
       return res.status(404).json({
         success: false,
-        message: "ID deposit tidak ditemukan dalam riwayat Anda."
+        message: "Data tidak ditemukan."
       });
     }
 
-    const txInDb = userHistory.historyDeposit[0];
-    const response = await axios.get(`${baseUrl}/deposit/status`, {
-      params: {
-        apikey: apiKey,
-        id
-      },
-      timeout: 15000
-    });
+    let localData = userWithHistory.historyDeposit[0];
+    let localStatus = String(localData.status || "pending").toLowerCase();
 
-    const resultFromDitz = response.data || {};
-    const depositDetails = extractDitzDepositData(resultFromDitz);
+    // ================= STATUS TERMINAL =================
+    if (!["pending", "processing"].includes(localStatus)) {
+      const nominal = Number(localData.nominal) || 0;
+      const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
+      const feeAdmin = Number(localData.fee) || 0;
+      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeAdmin;
 
-    const isApiSuccess =
-      resultFromDitz.success !== false &&
-      resultFromDitz.status !== false &&
-      Boolean(depositDetails?.status || depositDetails?.id || depositDetails?.invoice_id);
+      return res.status(200).json({
+        success: true,
+        data: {
+          id,
+          trx_id: id,
+          reff_id: localData.reff_id || localData.provider_reference_id || "-",
+          nominal,
+          kode_unik: kodeUnik,
+          tambahan: kodeUnik,
+          fee: feeAdmin,
+          fee_provider: Number(localData.fee_provider) || 0,
+          total_amount: totalAmount,
+          get_balance: Number(localData.get_balance) || nominal,
+          status: localStatus,
+          metode: localData.metode || "QRIS",
+          qr_image: localData.qr_image || null,
+          bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
+          qris_string: localData.qris_string || "",
+          created_at: localData.created_at || null,
+          expires_at: localData.provider_expires_at || null,
+          paid_at: localData.provider_time || null,
+          provider_id: localData.provider_id || null,
+          provider_reference_id: localData.provider_reference_id || null,
+          provider_amount: Number(localData.provider_amount) || totalAmount,
+          provider_status: localData.provider_status || null,
+          provider_time: localData.provider_time || null
+        }
+      });
+    }
 
-    if (!isApiSuccess) {
-      return res.status(502).json({
+    const DITZ_BASE = process.env.DITZ_BASE_URL || "https://www.ditznesia.com/api/dev";
+    const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+    if (!DITZ_API_KEY) {
+      return res.status(500).json({
         success: false,
-        message:
-          resultFromDitz?.message ||
-          resultFromDitz?.error ||
-          "Gagal memeriksa status deposit ke provider.",
-        error: resultFromDitz
+        message: "API Key Ditznesia belum dikonfigurasi di server."
       });
     }
 
-    const normalizedStatus = normalizeDepositStatus(
-      depositDetails.status,
-      txInDb.status || "pending"
-    );
-    const dbStatusNormalized = normalizeDepositStatus(txInDb.status, "pending");
+    const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
+      const controller = new AbortController();
+      const idTimeout = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(idTimeout);
+        return response;
+      } catch (err) {
+        clearTimeout(idTimeout);
+        return null;
+      }
+    };
 
-    if (normalizedStatus !== txInDb.status) {
-      await editHistoryDeposit(user._id, id, normalizedStatus);
+    let providerTrx = null;
+    const targetPaymentId = localData.provider_id || id;
+
+    if (targetPaymentId) {
+      const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
+      const detailRes = await fetchWithTimeout(detailUrl, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "User-Agent": "Mozilla/5.0"
+        }
+      });
+
+      if (detailRes && detailRes.ok) {
+        try {
+          const detailData = await detailRes.json();
+          if (detailData) {
+            providerTrx = detailData.data || detailData.deposit || detailData;
+          }
+        } catch (e) {}
+      }
     }
 
-    const calc = calcDepositAdminAndBalance({
-      nominal: txInDb.nominal ?? depositDetails.nominal ?? 0,
-      kodeUnik: txInDb.tambahan ?? txInDb.kode_unik ?? depositDetails.tambahan ?? 0,
-      apiData: {
-        fee: depositDetails.fee ?? txInDb.fee_provider ?? 0,
-        total_bayar: txInDb.total_bayar ?? depositDetails.total_bayar
-      },
-      role: user.role || req.session.role || "user"
-    });
+    if (providerTrx) {
+      let rawProviderStatus = String(providerTrx.status || localStatus).toLowerCase();
+      let providerStatus = (rawProviderStatus === "paid" || rawProviderStatus === "success") ? "success" : rawProviderStatus;
 
-    const fee = txInDb.fee ?? calc.fee;
-    const totalAmount = txInDb.total_amount ?? (calc.nominal + fee);
-    const creditAmount = parseInt(txInDb.get_balance, 10) || calc.get_balance;
+      const pId = String(providerTrx.id || providerTrx.invoice_id || targetPaymentId);
+      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || pId);
 
-    if (normalizedStatus === "success" && dbStatusNormalized !== "success") {
-      await User.updateOne(
-        {
-          _id: user._id,
-          historyDeposit: {
-            $elemMatch: {
-              id,
-              status: { $ne: "success" }
+      let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
+      if (typeof pPaidAt === "number") {
+        pPaidAt = new Date(pPaidAt).toISOString();
+      }
+
+      let pExpiresAt = providerTrx.expired_at || providerTrx.expires_at || null;
+      if (typeof pExpiresAt === "number") {
+        pExpiresAt = new Date(pExpiresAt).toISOString();
+      }
+
+      if (providerStatus === "success") {
+        const updateResult = await User.updateOne(
+          {
+            _id: user._id,
+            historyDeposit: {
+              $elemMatch: {
+                id,
+                status: { $in: ["pending", "processing"] }
+              }
+            }
+          },
+          {
+            $set: {
+              "historyDeposit.$.status": "success",
+              "historyDeposit.$.provider_id": pId,
+              "historyDeposit.$.provider_reference_id": pRef,
+              "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
+              "historyDeposit.$.provider_status": providerStatus,
+              "historyDeposit.$.provider_time": pPaidAt,
+              "historyDeposit.$.provider_expires_at": pExpiresAt
+            },
+            $inc: {
+              saldo: Number(localData.get_balance) || 0
             }
           }
-        },
-        {
-          $set: { "historyDeposit.$.status": "success" },
-          $inc: { saldo: creditAmount }
+        );
+
+        if (updateResult.modifiedCount > 0) {
+          localStatus = "success";
         }
-      );
+      } else if (["failed", "expired", "cancel", "cancelled"].includes(providerStatus)) {
+        const updateResult = await User.updateOne(
+          {
+            _id: user._id,
+            historyDeposit: {
+              $elemMatch: {
+                id,
+                status: { $in: ["pending", "processing"] }
+              }
+            }
+          },
+          {
+            $set: {
+              "historyDeposit.$.status": providerStatus,
+              "historyDeposit.$.provider_id": pId,
+              "historyDeposit.$.provider_reference_id": pRef,
+              "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
+              "historyDeposit.$.provider_status": providerStatus,
+              "historyDeposit.$.provider_time": pPaidAt,
+              "historyDeposit.$.provider_expires_at": pExpiresAt
+            }
+          }
+        );
+
+        if (updateResult.modifiedCount > 0) {
+          localStatus = providerStatus;
+        }
+      }
     }
+
+    const refreshedUser = await User.findOne(
+      { _id: user._id, "historyDeposit.id": id },
+      { "historyDeposit.$": 1 }
+    );
+
+    localData = refreshedUser?.historyDeposit?.[0] || localData;
+    localStatus = String(localData.status || localStatus || "pending").toLowerCase();
+
+    const nominal = Number(localData.nominal) || 0;
+    const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
+    const feeAdmin = Number(localData.fee) || 0;
+    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeAdmin;
 
     return res.status(200).json({
       success: true,
       data: {
-        id: String(depositDetails.id || depositDetails.invoice_id || id),
-        trx_id: String(depositDetails.id || depositDetails.invoice_id || id),
-        reff_id: String(depositDetails.trx_id || depositDetails.reff_id || txInDb.reff_id || "-"),
-        nominal: calc.nominal,
-        tambahan: calc.tambahan,
-        kode_unik: calc.kode_unik,
-        fee,
-        fee_provider: txInDb.fee_provider ?? calc.fee_provider,
-        fee_app: txInDb.fee_app ?? calc.fee_app,
-        get_balance: creditAmount,
-        total_bayar: calc.total_bayar,
+        id,
+        trx_id: id,
+        reff_id: localData.reff_id || localData.provider_reference_id || "-",
+        nominal,
+        kode_unik: kodeUnik,
+        tambahan: kodeUnik,
+        fee: feeAdmin,
+        fee_provider: Number(localData.fee_provider) || 0,
         total_amount: totalAmount,
-        metode: txInDb.metode || depositDetails.metode || "QRISFAST",
-        qr_image: txInDb.qr_image || depositDetails.qr_link || depositDetails.qr_image || null,
-        qris_string: txInDb.qris_string || depositDetails.qr_string || "",
-        bg_image: txInDb.bg_image || DITZ_DEPOSIT_BG_URL,
-        status: normalizedStatus,
-        expires_at:
-          txInDb.expires_at ||
-          parseDepositDate(depositDetails.expired_at || depositDetails.expires_at) ||
-          null,
-        created_at: depositDetails.created_at || txInDb.created_at
+        get_balance: Number(localData.get_balance) || nominal,
+        status: localStatus,
+        metode: localData.metode || "QRIS",
+        qr_image: localData.qr_image || null,
+        bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
+        qris_string: localData.qris_string || "",
+        created_at: localData.created_at || null,
+        expires_at: localData.provider_expires_at || null,
+        paid_at: localData.provider_time || null,
+        provider_id: localData.provider_id || null,
+        provider_reference_id: localData.provider_reference_id || null,
+        provider_amount: Number(localData.provider_amount) || totalAmount,
+        provider_status: localData.provider_status || null,
+        provider_time: localData.provider_time || null
       }
     });
+
   } catch (error) {
-    const apiError = error.response?.data;
+    console.error("Error Status Check Ditznesia:", error);
     return res.status(500).json({
       success: false,
-      message: apiError?.message || "Terjadi kesalahan internal saat memeriksa status deposit.",
-      error: apiError || error.message
+      message: "Gagal memuat detail terbaru."
     });
   }
 });
 
 // ================= CANCEL DEPOSIT (DITZNESIA) =================
 router.post("/deposit/cancel", requireLogin, async (req, res) => {
-  const user = await User.findById(req.session.userId);
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
-    });
-  }
-
-  const { id } = req.body;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: "ID deposit harus diisi."
-    });
-  }
-
-  const apiKey = resolveDitzApiKey();
-  const baseUrl = resolveDitzBaseUrl();
-
-  if (!apiKey) {
-    return res.status(500).json({
-      success: false,
-      message: "API Key Ditznesia belum dikonfigurasi di server."
-    });
-  }
-
   try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Sesi tidak valid." });
+    }
+
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID diperlukan." });
+    }
+
     const userHistory = await User.findOne(
       { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
 
-    if (!userHistory || userHistory.historyDeposit.length === 0) {
-      return res.status(404).json({
+    if (!userHistory || !userHistory.historyDeposit.length) {
+      return res.status(404).json({ success: false, message: "Data transaksi tidak ditemukan." });
+    }
+
+    const currentData = userHistory.historyDeposit[0];
+
+    if (currentData.status !== "pending") {
+      return res.status(400).json({
         success: false,
-        message: "ID deposit tidak ditemukan dalam riwayat Anda."
+        message: `Transaksi tidak bisa dibatalkan karena status sudah ${currentData.status}.`
       });
     }
 
-    const txInDb = userHistory.historyDeposit[0];
-    const response = await axios.get(`${baseUrl}/deposit/cancel`, {
-      params: {
-        apikey: apiKey,
-        id
-      },
-      timeout: 15000
-    });
+    const DITZ_BASE = process.env.DITZ_BASE_URL || "https://www.ditznesia.com/api/dev";
+    const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
 
-    const resultFromDitz = response.data || {};
-    const cancelDetails = extractDitzDepositData(resultFromDitz);
+    if (!DITZ_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: "API Key Ditznesia belum dikonfigurasi di server."
+      });
+    }
 
-    const isApiSuccess =
-      resultFromDitz.success !== false &&
-      resultFromDitz.status !== false;
+    const targetPaymentId = currentData.provider_id || id;
+    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
 
-    if (!isApiSuccess) {
+    let response;
+    try {
+      response = await fetch(cancelUrl, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "User-Agent": "Mozilla/5.0"
+        }
+      });
+    } catch (fetchError) {
+      console.error("Ditznesia Cancel Fetch Error:", fetchError);
       return res.status(502).json({
         success: false,
-        message:
-          resultFromDitz?.message ||
-          resultFromDitz?.error ||
-          cancelDetails?.message ||
-          "Gagal membatalkan deposit ke provider.",
-        error: resultFromDitz
+        message: "Koneksi server ke Ditznesia gagal."
       });
     }
 
-    const finalCancelStatus = normalizeDepositStatus(cancelDetails?.status, "cancel");
-    await editHistoryDeposit(user._id, id, finalCancelStatus);
+    const responseText = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(responseText);
+    } catch (jsonError) {
+      console.error("Ditznesia Cancel Invalid Response:", responseText.slice(0, 500));
+      return res.status(502).json({
+        success: false,
+        message: "Ditznesia mengembalikan respons yang bukan JSON."
+      });
+    }
+
+    await editHistoryDeposit(user._id, id, "cancelled");
 
     return res.status(200).json({
       success: true,
+      message: result?.message || "Deposit berhasil dibatalkan.",
       data: {
-        id: String(cancelDetails?.id || id),
-        status: finalCancelStatus,
-        created_at: cancelDetails?.created_at || txInDb.created_at
+        id: id,
+        trx_id: id,
+        status: "cancelled"
       }
     });
+
   } catch (error) {
-    const apiError = error.response?.data;
-    return res.status(500).json({
-      success: false,
-      message: apiError?.message || "Terjadi kesalahan internal saat membatalkan deposit.",
-      error: apiError || error.message
-    });
+    console.error("Cancel Deposit Error:", error);
+    return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
+
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
