@@ -3,933 +3,954 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FelixTopUp - Comic Admin Dashboard</title>
+    <title>Dashboard - Xs-Pedia Comic Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sidebar-width: 270px;
-            --topbar-height: 76px;
-            --comic-border: 3.5px solid #111319;
-            --comic-shadow: 5px 5px 0px #111319;
-            --comic-shadow-sm: 3px 3px 0px #111319;
-            --comic-shadow-lg: 8px 8px 0px #111319;
-
-            --bg-cream: #FFFDF5;
-            --bg-panel: #FFFFFF;
-            --ink-black: #111319;
-            --ink-muted: #4A5568;
-
-            --c-blue: #3B82F6;
-            --c-blue-soft: #DBEAFE;
-            --c-green: #10B981;
-            --c-green-soft: #D1FAE5;
-            --c-yellow: #FBBF24;
-            --c-yellow-soft: #FEF3C7;
-            --c-cyan: #06B6D4;
-            --c-cyan-soft: #CFFAFE;
-            --c-red: #EF4444;
-            --c-red-soft: #FEE2E2;
-            --c-purple: #8B5CF6;
-            --c-purple-soft: #EDE9FE;
-            --c-orange: #F97316;
-            --c-orange-soft: #FFEDD5;
-            --c-slate: #64748B;
-            --c-slate-soft: #F1F5F9;
-
-            --font-display: 'Bangers', cursive, sans-serif;
-            --font-comic: 'Comic Neue', 'Plus Jakarta Sans', sans-serif;
-            --font-ui: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: var(--font-ui);
-            background-color: var(--bg-cream);
-            background-image: radial-gradient(#111319 1.15px, transparent 1.15px);
-            background-size: 18px 18px;
-            color: var(--ink-black);
-            font-size: 0.96rem;
-            line-height: 1.45;
-            overflow-x: hidden;
-        }
-
-        .comic-title {
-            font-family: var(--font-display);
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* Layout */
-        .page-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            min-width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--c-yellow);
-            border-right: var(--comic-border);
-            z-index: 1030;
-            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0px 0px rgba(17, 19, 25, 0.12);
-        }
-
-        .sidebar-brand {
-            padding: 1.25rem 1.25rem 1rem;
-            background: var(--c-blue);
-            color: #FFFFFF;
-            border-bottom: var(--comic-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .brand-lockup {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-
-        .brand-badge {
-            width: 42px;
-            height: 42px;
-            background: var(--c-yellow);
-            color: var(--ink-black);
-            border: 3px solid var(--ink-black);
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: 1.35rem;
-            box-shadow: 2px 2px 0px var(--ink-black);
-            transform: rotate(-4deg);
-        }
-
-        .brand-text {
-            font-family: var(--font-display);
-            font-size: 1.85rem;
-            letter-spacing: 1.5px;
-            text-shadow: 2px 2px 0px var(--ink-black);
-            line-height: 1;
-        }
-
-        .brand-sub {
-            display: block;
-            font-family: var(--font-ui);
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            background: var(--ink-black);
-            color: var(--c-yellow);
-            padding: 2px 7px;
-            border-radius: 5px;
-            margin-top: 4px;
-            width: fit-content;
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            padding: 1rem 0.85rem;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.55rem;
-            flex: 1;
-        }
-
-        .nav-item .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 0.95rem;
-            background: var(--bg-panel);
-            color: var(--ink-black);
-            font-weight: 800;
-            font-size: 0.92rem;
-            border: 3px solid var(--ink-black);
-            border-radius: 12px;
-            box-shadow: var(--comic-shadow-sm);
-            transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
-        }
-
-        .nav-item .nav-link i {
-            font-size: 1.1rem;
-        }
-
-        .nav-item .nav-link:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 5px 5px 0px var(--ink-black);
-            background: var(--c-cyan-soft);
-        }
-
-        .nav-item .nav-link.active {
-            background: var(--c-orange);
-            color: #FFFFFF;
-        }
-
-        .nav-item.logout {
-            margin-top: auto;
-            padding-top: 0.75rem;
-            border-top: 3px dashed var(--ink-black);
-        }
-
-        .nav-item.logout .nav-link {
-            background: var(--c-red-soft);
-            color: #991B1B;
-        }
-
-        .nav-item.logout .nav-link:hover {
-            background: var(--c-red);
-            color: #FFFFFF;
-        }
-
-        .content-wrapper {
-            width: calc(100% - var(--sidebar-width));
-            margin-left: var(--sidebar-width);
-            transition: margin-left 0.25s ease, width 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        /* Topbar */
-        .topbar {
-            height: var(--topbar-height);
-            background-color: var(--bg-panel);
-            border-bottom: var(--comic-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 0 1.75rem;
-            position: sticky;
-            top: 0;
-            z-index: 1010;
-        }
-
-        .topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-        }
-
-        .sidebar-toggle-btn {
-            background: var(--c-yellow);
-            border: 3px solid var(--ink-black);
-            border-radius: 10px;
-            width: 42px;
-            height: 42px;
-            font-size: 1.35rem;
-            cursor: pointer;
-            color: var(--ink-black);
-            display: none;
-            place-items: center;
-            box-shadow: 3px 3px 0px var(--ink-black);
-        }
-
-        .sidebar-toggle-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px var(--ink-black);
-        }
-
-        .topbar-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            background: var(--bg-cream);
-            border: 2.5px solid var(--ink-black);
-            border-radius: 999px;
-            padding: 0.35rem 0.85rem;
-            font-size: 0.8rem;
-            font-weight: 800;
-            box-shadow: 2px 2px 0px var(--ink-black);
-        }
-
-        .status-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: var(--c-green);
-            border: 1.5px solid var(--ink-black);
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            margin-left: auto;
-        }
-
-        .comic-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.55rem 1rem;
-            border-radius: 11px;
-            border: 3px solid var(--ink-black);
-            font-family: var(--font-ui);
-            font-weight: 800;
-            font-size: 0.86rem;
-            cursor: pointer;
-            box-shadow: var(--comic-shadow-sm);
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
-        }
-
-        .comic-btn:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 5px 5px 0px var(--ink-black);
-        }
-
-        .comic-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px var(--ink-black);
-        }
-
-        .comic-btn-primary {
-            background: var(--c-blue);
-            color: #FFFFFF;
-        }
-
-        .comic-btn-yellow {
-            background: var(--c-yellow);
-            color: var(--ink-black);
-        }
-
-        .comic-btn-danger {
-            background: var(--c-red);
-            color: #FFFFFF;
-        }
-
-        .comic-btn-light {
-            background: var(--bg-panel);
-            color: var(--ink-black);
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 1.75rem;
-            max-width: 1440px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1.35rem;
-        }
-
-        .page-heading {
-            margin: 0;
-            font-size: 2.35rem;
-            line-height: 1.05;
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-
-        .caption-tag {
-            background: var(--c-yellow);
-            border: 3px solid var(--ink-black);
-            box-shadow: 3px 3px 0px var(--ink-black);
-            padding: 0.25rem 0.7rem;
-            border-radius: 8px;
-            font-family: var(--font-ui);
-            font-size: 0.78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .page-subtitle {
-            margin: 0.35rem 0 0;
-            font-family: var(--font-comic);
-            font-weight: 700;
-            color: var(--ink-muted);
-            font-size: 0.98rem;
-        }
-
-        /* Alert Banner */
-        #alertContainer {
-            margin-bottom: 1.25rem;
-        }
-
-        .comic-alert {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            padding: 0.85rem 1.15rem;
-            border: 3px solid var(--ink-black);
-            border-radius: 12px;
-            box-shadow: var(--comic-shadow-sm);
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .comic-alert.success { background: var(--c-green-soft); color: #064E3B; }
-        .comic-alert.danger { background: var(--c-red-soft); color: #7F1D1D; }
-        .comic-alert.warning { background: var(--c-yellow-soft); color: #78350F; }
-
-        /* Section Panels */
-        .comic-panel {
-            background: var(--bg-panel);
-            border: var(--comic-border);
-            border-radius: 16px;
-            box-shadow: var(--comic-shadow);
-            padding: 1.35rem;
-            margin-bottom: 1.65rem;
-            position: relative;
-        }
-
-        .panel-header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            margin-bottom: 1.15rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 3px dashed var(--ink-black);
-        }
-
-        .panel-title {
-            margin: 0;
-            font-size: 1.45rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .panel-badge {
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 0.25rem 0.65rem;
-            border-radius: 7px;
-            border: 2.5px solid var(--ink-black);
-            background: var(--bg-cream);
-        }
-
-        /* Grids */
-        .hero-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.15rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
-            gap: 1.1rem;
-        }
-
-        /* Comic Cards */
-        .stat-card {
-            background-color: var(--bg-panel);
-            border: var(--comic-border);
-            border-radius: 14px;
-            box-shadow: var(--comic-shadow);
-            position: relative;
-            transition: transform 0.14s ease, box-shadow 0.14s ease;
-            overflow: hidden;
-        }
-
-        .stat-card.clickable {
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: 8px 8px 0px var(--ink-black);
-        }
-
-        .stat-card.hero-card {
-            border-width: 4px;
-        }
-
-        .card-top-strip {
-            height: 10px;
-            border-bottom: 3px solid var(--ink-black);
-        }
-
-        .stat-card .card-body {
-            padding: 1.1rem 1.15rem;
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 0.75rem;
-        }
-
-        .stat-card.hero-card .card-body {
-            padding: 1.3rem 1.25rem;
-        }
-
-        .card-info {
-            min-width: 0;
-            flex: 1;
-        }
-
-        .stat-card .card-title {
-            font-size: 0.78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin: 0 0 0.4rem 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 2px 8px;
-            border-radius: 6px;
-            border: 2px solid var(--ink-black);
-        }
-
-        .stat-card .card-value {
-            font-size: 1.48rem;
-            font-weight: 800;
-            color: var(--ink-black);
-            word-break: break-word;
-            line-height: 1.2;
-        }
-
-        .stat-card.hero-card .card-value {
-            font-size: 1.75rem;
-        }
-
-        .card-hint {
-            margin-top: 0.45rem;
-            font-size: 0.76rem;
-            font-weight: 700;
-            color: var(--ink-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .stat-card .card-icon-box {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            border: 3px solid var(--ink-black);
-            box-shadow: 2.5px 2.5px 0px var(--ink-black);
-            display: grid;
-            place-items: center;
-            font-size: 1.4rem;
-            flex-shrink: 0;
-            color: var(--ink-black);
-        }
-
-        .stat-card.hero-card .card-icon-box {
-            width: 54px;
-            height: 54px;
-            font-size: 1.65rem;
-        }
-
-        /* Color Themes per Card */
-        .theme-blue .card-top-strip, .theme-blue .card-icon-box { background: var(--c-blue); color: #fff; }
-        .theme-blue .card-title { background: var(--c-blue-soft); color: #1E3A8A; }
-
-        .theme-green .card-top-strip, .theme-green .card-icon-box { background: var(--c-green); color: #fff; }
-        .theme-green .card-title { background: var(--c-green-soft); color: #065F46; }
-
-        .theme-yellow .card-top-strip, .theme-yellow .card-icon-box { background: var(--c-yellow); color: var(--ink-black); }
-        .theme-yellow .card-title { background: var(--c-yellow-soft); color: #78350F; }
-
-        .theme-cyan .card-top-strip, .theme-cyan .card-icon-box { background: var(--c-cyan); color: var(--ink-black); }
-        .theme-cyan .card-title { background: var(--c-cyan-soft); color: #164E63; }
-
-        .theme-purple .card-top-strip, .theme-purple .card-icon-box { background: var(--c-purple); color: #fff; }
-        .theme-purple .card-title { background: var(--c-purple-soft); color: #4C1D95; }
-
-        .theme-orange .card-top-strip, .theme-orange .card-icon-box { background: var(--c-orange); color: #fff; }
-        .theme-orange .card-title { background: var(--c-orange-soft); color: #7C2D12; }
-
-        .theme-red .card-top-strip, .theme-red .card-icon-box { background: var(--c-red); color: #fff; }
-        .theme-red .card-title { background: var(--c-red-soft); color: #7F1D1D; }
-
-        .theme-slate .card-top-strip, .theme-slate .card-icon-box { background: var(--c-slate); color: #fff; }
-        .theme-slate .card-title { background: var(--c-slate-soft); color: #1E293B; }
-
-        .refresh-btn {
-            position: absolute;
-            top: 18px;
-            right: 70px;
-            background: var(--bg-panel);
-            border: 2.5px solid var(--ink-black);
-            border-radius: 8px;
-            width: 34px;
-            height: 34px;
-            display: grid;
-            place-items: center;
-            color: var(--ink-black);
-            cursor: pointer;
-            font-size: 0.95rem;
-            box-shadow: 2px 2px 0px var(--ink-black);
-            transition: transform 0.12s ease, background-color 0.12s ease;
-            z-index: 2;
-        }
-
-        .refresh-btn:hover {
-            background: var(--c-yellow);
-            transform: translate(-1px, -1px);
-        }
-
-        /* Quick Inspector Strip for Admin */
-        .inspector-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.85rem;
-            background: var(--bg-cream);
-            border: 3px solid var(--ink-black);
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
-        }
-
-        .filter-chip {
-            background: var(--bg-panel);
-            border: 2.5px solid var(--ink-black);
-            border-radius: 9px;
-            padding: 0.38rem 0.75rem;
-            font-weight: 800;
-            font-size: 0.8rem;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px var(--ink-black);
-            transition: all 0.12s ease;
-        }
-
-        .filter-chip:hover {
-            transform: translate(-1px, -1px);
-            background: var(--c-yellow-soft);
-        }
-
-        .filter-chip.active {
-            background: var(--ink-black);
-            color: var(--c-yellow);
-        }
-
-        .search-box-wrap {
-            position: relative;
-            min-width: 240px;
-            flex: 1;
-            max-width: 360px;
-        }
-
-        .search-box-wrap i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-weight: 800;
-        }
-
-        .comic-input {
-            width: 100%;
-            padding: 0.5rem 0.85rem 0.5rem 2.2rem;
-            border: 3px solid var(--ink-black);
-            border-radius: 10px;
-            font-family: var(--font-ui);
-            font-weight: 700;
-            font-size: 0.88rem;
-            background: var(--bg-panel);
-            color: var(--ink-black);
-            box-shadow: 2.5px 2.5px 0px var(--ink-black);
-            outline: none;
-        }
-
-        .comic-input:focus {
-            background: #FEFCE8;
-        }
-
-        /* Clean Admin Detail Table */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            border: 3px solid var(--ink-black);
-            border-radius: 12px;
-            box-shadow: var(--comic-shadow-sm);
-            background: var(--bg-panel);
-        }
-
-        .comic-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        .comic-table th {
-            background: var(--ink-black);
-            color: #FFFFFF;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.76rem;
-            letter-spacing: 0.6px;
-            padding: 0.8rem 0.9rem;
-            white-space: nowrap;
-        }
-
-        .comic-table td {
-            padding: 0.75rem 0.9rem;
-            border-bottom: 2px solid #E2E8F0;
-            font-weight: 600;
-            vertical-align: middle;
-        }
-
-        .comic-table tbody tr:nth-child(even) {
-            background: #FFFDF7;
-        }
-
-        .comic-table tbody tr:hover {
-            background: var(--c-yellow-soft);
-        }
-
-        .badge-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.22rem 0.6rem;
-            border-radius: 999px;
-            border: 2px solid var(--ink-black);
-            font-size: 0.73rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .badge-verified { background: var(--c-green-soft); color: #065F46; }
-        .badge-unverified { background: var(--c-red-soft); color: #991B1B; }
-        .badge-admin { background: var(--c-red); color: #FFFFFF; }
-        .badge-reseller { background: var(--c-blue); color: #FFFFFF; }
-        .badge-user { background: var(--c-slate-soft); color: var(--ink-black); }
-
-        .btn-detail-row {
-            background: var(--c-cyan-soft);
-            color: var(--ink-black);
-            border: 2.5px solid var(--ink-black);
-            border-radius: 8px;
-            padding: 0.32rem 0.65rem;
-            font-weight: 800;
-            font-size: 0.78rem;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px var(--ink-black);
-            transition: transform 0.1s ease;
-        }
-
-        .btn-detail-row:hover {
-            background: var(--c-yellow);
-            transform: translate(-1px, -1px);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(17, 19, 25, 0.65);
-            backdrop-filter: blur(2px);
-            z-index: 1029;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
-
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            z-index: 1050;
-            background: var(--bg-panel);
-            border: 4px solid var(--ink-black);
-            border-radius: 16px;
-            width: 92%;
-            max-width: 860px;
-            box-shadow: var(--comic-shadow-lg);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-            overflow: hidden;
-        }
-
-        .modal.active, .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal.active {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.35rem;
-            background: var(--c-yellow);
-            border-bottom: 3.5px solid var(--ink-black);
-        }
-
-        .modal-title {
-            margin: 0;
-            font-size: 1.45rem;
-        }
-
-        .modal-close-btn {
-            background: var(--c-red);
-            color: #FFFFFF;
-            border: 2.5px solid var(--ink-black);
-            border-radius: 8px;
-            width: 36px;
-            height: 36px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px var(--ink-black);
-            display: grid;
-            place-items: center;
-        }
-
-        .modal-body {
-            padding: 1.35rem;
-            max-height: 74vh;
-            overflow-y: auto;
-        }
-
-        .modal-search-bar {
-            margin-bottom: 1rem;
-        }
-
-        .detail-grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 0.85rem;
-            margin-bottom: 1.1rem;
-        }
-
-        .mini-box {
-            background: var(--bg-cream);
-            border: 2.5px solid var(--ink-black);
-            border-radius: 10px;
-            padding: 0.75rem 0.9rem;
-            box-shadow: 3px 3px 0px var(--ink-black);
-        }
-
-        .mini-box-label {
-            font-size: 0.72rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: var(--ink-muted);
-        }
-
-        .mini-box-val {
-            font-size: 1.05rem;
-            font-weight: 800;
-            margin-top: 2px;
-            word-break: break-word;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 1.05rem;
-            height: 1.05rem;
-            border: 3px solid #E2E8F0;
-            border-top: 3px solid var(--ink-black);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .retry-btn {
-            background: var(--c-yellow);
-            color: var(--ink-black);
-            border: 2.5px solid var(--ink-black);
-            padding: 0.3rem 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 800;
-            font-size: 0.78rem;
-            margin-top: 0.5rem;
-            box-shadow: 2px 2px 0px var(--ink-black);
-        }
-
-        .retry-btn:hover {
-            background: var(--c-orange);
-            color: #FFFFFF;
-        }
-
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(calc(-1 * var(--sidebar-width)));
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .content-wrapper {
-                width: 100%;
-                margin-left: 0;
-            }
-            .sidebar-toggle-btn {
-                display: grid;
-            }
-            .refresh-btn {
-                right: 60px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .topbar {
-                padding: 0 1rem;
-            }
-            .main-content {
-                padding: 1.1rem;
-            }
-            .page-heading {
-                font-size: 1.85rem;
-            }
-            .topbar-pill {
-                display: none;
-            }
-        }
-    </style>
+:root {
+    --sidebar-width: 268px;
+    --topbar-height: 74px;
+    --comic-border: 3.5px solid #111319;
+    --comic-shadow: 5px 5px 0px #111319;
+    --comic-shadow-sm: 3px 3px 0px #111319;
+    --comic-shadow-lg: 8px 8px 0px #111319;
+
+    --bg-cream: #FFFDF5;
+    --bg-panel: #FFFFFF;
+    --ink-black: #111319;
+    --ink-muted: #4A5568;
+
+    --c-blue: #3B82F6;
+    --c-blue-soft: #DBEAFE;
+    --c-green: #10B981;
+    --c-green-soft: #D1FAE5;
+    --c-yellow: #FBBF24;
+    --c-yellow-soft: #FEF3C7;
+    --c-cyan: #06B6D4;
+    --c-cyan-soft: #CFFAFE;
+    --c-red: #EF4444;
+    --c-red-soft: #FEE2E2;
+    --c-purple: #8B5CF6;
+    --c-purple-soft: #EDE9FE;
+    --c-orange: #F97316;
+    --c-orange-soft: #FFEDD5;
+    --c-slate: #64748B;
+    --c-slate-soft: #F1F5F9;
+
+    --font-display: 'Bangers', cursive, sans-serif;
+    --font-comic: 'Comic Neue', 'Plus Jakarta Sans', sans-serif;
+    --font-ui: 'Plus Jakarta Sans', sans-serif;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-ui);
+    background-color: var(--bg-cream);
+    background-image: radial-gradient(#111319 1.1px, transparent 1.1px);
+    background-size: 18px 18px;
+    color: var(--ink-black);
+    font-size: 0.94rem;
+    line-height: 1.4;
+    overflow-x: hidden;
+}
+
+.comic-title {
+    font-family: var(--font-display);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--c-yellow);
+    border-right: var(--comic-border);
+    z-index: 1030;
+    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0px 0px rgba(17, 19, 25, 0.12);
+}
+
+.sidebar-brand {
+    padding: 1.15rem 1.2rem;
+    background: var(--c-blue);
+    color: #FFFFFF;
+    border-bottom: var(--comic-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.brand-badge {
+    width: 40px;
+    height: 40px;
+    background: var(--c-yellow);
+    color: var(--ink-black);
+    border: 3px solid var(--ink-black);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1.3rem;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    transform: rotate(-4deg);
+}
+
+.brand-text {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 0px var(--ink-black);
+    line-height: 1;
+}
+
+.brand-sub {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    background: var(--ink-black);
+    color: var(--c-yellow);
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-top: 4px;
+    width: fit-content;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0.85rem 0.8rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.48rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.68rem;
+    padding: 0.66rem 0.88rem;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    font-weight: 800;
+    font-size: 0.88rem;
+    border: 3px solid var(--ink-black);
+    border-radius: 11px;
+    box-shadow: var(--comic-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.nav-item .nav-link:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--ink-black);
+    background: var(--c-cyan-soft);
+}
+
+.nav-item .nav-link.active {
+    background: var(--c-orange);
+    color: #FFFFFF;
+}
+
+.nav-item.logout {
+    margin-top: auto;
+    padding-top: 0.65rem;
+    border-top: 3px dashed var(--ink-black);
+}
+
+.nav-item.logout .nav-link {
+    background: var(--c-red-soft);
+    color: #991B1B;
+}
+
+.nav-item.logout .nav-link:hover {
+    background: var(--c-red);
+    color: #FFFFFF;
+}
+
+.content-wrapper {
+    width: calc(100% - var(--sidebar-width));
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.24s ease, width 0.24s ease;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    height: var(--topbar-height);
+    background-color: var(--bg-panel);
+    border-bottom: var(--comic-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1010;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-toggle-btn {
+    background: var(--c-yellow);
+    border: 3px solid var(--ink-black);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--ink-black);
+    display: none;
+    place-items: center;
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.sidebar-toggle-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px var(--ink-black);
+}
+
+.main-content {
+    padding: 1.5rem;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-bottom: 1.2rem;
+}
+
+.page-heading {
+    margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.05;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.caption-tag {
+    background: var(--c-yellow);
+    border: 2.5px solid var(--ink-black);
+    box-shadow: 2.5px 2.5px 0px var(--ink-black);
+    padding: 0.2rem 0.65rem;
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.comic-panel {
+    background: var(--bg-panel);
+    border: var(--comic-border);
+    border-radius: 15px;
+    box-shadow: var(--comic-shadow);
+    padding: 1.2rem;
+    margin-bottom: 1.4rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    margin-bottom: 1.4rem;
+}
+
+.stat-card {
+    background-color: var(--bg-panel);
+    border: var(--comic-border);
+    border-radius: 14px;
+    box-shadow: var(--comic-shadow);
+    overflow: hidden;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.stat-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px var(--ink-black);
+}
+
+.card-top-strip {
+    height: 9px;
+    border-bottom: 3px solid var(--ink-black);
+}
+
+.stat-card .card-body {
+    padding: 1rem 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.stat-card .card-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.35rem 0;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 2px solid var(--ink-black);
+}
+
+.stat-card .card-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--ink-black);
+    line-height: 1.15;
+}
+
+.card-icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    border: 3px solid var(--ink-black);
+    box-shadow: 2.5px 2.5px 0px var(--ink-black);
+    display: grid;
+    place-items: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.theme-success .card-top-strip, .theme-success .card-icon-box { background: var(--c-green); color: #fff; }
+.theme-success .card-title { background: var(--c-green-soft); color: #065F46; }
+
+.theme-secondary .card-top-strip, .theme-secondary .card-icon-box { background: var(--c-slate); color: #fff; }
+.theme-secondary .card-title { background: var(--c-slate-soft); color: #1E293B; }
+
+.theme-primary .card-top-strip, .theme-primary .card-icon-box { background: var(--c-blue); color: #fff; }
+.theme-primary .card-title { background: var(--c-blue-soft); color: #1E3A8A; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px dashed var(--ink-black);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.form-inline-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.comic-input, .search-input, .action-input, .action-select, .comic-textarea {
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.45rem 0.7rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.86rem;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+    outline: none;
+}
+
+.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus, .comic-textarea:focus {
+    background: #FEFCE8;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.4rem 0.7rem;
+    background: var(--bg-panel);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--ink-black);
+    min-width: 190px;
+}
+
+.action-btn, .save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background-color: var(--c-blue);
+    color: #FFFFFF;
+    border: 2.5px solid var(--ink-black);
+    padding: 0.42rem 0.72rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.8rem;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    white-space: nowrap;
+}
+
+.action-btn:hover, .save-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3.5px 3.5px 0px var(--ink-black);
+}
+
+.action-btn:active, .save-btn:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1px 1px 0px var(--ink-black);
+}
+
+.action-btn.delete-btn { background-color: var(--c-red); color: #fff; }
+.action-btn.verify-btn { background-color: var(--c-cyan); color: var(--ink-black); }
+.action-btn.unverify-btn { background-color: var(--c-yellow); color: var(--ink-black); }
+.action-btn.edit-btn { background-color: var(--c-green); color: #fff; }
+.save-btn { background-color: var(--c-green); color: #fff; padding: 0.62rem 1.2rem; font-size: 0.9rem; }
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-panel);
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.data-table, .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.86rem;
+}
+
+.data-table th, .data-table td,
+.users-table th, .users-table td {
+    padding: 0.52rem 0.68rem;
+    border-bottom: 1.5px solid #E2E8F0;
+    vertical-align: middle;
+}
+
+.data-table th, .users-table th {
+    background: var(--ink-black);
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.data-table tbody tr:nth-child(even),
+.users-table tbody tr:nth-child(even) {
+    background: #FFFDF7;
+}
+
+.data-table tbody tr:hover,
+.users-table tbody tr:hover {
+    background: var(--c-yellow-soft);
+}
+
+.data-table tbody tr:last-child td,
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-cell-main {
+    font-weight: 800;
+    color: var(--ink-black);
+    line-height: 1.15;
+}
+
+.user-cell-sub {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+}
+
+.otp-compact-inline {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.otp-mini-code {
+    font-family: monospace;
+    font-weight: 800;
+    background: var(--c-green-soft);
+    color: #065F46;
+    border: 1.5px solid var(--ink-black);
+    padding: 1px 5px;
+    border-radius: 5px;
+}
+
+.otp-mini-del {
+    background: var(--c-red-soft);
+    color: #991B1B;
+    border: 1.5px solid var(--ink-black);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.otp-mini-del:hover {
+    background: var(--c-red);
+    color: #fff;
+}
+
+.row-actions-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    white-space: nowrap;
+}
+
+.row-actions-compact .action-btn {
+    padding: 0.26rem 0.48rem;
+    font-size: 0.74rem;
+    margin-right: 0;
+}
+
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+}
+
+.action-select {
+    padding: 0.28rem 0.42rem;
+    font-size: 0.78rem;
+}
+
+.action-input {
+    max-width: 120px;
+    padding: 0.28rem 0.48rem;
+    font-size: 0.78rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.16rem 0.48rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border-radius: 999px;
+    border: 2px solid var(--ink-black);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-success { background-color: var(--c-green-soft); color: #065F46; }
+.status-pending { background-color: var(--c-yellow-soft); color: #78350F; }
+.status-failed, .status-cancel, .status-expired { background-color: var(--c-red-soft); color: #991B1B; }
+
+/* Notification Composer Grid */
+.notif-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.form-group {
+    margin-bottom: 0.85rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.form-group textarea {
+    min-height: 135px;
+    resize: vertical;
+}
+
+.mode-pills {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.mode-pill-btn {
+    flex: 1;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    border: 2.5px solid var(--ink-black);
+    background: var(--bg-cream);
+    color: var(--ink-black);
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.mode-pill-btn.active {
+    background: var(--c-yellow);
+}
+
+.recipient-box {
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-cream);
+    padding: 0.8rem;
+    max-height: 290px;
+    overflow-y: auto;
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.recipient-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 2px solid var(--ink-black);
+    margin-bottom: 0.45rem;
+    cursor: pointer;
+}
+
+.recipient-item:last-child {
+    margin-bottom: 0;
+}
+
+.recipient-item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--ink-black);
+    cursor: pointer;
+}
+
+.rekap-box {
+    background-color: var(--bg-cream);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+    border: 3px solid var(--ink-black);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 19, 25, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1029;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    z-index: 1050;
+    background: var(--bg-panel);
+    border: 4px solid var(--ink-black);
+    border-radius: 16px;
+    width: 94%;
+    max-width: 880px;
+    box-shadow: var(--comic-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal.active, .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal.active {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--c-yellow);
+    border-bottom: 3.5px solid var(--ink-black);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.modal-close-btn {
+    background: var(--c-red);
+    color: #FFFFFF;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    display: grid;
+    place-items: center;
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    max-height: 78vh;
+}
+
+.modal-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.15rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 3px dashed var(--ink-black);
+}
+
+.tab-btn {
+    background: var(--bg-cream);
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.tab-btn.active {
+    background: var(--ink-black);
+    color: var(--c-yellow);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 165px 1fr;
+    gap: 0.55rem 1.1rem;
+    align-items: start;
+}
+
+.detail-grid dt {
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.detail-grid dd {
+    margin: 0;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.otp-code {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: var(--bg-panel);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 2.5px dashed var(--ink-black);
+}
+
+.otp-history-item {
+    padding: 0.85rem 1rem;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 11px;
+    margin-bottom: 0.75rem;
+    background: var(--bg-cream);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.otp-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.otp-code-display {
+    font-family: monospace;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ink-black);
+}
+
+#toast-container {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toast-message {
+    background-color: var(--ink-black);
+    color: #FFFFFF;
+    padding: 0.75rem 1.15rem;
+    border: 3px solid var(--ink-black);
+    border-radius: 11px;
+    box-shadow: var(--comic-shadow-sm);
+    font-weight: 800;
+    font-size: 0.86rem;
+    opacity: 0;
+    transform: translateY(-14px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.spinner {
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 3px solid #E2E8F0;
+    border-top-color: var(--ink-black);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spinner-border 0.75s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 992px) {
+    .sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); }
+    .sidebar.active { transform: translateX(0); }
+    .content-wrapper { width: 100%; margin-left: 0; }
+    .sidebar-toggle-btn { display: grid; }
+    .notif-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .main-content, .topbar { padding: 0.9rem; }
+    .page-heading { font-size: 1.8rem; }
+    .detail-grid { grid-template-columns: 1fr; gap: 0.35rem; }
+    .card-header { flex-direction: column; align-items: stretch; }
+    .search-bar input { min-width: 0; width: 100%; }
+}
+</style>
 </head>
 <body>
-
+<div id="toast-container"></div>
 <div class="modal-overlay" id="modalOverlay"></div>
 <div class="page-wrapper">
     <nav class="sidebar" id="sidebar">
@@ -937,7 +958,7 @@
             <div class="brand-lockup">
                 <div class="brand-badge"><i class="bi bi-lightning-charge-fill"></i></div>
                 <div>
-                    <div class="brand-text">FelixTopUp</div>
+                    <div class="brand-text">Xs-Pedia</div>
                     <span class="brand-sub">Comic Admin HQ</span>
                 </div>
             </div>
@@ -947,7 +968,7 @@
             <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="bi bi-people-fill"></i> Global User</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/deposit"><i class="bi bi-wallet2"></i> Global Deposit</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/order"><i class="bi bi-cart-check-fill"></i> Global Order</a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clipboard-data-fill"></i> Rekap Transaksi</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/notif-member"><i class="bi bi-megaphone-fill"></i> Notif Member</a></li>
             <li class="nav-item logout"><a class="nav-link" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>
     </nav>
@@ -956,798 +977,111 @@
         <header class="topbar">
             <div class="topbar-left">
                 <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Menu"><i class="bi bi-list"></i></button>
-                <span class="comic-title" style="font-size: 1.35rem;">Admin Control Panel</span>
-                <span class="topbar-pill" id="lastSyncPill">
-                    <span class="status-dot"></span>
-                    <span id="lastSyncText">Auto-Sync 60s</span>
-                </span>
+                <span class="comic-title" style="font-size: 1.3rem;">Dashboard Xs-Pedia</span>
             </div>
-            <div class="topbar-actions">
-                <button class="comic-btn comic-btn-primary" id="refreshAllBtn">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh All
-                </button>
-            </div>
+            <span class="caption-tag"><i class="bi bi-bell-fill"></i> Xs-Pedia Panel</span>
         </header>
 
         <main class="main-content">
             <div class="page-header">
-                <div>
-                    <h1 class="page-heading comic-title">
-                        Dashboard Overview
-                        <span class="caption-tag"><i class="bi bi-stars"></i> Comic Edition</span>
-                    </h1>
-                    <p class="page-subtitle">Ringkasan cepat saldo, performa transaksi, dan inspeksi data user tanpa bikin mata lelah.</p>
-                </div>
+    <h1 class="page-heading comic-title">
+        Dashboard Admin
+        <span class="caption-tag"><i class="bi bi-lightning-charge-fill"></i> Xs-Pedia HQ</span>
+    </h1>
+    <a href="/admin/notif-member" class="action-btn" style="background: var(--c-yellow); color: var(--ink-black);">
+        <i class="bi bi-megaphone-fill"></i> Kirim Notif Member
+    </a>
+</div>
+
+<section class="dashboard-grid">
+    <article class="stat-card theme-primary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Total Pengguna</div>
+                <div class="card-value" id="statTotalUsers">0</div>
             </div>
+            <div class="card-icon-box"><i class="bi bi-people-fill"></i></div>
+        </div>
+    </article>
 
-            <div id="alertContainer"></div>
+    <article class="stat-card theme-success">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Deposit Sukses</div>
+                <div class="card-value" id="statTotalDeposit">Rp 0</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-wallet2"></i></div>
+        </div>
+    </article>
 
-            <!-- Panel 1: Saldo & Keuangan Utama -->
-            <section class="comic-panel">
-                <div class="panel-header">
-                    <h2 class="panel-title comic-title"><i class="bi bi-safe2-fill"></i> Saldo & Performa Keuangan</h2>
-                    <span class="panel-badge">Prioritas Utama</span>
-                </div>
-                <div class="hero-grid">
-                    <article class="stat-card hero-card theme-blue" id="saldoProviderCard">
-                        <div class="card-top-strip"></div>
-                        <button class="refresh-btn" id="refreshProviderBtn" title="Refresh Saldo Provider">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title"><i class="bi bi-cloud-check-fill"></i> Saldo Provider</div>
-                                <div class="card-value" id="saldoProvider">Loading...</div>
-                                <div class="card-hint"><i class="bi bi-info-circle"></i> Atlantic API Proxy (Cache 1m)</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-cloud-arrow-down-fill"></i></div>
-                        </div>
-                    </article>
+    <article class="stat-card theme-secondary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Omset Order Sukses</div>
+                <div class="card-value" id="statTotalOrder">Rp 0</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-cart-check-fill"></i></div>
+        </div>
+    </article>
+</section>
 
-                    <article class="stat-card hero-card clickable theme-green" id="totalSaldoUserCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title"><i class="bi bi-wallet2"></i> Total Saldo User</div>
-                                <div class="card-value" id="totalSaldoUser">...</div>
-                                <div class="card-hint"><i class="bi bi-cursor-fill"></i> Klik untuk lihat user bersaldo</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-wallet-fill"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card hero-card theme-cyan">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title"><i class="bi bi-cash-coin"></i> Total Deposit Sukses</div>
-                                <div class="card-value" id="totalDepositValue">...</div>
-                                <div class="card-hint"><i class="bi bi-check-circle-fill"></i> Akumulasi deposit status sukses</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-cash-stack"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card hero-card theme-purple">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title"><i class="bi bi-graph-up-arrow"></i> Total Order Sukses</div>
-                                <div class="card-value" id="totalOrderValue">...</div>
-                                <div class="card-hint"><i class="bi bi-bag-check-fill"></i> Akumulasi order status sukses</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-trophy-fill"></i></div>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Panel 2: Statistik Pengguna, Role & Volume Transaksi -->
-            <section class="comic-panel">
-                <div class="panel-header">
-                    <h2 class="panel-title comic-title"><i class="bi bi-people-fill"></i> Statistik User & Volume Transaksi</h2>
-                    <span class="panel-badge">Klik Kartu Untuk Detail</span>
-                </div>
-                <div class="stats-grid">
-                    <article class="stat-card clickable theme-yellow" id="totalCoinUserCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Total Coin User</div>
-                                <div class="card-value" id="totalCoinUser">...</div>
-                                <div class="card-hint">Klik detail koin</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-coin"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-blue" id="totalUsersCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Total User</div>
-                                <div class="card-value" id="totalUsers">...</div>
-                                <div class="card-hint">Klik semua user</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-people-fill"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-green" id="verifiedUsersCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">User Terverifikasi</div>
-                                <div class="card-value" id="verifiedUsers">...</div>
-                                <div class="card-hint">Klik akun verified</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-person-check-fill"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-orange" id="unverifiedUsersCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Belum Verifikasi</div>
-                                <div class="card-value" id="unverifiedUsers">...</div>
-                                <div class="card-hint">Klik belum verified</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-person-exclamation"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-slate" id="roleUserCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Role: User</div>
-                                <div class="card-value" id="roleUser">...</div>
-                                <div class="card-hint">Klik daftar user</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-person"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-cyan" id="roleResellerCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Role: Reseller</div>
-                                <div class="card-value" id="roleReseller">...</div>
-                                <div class="card-hint">Klik daftar reseller</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-person-badge-fill"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card clickable theme-red" id="roleAdminCard">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Role: Admin</div>
-                                <div class="card-value" id="roleAdmin">...</div>
-                                <div class="card-hint">Klik daftar admin</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-shield-lock-fill"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card theme-purple">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Jml. Semua Deposit</div>
-                                <div class="card-value" id="totalDepositCount">...</div>
-                                <div class="card-hint">Total riwayat deposit</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-list-ol"></i></div>
-                        </div>
-                    </article>
-
-                    <article class="stat-card theme-yellow">
-                        <div class="card-top-strip"></div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="card-title">Jml. Semua Order</div>
-                                <div class="card-value" id="totalOrderCount">...</div>
-                                <div class="card-hint">Total riwayat order</div>
-                            </div>
-                            <div class="card-icon-box"><i class="bi bi-bar-chart-steps"></i></div>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Panel 3: Admin Quick Detail Inspector (Langsung terbaca tanpa ribet buka-tutup modal) -->
-            <section class="comic-panel" id="quickInspectorSection">
-                <div class="panel-header">
-                    <h2 class="panel-title comic-title"><i class="bi bi-binoculars-fill"></i> Admin Quick Detail Inspector</h2>
-                    <span class="panel-badge" id="inspectorCountBadge">0 User Ditampilkan</span>
-                </div>
-
-                <div class="inspector-toolbar">
-                    <div class="filter-group" id="quickFilterGroup">
-                        <button type="button" class="filter-chip active" data-filter="all">Semua User</button>
-                        <button type="button" class="filter-chip" data-filter="hasSaldo">Punya Saldo</button>
-                        <button type="button" class="filter-chip" data-filter="hasCoin">Punya Coin</button>
-                        <button type="button" class="filter-chip" data-filter="verified">Verified</button>
-                        <button type="button" class="filter-chip" data-filter="unverified">Belum Verified</button>
-                        <button type="button" class="filter-chip" data-filter="reseller">Reseller</button>
-                        <button type="button" class="filter-chip" data-filter="admin">Admin</button>
-                    </div>
-
-                    <div class="search-box-wrap">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="quickSearchInput" class="comic-input" placeholder="Cari nama, username, atau role...">
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="comic-table" id="quickUserTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>User</th>
-                                <th>Role & Status</th>
-                                <th>Saldo</th>
-                                <th>Coin</th>
-                                <th>Tx (Dep / Ord)</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="quickUserTableBody">
-                            <tr>
-                                <td colspan="7" style="text-align:center; padding: 2rem;">
-                                    <span class="loading-spinner"></span> Memuat data detail user...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+<div class="comic-panel">
+    <div class="card-header">
+        <h3 class="comic-title">Akses Cepat Admin</h3>
+        <span class="caption-tag">Siap Digunakan</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:0.65rem;">
+        <a href="/admin/users" class="action-btn"><i class="bi bi-people-fill"></i> Kelola Global User</a>
+        <a href="/admin/deposit" class="action-btn" style="background:var(--c-green);"><i class="bi bi-wallet2"></i> Kelola Global Deposit</a>
+        <a href="/admin/order" class="action-btn" style="background:var(--c-purple);"><i class="bi bi-cart-check-fill"></i> Kelola Global Order</a>
+        <a href="/admin/notif-member" class="action-btn" style="background:var(--c-orange);"><i class="bi bi-megaphone-fill"></i> Kirim Notifikasi Member</a>
+    </div>
+</div>
         </main>
     </div>
 </div>
 
-<div class="modal" id="dataModal" role="dialog" aria-modal="true" aria-labelledby="dataModalLabel">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title comic-title" id="dataModalLabel">Detail Data</h5>
-            <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="modal-body" id="dataModalBody"></div>
-    </div>
-</div>
-
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    let allUsersData = [];
-    let currentFilter = 'all';
-    let currentSearch = '';
-    let providerBalanceCache = null;
-    let providerBalanceTimestamp = null;
-    const CACHE_DURATION = 60000;
-
-    const modal = document.getElementById('dataModal');
+document.addEventListener('DOMContentLoaded', async () => {
     const modalOverlay = document.getElementById('modalOverlay');
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-    const refreshProviderBtn = document.getElementById('refreshProviderBtn');
-    const refreshAllBtn = document.getElementById('refreshAllBtn');
-    const quickSearchInput = document.getElementById('quickSearchInput');
-    const quickFilterGroup = document.getElementById('quickFilterGroup');
-
-    // --- Utility Functions ---
-    const formatRupiah = (num) => {
-        if (num === null || num === undefined || isNaN(num)) return 'Rp 0';
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-    };
-
-    const formatNumber = (num) => {
-        if (num === null || num === undefined || isNaN(num)) return '0';
-        return new Intl.NumberFormat('id-ID').format(num);
-    };
-
-    const escapeHtml = (str) => {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    };
-
-    const isUserVerified = (u) => u.isVerified === true || u.isVerified === 'true';
-
-    const displayAlert = (message, type = 'danger') => {
-        const alertContainer = document.getElementById('alertContainer');
-        const iconMap = {
-            success: 'bi-check-circle-fill',
-            danger: 'bi-exclamation-triangle-fill',
-            warning: 'bi-exclamation-circle-fill'
-        };
-        const icon = iconMap[type] || 'bi-info-circle-fill';
-        alertContainer.innerHTML = `
-            <div class="comic-alert ${type}">
-                <div><i class="bi ${icon}"></i> ${escapeHtml(message)}</div>
-                <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;font-weight:800;cursor:pointer;font-size:1.1rem;">&times;</button>
-            </div>
-        `;
-        setTimeout(() => {
-            if (alertContainer.firstElementChild) {
-                alertContainer.innerHTML = '';
-            }
-        }, 5000);
-    };
-
-    const updateSyncTime = () => {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const el = document.getElementById('lastSyncText');
-        if (el) el.textContent = `Sync ${timeStr}`;
-    };
-
-    const updateCardDisplay = (isError = false, errorMessage = 'Error') => {
-        const cardValues = document.querySelectorAll('.card-value');
-        cardValues.forEach(el => {
-            if (isError) {
-                el.innerHTML = `<span style="font-size: 0.95rem; color: #991B1B; background: var(--c-red-soft); padding: 2px 8px; border-radius: 6px; border: 2px solid var(--ink-black);">${escapeHtml(errorMessage)}</span>`;
-            } else {
-                el.innerHTML = '<span class="loading-spinner"></span>';
-            }
-        });
-    };
-
-    // --- Provider Balance Fetch ---
-    const fetchProviderBalance = async (forceRefresh = false) => {
-        if (!forceRefresh && providerBalanceCache !== null && providerBalanceTimestamp) {
-            if (Date.now() - providerBalanceTimestamp < CACHE_DURATION) {
-                return providerBalanceCache;
-            }
-        }
-
-        document.getElementById('saldoProvider').innerHTML = '<span class="loading-spinner"></span> <span style="font-size:0.95rem;">Loading...</span>';
-
-        const response = await fetch('/admin/atlantic/profile');
-        if (!response.ok) {
-            const responseText = await response.text();
-            if (responseText.includes('Just a moment...') || responseText.includes('cloudflare')) {
-                throw new Error('Atlantic API sedang dalam proteksi Cloudflare. Coba lagi nanti.');
-            }
-            throw new Error(`HTTP ${response.status}: Gagal mengambil saldo provider`);
-        }
-
-        const result = await response.json();
-        if (result.success && result.profile && result.profile.saldo !== undefined) {
-            const balance = parseFloat(result.profile.saldo);
-            if (!isNaN(balance)) {
-                providerBalanceCache = balance;
-                providerBalanceTimestamp = Date.now();
-                return balance;
-            }
-            throw new Error('Format saldo tidak valid: ' + result.profile.saldo);
-        }
-        throw new Error('Format respons tidak valid dari Atlantic API');
-    };
-
-    window.retryProviderBalance = () => updateProviderBalance(true);
-
-    const updateProviderBalance = async (forceRefresh = false) => {
-        try {
-            const providerBalance = await fetchProviderBalance(forceRefresh);
-            document.getElementById('saldoProvider').textContent = formatRupiah(providerBalance);
-            return true;
-        } catch (error) {
-            console.error('Error updating provider balance:', error);
-            if (providerBalanceCache !== null) {
-                document.getElementById('saldoProvider').textContent = formatRupiah(providerBalanceCache);
-                displayAlert(`Menampilkan cache saldo provider: ${error.message}`, 'warning');
-                return true;
-            }
-            document.getElementById('saldoProvider').innerHTML = `
-                <div>
-                    <span style="font-size: 0.95rem; color: #991B1B; font-weight: 800;">Gagal Load</span><br>
-                    <button type="button" class="retry-btn" onclick="retryProviderBalance()"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
-                </div>
-            `;
-            displayAlert(`Gagal memuat saldo provider: ${error.message}`, 'danger');
-            return false;
-        }
-    };
-
-    // --- Users Data Fetch & Render ---
-    const fetchUsersData = async () => {
-        const response = await fetch('/data/users');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: Gagal mengambil data user`);
-        }
-        const usersData = await response.json();
-        return Array.isArray(usersData) ? usersData : [];
-    };
-
-    const getRoleBadge = (role) => {
-        const r = (role || 'user').toLowerCase();
-        if (r === 'admin') return `<span class="badge-pill badge-admin"><i class="bi bi-shield-fill"></i> Admin</span>`;
-        if (r === 'reseller') return `<span class="badge-pill badge-reseller"><i class="bi bi-star-fill"></i> Reseller</span>`;
-        return `<span class="badge-pill badge-user"><i class="bi bi-person-fill"></i> ${escapeHtml(role || 'user')}</span>`;
-    };
-
-    const getVerifiedBadge = (verified) => {
-        return verified
-            ? `<span class="badge-pill badge-verified"><i class="bi bi-check-circle-fill"></i> Verified</span>`
-            : `<span class="badge-pill badge-unverified"><i class="bi bi-x-circle-fill"></i> Unverified</span>`;
-    };
-
-    const renderQuickInspectorTable = () => {
-        const tbody = document.getElementById('quickUserTableBody');
-        const badge = document.getElementById('inspectorCountBadge');
-
-        const filtered = allUsersData.filter(u => {
-            if (currentFilter === 'hasSaldo' && !((u.saldo || 0) > 0)) return false;
-            if (currentFilter === 'hasCoin' && !((u.coin || 0) > 0)) return false;
-            if (currentFilter === 'verified' && !isUserVerified(u)) return false;
-            if (currentFilter === 'unverified' && isUserVerified(u)) return false;
-            if (currentFilter === 'reseller' && (u.role || '').toLowerCase() !== 'reseller') return false;
-            if (currentFilter === 'admin' && (u.role || '').toLowerCase() !== 'admin') return false;
-
-            if (currentSearch.trim() !== '') {
-                const q = currentSearch.trim().toLowerCase();
-                const name = (u.fullname || '').toLowerCase();
-                const uname = (u.username || '').toLowerCase();
-                const role = (u.role || '').toLowerCase();
-                if (!name.includes(q) && !uname.includes(q) && !role.includes(q)) return false;
-            }
-            return true;
-        });
-
-        badge.textContent = `${formatNumber(filtered.length)} / ${formatNumber(allUsersData.length)} User`;
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align:center; padding: 2rem; font-weight:700; color: var(--ink-muted);">
-                        <i class="bi bi-inbox" style="font-size:1.5rem; display:block; margin-bottom:0.35rem;"></i>
-                        Tidak ada data user yang cocok dengan filter/pencarian ini.
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        const previewRows = filtered.slice(0, 15);
-        tbody.innerHTML = previewRows.map((u, idx) => {
-            const depCount = Array.isArray(u.historyDeposit) ? u.historyDeposit.length : 0;
-            const ordCount = Array.isArray(u.historyOrder) ? u.historyOrder.length : 0;
-            const verified = isUserVerified(u);
-
-            return `
-                <tr>
-                    <td><strong>${idx + 1}</strong></td>
-                    <td>
-                        <div style="font-weight:800;">${escapeHtml(u.fullname || '-')}</div>
-                        <div style="font-size:0.8rem; color:var(--ink-muted);">@${escapeHtml(u.username || '-')}</div>
-                    </td>
-                    <td>
-                        <div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
-                            ${getRoleBadge(u.role)}
-                            ${getVerifiedBadge(verified)}
-                        </div>
-                    </td>
-                    <td><strong style="color:#065F46;">${formatRupiah(u.saldo || 0)}</strong></td>
-                    <td><strong>${formatNumber(u.coin || 0)}</strong></td>
-                    <td>
-                        <span style="font-size:0.82rem; font-weight:700;">
-                            Dep: ${formatNumber(depCount)} • Ord: ${formatNumber(ordCount)}
-                        </span>
-                    </td>
-                    <td>
-                        <button type="button" class="btn-detail-row" data-username="${escapeHtml(u.username || '')}">
-                            <i class="bi bi-eye-fill"></i> Detail
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('') + (filtered.length > 15 ? `
-            <tr>
-                <td colspan="7" style="text-align:center; background:#FEF9C3; font-weight:800; font-size:0.83rem;">
-                    Menampilkan 15 data teratas dari ${formatNumber(filtered.length)} user. Gunakan kolom cari atau klik kartu statistik untuk melihat seluruhnya.
-                </td>
-            </tr>
-        ` : '');
-
-        tbody.querySelectorAll('.btn-detail-row').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const uname = btn.getAttribute('data-username');
-                const found = allUsersData.find(item => (item.username || '') === uname);
-                if (found) openSingleUserDetailModal(found);
-            });
-        });
-    };
-
-    const openSingleUserDetailModal = (user) => {
-        const depList = Array.isArray(user.historyDeposit) ? user.historyDeposit : [];
-        const ordList = Array.isArray(user.historyOrder) ? user.historyOrder : [];
-        const depSuccess = depList.filter(d => d.status && d.status.toLowerCase() === 'success').reduce((s, d) => s + (d.get_balance || 0), 0);
-        const ordSuccess = ordList.filter(o => o.status && o.status.toLowerCase() === 'success').reduce((s, o) => s + (parseFloat(o.price) || 0), 0);
-
-        document.getElementById('dataModalLabel').textContent = `Detail User: ${user.fullname || user.username || 'User'}`;
-        document.getElementById('dataModalBody').innerHTML = `
-            <div class="detail-grid-cards">
-                <div class="mini-box">
-                    <div class="mini-box-label">Username</div>
-                    <div class="mini-box-val">@${escapeHtml(user.username || '-')}</div>
-                </div>
-                <div class="mini-box">
-                    <div class="mini-box-label">Role & Verifikasi</div>
-                    <div class="mini-box-val" style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:4px;">
-                        ${getRoleBadge(user.role)}
-                        ${getVerifiedBadge(isUserVerified(user))}
-                    </div>
-                </div>
-                <div class="mini-box">
-                    <div class="mini-box-label">Saldo Saat Ini</div>
-                    <div class="mini-box-val" style="color:#065F46;">${formatRupiah(user.saldo || 0)}</div>
-                </div>
-                <div class="mini-box">
-                    <div class="mini-box-label">Total Coin</div>
-                    <div class="mini-box-val">${formatNumber(user.coin || 0)}</div>
-                </div>
-                <div class="mini-box">
-                    <div class="mini-box-label">Deposit Sukses</div>
-                    <div class="mini-box-val">${formatRupiah(depSuccess)} <span style="font-size:0.78rem; color:var(--ink-muted);">(${depList.length} tx)</span></div>
-                </div>
-                <div class="mini-box">
-                    <div class="mini-box-label">Order Sukses</div>
-                    <div class="mini-box-val">${formatRupiah(ordSuccess)} <span style="font-size:0.78rem; color:var(--ink-muted);">(${ordList.length} tx)</span></div>
-                </div>
-            </div>
-            <p style="margin:0; font-size:0.84rem; color:var(--ink-muted); font-weight:700;">
-                <i class="bi bi-lightbulb-fill"></i> Tips Admin: Untuk kelola penuh akun, deposit, atau order, buka menu di sidebar kiri.
-            </p>
-        `;
-        modal.classList.add('active');
-        modalOverlay.classList.add('active');
-    };
-
-    const updateUsersData = async () => {
-        try {
-            const usersData = await fetchUsersData();
-            allUsersData = usersData;
-
-            const stats = allUsersData.reduce((acc, user) => {
-                acc.totalSaldoUser += user.saldo || 0;
-                acc.totalCoinUser += user.coin || 0;
-                if (isUserVerified(user)) acc.verifiedUsers++;
-
-                const roleKey = (user.role || 'user').toLowerCase();
-                acc.roles[roleKey] = (acc.roles[roleKey] || 0) + 1;
-
-                if (Array.isArray(user.historyDeposit)) {
-                    acc.totalDepositCount += user.historyDeposit.length;
-                    acc.totalDepositValue += user.historyDeposit
-                        .filter(d => d.status && d.status.toLowerCase() === 'success')
-                        .reduce((sum, d) => sum + (d.get_balance || 0), 0);
-                }
-
-                if (Array.isArray(user.historyOrder)) {
-                    acc.totalOrderCount += user.historyOrder.length;
-                    acc.totalOrderValue += user.historyOrder
-                        .filter(o => o.status && o.status.toLowerCase() === 'success')
-                        .reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
-                }
-                return acc;
-            }, {
-                totalSaldoUser: 0,
-                totalCoinUser: 0,
-                verifiedUsers: 0,
-                totalDepositValue: 0,
-                totalDepositCount: 0,
-                totalOrderValue: 0,
-                totalOrderCount: 0,
-                roles: { user: 0, reseller: 0, admin: 0 }
-            });
-
-            document.getElementById('totalSaldoUser').textContent = formatRupiah(stats.totalSaldoUser);
-            document.getElementById('totalCoinUser').textContent = formatNumber(stats.totalCoinUser);
-            document.getElementById('totalUsers').textContent = formatNumber(allUsersData.length);
-            document.getElementById('verifiedUsers').textContent = formatNumber(stats.verifiedUsers);
-            document.getElementById('unverifiedUsers').textContent = formatNumber(allUsersData.length - stats.verifiedUsers);
-            document.getElementById('roleUser').textContent = formatNumber(stats.roles.user);
-            document.getElementById('roleReseller').textContent = formatNumber(stats.roles.reseller);
-            document.getElementById('roleAdmin').textContent = formatNumber(stats.roles.admin);
-            document.getElementById('totalDepositValue').textContent = formatRupiah(stats.totalDepositValue);
-            document.getElementById('totalOrderValue').textContent = formatRupiah(stats.totalOrderValue);
-            document.getElementById('totalDepositCount').textContent = `${formatNumber(stats.totalDepositCount)} Tx`;
-            document.getElementById('totalOrderCount').textContent = `${formatNumber(stats.totalOrderCount)} Tx`;
-
-            renderQuickInspectorTable();
-            return true;
-        } catch (error) {
-            console.error('Error updating users data:', error);
-            updateCardDisplay(true, 'Gagal Load Data');
-            document.getElementById('quickUserTableBody').innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align:center; padding: 1.5rem; color:#991B1B; font-weight:800;">
-                        Gagal memuat data user: ${escapeHtml(error.message)}
-                    </td>
-                </tr>
-            `;
-            displayAlert(`Gagal memuat data user: ${error.message}`, 'danger');
-            return false;
-        }
-    };
-
-    const loadDashboard = async () => {
-        updateCardDisplay(false);
-        try {
-            const [providerSuccess, usersSuccess] = await Promise.all([
-                updateProviderBalance(),
-                updateUsersData()
-            ]);
-            updateSyncTime();
-            if (providerSuccess && usersSuccess) {
-                displayAlert('Dashboard berhasil diperbarui dengan data real-time', 'success');
-            }
-        } catch (error) {
-            console.error('Error loading dashboard:', error);
-            displayAlert(`Gagal memuat dashboard: ${error.message}`, 'danger');
-        }
-    };
-
-    const refreshAllData = async () => {
-        await loadDashboard();
-    };
-
-    // --- Sidebar & Modal Handlers ---
     const toggleSidebar = () => {
         sidebar.classList.toggle('active');
         modalOverlay.classList.toggle('active');
     };
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    sidebar.addEventListener('click', (event) => event.stopPropagation());
-
-    const closeModal = () => {
-        modal.classList.remove('active');
-        if (!sidebar.classList.contains('active')) {
-            modalOverlay.classList.remove('active');
-        }
-    };
-
+    sidebar.addEventListener('click', (e) => e.stopPropagation());
     modalOverlay.addEventListener('click', () => {
-        if (sidebar.classList.contains('active') && !modal.classList.contains('active')) {
-            toggleSidebar();
-        } else if (modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-    modalCloseBtn.addEventListener('click', closeModal);
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
+        if (sidebar.classList.contains('active')) toggleSidebar();
     });
 
-    refreshProviderBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        updateProviderBalance(true);
-    });
+    const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n || 0);
 
-    refreshAllBtn.addEventListener('click', () => refreshAllData());
-
-    // Quick Inspector Filters & Search
-    quickFilterGroup.querySelectorAll('.filter-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-            quickFilterGroup.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.getAttribute('data-filter');
-            renderQuickInspectorTable();
-        });
-    });
-
-    quickSearchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value;
-        renderQuickInspectorTable();
-    });
-
-    // Modal Table with Live Search inside Modal
-    const showModalWithData = (title, data, columns) => {
-        document.getElementById('dataModalLabel').textContent = title;
-        const body = document.getElementById('dataModalBody');
-
-        if (!data || data.length === 0) {
-            body.innerHTML = `<p style="text-align:center; color: var(--ink-muted); font-weight:700; padding: 2.5rem 0;">Tidak ada data untuk ditampilkan.</p>`;
-        } else {
-            body.innerHTML = `
-                <div class="modal-search-bar">
-                    <input type="text" id="modalFilterInput" class="comic-input" style="padding-left:0.9rem; max-width:100%;" placeholder="Filter cepat di daftar ${escapeHtml(title)}...">
-                </div>
-                <div class="table-responsive">
-                    <table class="comic-table" id="modalResultTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                ${columns.map(c => `<th>${escapeHtml(c.label)}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody id="modalResultTbody"></tbody>
-                    </table>
-                </div>
-            `;
-
-            const renderModalRows = (items) => {
-                const tbody = document.getElementById('modalResultTbody');
-                if (!items.length) {
-                    tbody.innerHTML = `<tr><td colspan="${columns.length + 1}" style="text-align:center; padding:1.25rem; font-weight:700;">Tidak ada hasil cocok.</td></tr>`;
-                    return;
-                }
-                tbody.innerHTML = items.map((item, idx) => `
-                    <tr>
-                        <td><strong>${idx + 1}</strong></td>
-                        ${columns.map(c => {
-                            const raw = item[c.key];
-                            const val = raw !== undefined && raw !== null ? raw : 0;
-                            const displayVal = c.formatter ? c.formatter(val) : escapeHtml(val);
-                            return `<td>${displayVal}</td>`;
-                        }).join('')}
-                    </tr>
-                `).join('');
-            };
-
-            renderModalRows(data);
-
-            const modalInput = document.getElementById('modalFilterInput');
-            modalInput.addEventListener('input', (e) => {
-                const q = e.target.value.trim().toLowerCase();
-                if (!q) return renderModalRows(data);
-                const matches = data.filter(item =>
-                    columns.some(c => String(item[c.key] ?? '').toLowerCase().includes(q))
-                );
-                renderModalRows(matches);
+    try {
+        const res = await fetch('/admin/data/users');
+        const users = await res.json();
+        if (Array.isArray(users)) {
+            document.getElementById('statTotalUsers').textContent = users.length;
+            let totalDepo = 0;
+            let totalOrder = 0;
+            users.forEach(u => {
+                (u.historyDeposit || []).forEach(d => {
+                    if (d.status === 'success') totalDepo += Number(d.get_balance || d.nominal || 0);
+                });
+                (u.historyOrder || []).forEach(o => {
+                    if (o.status === 'success') totalOrder += Number(o.price || 0);
+                });
             });
+            document.getElementById('statTotalDeposit').textContent = formatRupiah(totalDepo);
+            document.getElementById('statTotalOrder').textContent = formatRupiah(totalOrder);
         }
-
-        modal.classList.add('active');
-        modalOverlay.classList.add('active');
-    };
-
-    // --- Card Click Handlers ---
-    const commonCols = [
-        { key: 'fullname', label: 'Nama Lengkap' },
-        { key: 'username', label: 'Username' }
-    ];
-
-    document.getElementById('totalSaldoUserCard').addEventListener('click', () =>
-        showModalWithData('Pengguna dengan Saldo', allUsersData.filter(u => (u.saldo || 0) > 0), [...commonCols, { key: 'saldo', label: 'Saldo', formatter: formatRupiah }])
-    );
-    document.getElementById('totalCoinUserCard').addEventListener('click', () =>
-        showModalWithData('Pengguna dengan Coin', allUsersData.filter(u => (u.coin || 0) > 0), [...commonCols, { key: 'coin', label: 'Coin', formatter: formatNumber }])
-    );
-    document.getElementById('totalUsersCard').addEventListener('click', () =>
-        showModalWithData('Semua User Terdaftar', allUsersData, [...commonCols, { key: 'role', label: 'Role' }])
-    );
-    document.getElementById('verifiedUsersCard').addEventListener('click', () =>
-        showModalWithData('User Terverifikasi', allUsersData.filter(u => isUserVerified(u)), [...commonCols, { key: 'role', label: 'Role' }])
-    );
-    document.getElementById('unverifiedUsersCard').addEventListener('click', () =>
-        showModalWithData('User Belum Verifikasi', allUsersData.filter(u => !isUserVerified(u)), [...commonCols, { key: 'role', label: 'Role' }])
-    );
-    document.getElementById('roleUserCard').addEventListener('click', () =>
-        showModalWithData('User Role: "User"', allUsersData.filter(u => (u.role || '').toLowerCase() === 'user'), commonCols)
-    );
-    document.getElementById('roleResellerCard').addEventListener('click', () =>
-        showModalWithData('User Role: "Reseller"', allUsersData.filter(u => (u.role || '').toLowerCase() === 'reseller'), commonCols)
-    );
-    document.getElementById('roleAdminCard').addEventListener('click', () =>
-        showModalWithData('User Role: "Admin"', allUsersData.filter(u => (u.role || '').toLowerCase() === 'admin'), commonCols)
-    );
-
-    // Initial Load & Auto Refresh
-    loadDashboard();
-    setInterval(refreshAllData, 60000);
+    } catch (err) {
+        console.error('Gagal memuat statistik dashboard:', err);
+    }
 });
 </script>
 </body>

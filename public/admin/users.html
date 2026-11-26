@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Users - FelixTopUp Comic Admin</title>
+    <title>Global Users - Xs-Pedia Comic Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,7 +124,7 @@ a {
 
 .brand-text {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 1.75rem;
     letter-spacing: 1.5px;
     text-shadow: 2px 2px 0px var(--ink-black);
     line-height: 1;
@@ -147,23 +147,24 @@ a {
 
 .sidebar-nav {
     list-style: none;
-    padding: 0.9rem 0.8rem;
+    padding: 0.85rem 0.8rem;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.48rem;
     flex: 1;
+    overflow-y: auto;
 }
 
 .nav-item .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.7rem 0.9rem;
+    gap: 0.68rem;
+    padding: 0.66rem 0.88rem;
     background: var(--bg-panel);
     color: var(--ink-black);
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     border: 3px solid var(--ink-black);
     border-radius: 11px;
     box-shadow: var(--comic-shadow-sm);
@@ -183,7 +184,7 @@ a {
 
 .nav-item.logout {
     margin-top: auto;
-    padding-top: 0.7rem;
+    padding-top: 0.65rem;
     border-top: 3px dashed var(--ink-black);
 }
 
@@ -394,7 +395,7 @@ a {
     gap: 0.45rem;
 }
 
-.comic-input, .search-input, .action-input, .action-select {
+.comic-input, .search-input, .action-input, .action-select, .comic-textarea {
     border: 2.5px solid var(--ink-black);
     border-radius: 9px;
     padding: 0.45rem 0.7rem;
@@ -407,7 +408,7 @@ a {
     outline: none;
 }
 
-.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus {
+.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus, .comic-textarea:focus {
     background: #FEFCE8;
 }
 
@@ -437,7 +438,7 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
     background-color: var(--c-blue);
     color: #FFFFFF;
     border: 2.5px solid var(--ink-black);
@@ -466,9 +467,8 @@ a {
 .action-btn.verify-btn { background-color: var(--c-cyan); color: var(--ink-black); }
 .action-btn.unverify-btn { background-color: var(--c-yellow); color: var(--ink-black); }
 .action-btn.edit-btn { background-color: var(--c-green); color: #fff; }
-.save-btn { background-color: var(--c-green); color: #fff; padding: 0.6rem 1.15rem; font-size: 0.88rem; }
+.save-btn { background-color: var(--c-green); color: #fff; padding: 0.62rem 1.2rem; font-size: 0.9rem; }
 
-/* Compact High-Density Table */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -612,6 +612,116 @@ a {
 .status-pending { background-color: var(--c-yellow-soft); color: #78350F; }
 .status-failed, .status-cancel, .status-expired { background-color: var(--c-red-soft); color: #991B1B; }
 
+/* Notification Composer Grid */
+.notif-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.form-group {
+    margin-bottom: 0.85rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.form-group textarea {
+    min-height: 135px;
+    resize: vertical;
+}
+
+.mode-pills {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.mode-pill-btn {
+    flex: 1;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    border: 2.5px solid var(--ink-black);
+    background: var(--bg-cream);
+    color: var(--ink-black);
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.mode-pill-btn.active {
+    background: var(--c-yellow);
+}
+
+.recipient-box {
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-cream);
+    padding: 0.8rem;
+    max-height: 290px;
+    overflow-y: auto;
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.recipient-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 2px solid var(--ink-black);
+    margin-bottom: 0.45rem;
+    cursor: pointer;
+}
+
+.recipient-item:last-child {
+    margin-bottom: 0;
+}
+
+.recipient-item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--ink-black);
+    cursor: pointer;
+}
+
+.rekap-box {
+    background-color: var(--bg-cream);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+    border: 3px solid var(--ink-black);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -744,39 +854,6 @@ a {
     word-break: break-word;
 }
 
-.rekap-box {
-    background-color: var(--bg-cream);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    margin-top: 1rem;
-    border: 3px solid var(--ink-black);
-    box-shadow: 3px 3px 0px var(--ink-black);
-}
-
-.form-group {
-    margin-bottom: 0.8rem;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 800;
-    font-size: 0.82rem;
-    margin-bottom: 0.3rem;
-    text-transform: uppercase;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.9rem;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    background: var(--bg-panel);
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
 .otp-code {
     font-family: monospace;
     font-size: 1.2rem;
@@ -860,6 +937,7 @@ a {
     .sidebar.active { transform: translateX(0); }
     .content-wrapper { width: 100%; margin-left: 0; }
     .sidebar-toggle-btn { display: grid; }
+    .notif-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -880,7 +958,7 @@ a {
             <div class="brand-lockup">
                 <div class="brand-badge"><i class="bi bi-lightning-charge-fill"></i></div>
                 <div>
-                    <div class="brand-text">FelixTopUp</div>
+                    <div class="brand-text">Xs-Pedia</div>
                     <span class="brand-sub">Comic Admin HQ</span>
                 </div>
             </div>
@@ -890,7 +968,7 @@ a {
             <li class="nav-item"><a class="nav-link active" href="/admin/users"><i class="bi bi-people-fill"></i> Global User</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/deposit"><i class="bi bi-wallet2"></i> Global Deposit</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/order"><i class="bi bi-cart-check-fill"></i> Global Order</a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clipboard-data-fill"></i> Rekap Transaksi</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/notif-member"><i class="bi bi-megaphone-fill"></i> Notif Member</a></li>
             <li class="nav-item logout"><a class="nav-link" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>
     </nav>
@@ -901,51 +979,50 @@ a {
                 <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Menu"><i class="bi bi-list"></i></button>
                 <span class="comic-title" style="font-size: 1.3rem;">Manajemen Pengguna</span>
             </div>
-            <span class="caption-tag" id="totalUsersBadge">0 Pengguna</span>
+            <span class="caption-tag"><i class="bi bi-bell-fill"></i> Xs-Pedia Panel</span>
         </header>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-heading comic-title">
-                    Daftar Semua Pengguna
-                    <span class="caption-tag"><i class="bi bi-people-fill"></i> Compact View</span>
-                </h1>
-            </div>
+    <h1 class="page-heading comic-title">
+        Daftar Semua Pengguna
+        <span class="caption-tag"><i class="bi bi-people-fill"></i> Compact View</span>
+    </h1>
+</div>
 
-            <div class="comic-panel" style="padding: 1rem;">
-                <div class="card-header">
-                    <h3 class="comic-title">Data User Rapat & Cepat</h3>
-                    <div class="search-bar">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cari nama atau username...">
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 44px;">#</th>
-                                <th>Pengguna</th>
-                                <th>Saldo</th>
-                                <th>H2H</th>
-                                <th>OTP</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-                            <tr>
-                                <td colspan="6" style="text-align:center; padding: 2rem;">
-                                    <span class="spinner"></span> Memuat data...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="comic-panel" style="padding: 1rem;">
+    <div class="card-header">
+        <h3 class="comic-title">Data User Rapat & Cepat</h3>
+        <div class="search-bar">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Cari nama, username, atau gmail...">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th style="width: 44px;">#</th>
+                    <th>Pengguna</th>
+                    <th>Saldo</th>
+                    <th>H2H</th>
+                    <th>OTP</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr>
+                    <td colspan="6" style="text-align:center; padding: 2rem;">
+                        <span class="spinner"></span> Memuat data...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
         </main>
     </div>
 </div>
-
 <div class="modal" id="userDetailsModal">
     <div class="modal-header">
         <h5 class="modal-title comic-title" id="userDetailsModalLabel">Detail Pengguna</h5>
@@ -953,7 +1030,6 @@ a {
     </div>
     <div class="modal-body" id="userDetailsModalBody"></div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     let allUsersData = [];
@@ -1021,7 +1097,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) return result.data;
             throw new Error(result.message);
         } catch (error) {
-            console.error('Error checking OTP status:', error);
             return null;
         }
     };
@@ -1033,7 +1108,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) return result.data;
             throw new Error(result.message);
         } catch (error) {
-            console.error('Error getting OTP history:', error);
             return [];
         }
     };
@@ -1059,7 +1133,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshOtpStatus = async (username) => {
         const otpCell = document.getElementById(`otp-status-${username}`);
         if (!otpCell) return;
-
         try {
             const response = await fetch(`/admin/user/otp-status?username=${encodeURIComponent(username)}`);
             const result = await response.json();
@@ -1068,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (otpData.hasOtp) {
                     otpCell.innerHTML = `
                         <div class="otp-compact-inline">
-                            <span class="otp-mini-code" title="Aktivitas: ${escapeHtml(otpData.aktifitas || '-')} | Sisa: ${escapeHtml(otpData.waktuSisaMenit ?? '-')}m">${escapeHtml(otpData.otpCode)}</span>
+                            <span class="otp-mini-code">${escapeHtml(otpData.otpCode)}</span>
                             <span style="font-size:0.72rem; color:var(--ink-muted);">${escapeHtml(otpData.waktuSisaMenit ?? 0)}m</span>
                             <button type="button" class="otp-mini-del" onclick="clearActiveOtp('${escapeHtml(username)}')" title="Hapus OTP"><i class="bi bi-x"></i></button>
                         </div>
@@ -1086,8 +1159,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTable = (users) => {
         const tableBody = document.getElementById('usersTableBody');
-        document.getElementById('totalUsersBadge').textContent = `${users.length} Pengguna`;
-
         if (!users || users.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; font-weight:700;">Pengguna tidak ditemukan.</td></tr>`;
             return;
@@ -1100,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><strong>${index + 1}</strong></td>
                     <td>
                         <div class="user-cell-main">${escapeHtml(user.fullname || '-')}</div>
-                        <div class="user-cell-sub">@${escapeHtml(user.username || '-')}</div>
+                        <div class="user-cell-sub">@${escapeHtml(user.username || '-')} • ${escapeHtml(user.email || '-')}</div>
                     </td>
                     <td><strong>${formatRupiah(user.saldo)}</strong></td>
                     <td>
@@ -1113,9 +1184,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td>
                         <div class="row-actions-compact">
-                            <button type="button" class="action-btn view-details-btn" data-user-index="${realIndex}" title="Detail"><i class="bi bi-eye-fill"></i> Detail</button>
-                            <button type="button" class="action-btn edit-btn edit-user-btn" data-user-index="${realIndex}" title="Edit"><i class="bi bi-pencil-fill"></i></button>
-                            <button type="button" class="action-btn delete-btn delete-user-btn" data-username="${escapeHtml(user.username)}" title="Hapus"><i class="bi bi-trash-fill"></i></button>
+                            <button type="button" class="action-btn view-details-btn" data-user-index="${realIndex}"><i class="bi bi-eye-fill"></i> Detail</button>
+                            <button type="button" class="action-btn edit-btn edit-user-btn" data-user-index="${realIndex}"><i class="bi bi-pencil-fill"></i></button>
+                            <button type="button" class="action-btn delete-btn delete-user-btn" data-username="${escapeHtml(user.username)}"><i class="bi bi-trash-fill"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -1159,40 +1230,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('userDetailsModalLabel').textContent = `Edit Pengguna: ${user.username}`;
         document.getElementById('userDetailsModalBody').innerHTML = `
             <div class="rekap-box" style="margin-top:0;">
-                <h4 class="comic-title" style="margin:0 0 0.9rem; font-size:1.2rem;">Edit Data Pengguna</h4>
                 <form id="editUserForm">
+                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="editFullname" value="${escapeHtml(user.fullname || '')}" required></div>
+                    <div class="form-group"><label>Username</label><input type="text" id="editUsername" value="${escapeHtml(user.username || '')}" required></div>
+                    <div class="form-group"><label>Email / Gmail</label><input type="email" id="editEmail" value="${escapeHtml(user.email || '')}" required></div>
+                    <div class="form-group"><label>Nomor Telepon</label><input type="text" id="editNomor" value="${escapeHtml(user.nomor || '')}"></div>
                     <div class="form-group">
-                        <label for="editFullname">Nama Lengkap</label>
-                        <input type="text" id="editFullname" value="${escapeHtml(user.fullname || '')}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUsername">Username</label>
-                        <input type="text" id="editUsername" value="${escapeHtml(user.username || '')}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editEmail">Email</label>
-                        <input type="email" id="editEmail" value="${escapeHtml(user.email || '')}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editNomor">Nomor Telepon</label>
-                        <input type="text" id="editNomor" value="${escapeHtml(user.nomor || '')}">
-                    </div>
-                    <div class="form-group">
-                        <label for="editRole">Role</label>
+                        <label>Role</label>
                         <select id="editRole" required>
                             <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                             <option value="reseller" ${user.role === 'reseller' ? 'selected' : ''}>Reseller</option>
                         </select>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; margin-top: 1.1rem;">
-                        <button type="button" class="action-btn" onclick="closeModal()" style="background-color: var(--c-slate);">Batal</button>
-                        <button type="submit" class="save-btn"><i class="bi bi-save-fill"></i> Simpan Perubahan</button>
+                    <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                        <button type="button" class="action-btn" onclick="closeModal()" style="background:var(--c-slate);">Batal</button>
+                        <button type="submit" class="save-btn"><i class="bi bi-save-fill"></i> Simpan</button>
                     </div>
                 </form>
             </div>
         `;
-
         document.getElementById('editUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const updatedData = {
@@ -1203,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 nomor: document.getElementById('editNomor').value,
                 role: document.getElementById('editRole').value
             };
-
             try {
                 const response = await fetch('/admin/user/update', {
                     method: 'POST',
@@ -1213,25 +1269,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
                 showToast(result.message, true);
-
-                const userIndex = allUsersData.findIndex(u => u.username === user.username);
-                if (userIndex !== -1) {
-                    allUsersData[userIndex] = {
-                        ...allUsersData[userIndex],
-                        fullname: updatedData.fullname,
-                        username: updatedData.newUsername,
-                        email: updatedData.email,
-                        nomor: updatedData.nomor,
-                        role: updatedData.role
-                    };
-                }
+                const idx = allUsersData.findIndex(u => u.username === user.username);
+                if (idx !== -1) allUsersData[idx] = { ...allUsersData[idx], ...updatedData, username: updatedData.newUsername };
                 renderTable(allUsersData);
                 closeModal();
             } catch (error) {
                 showToast(error.message, false);
             }
         });
-
         userModal.classList.add('active');
         modalOverlay.classList.add('active');
     };
@@ -1256,18 +1301,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const displayUserDetails = async (user) => {
         document.getElementById('userDetailsModalLabel').textContent = `Detail: ${user.username}`;
-        const totalDepositSuccess = (user.historyDeposit || []).filter(d => d.status === 'success').reduce((sum, d) => sum + (d.get_balance || 0), 0);
-        const totalOrderSuccess = (user.historyOrder || []).filter(o => o.status === 'success').reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
-
         const otpData = await checkOtpStatus(user.username);
         const otpHistory = await getOtpHistory(user.username);
-
         document.getElementById('userDetailsModalBody').innerHTML = `
             <div class="modal-tabs">
                 <button type="button" class="tab-btn active" data-tab="info">Info & Aksi</button>
                 <button type="button" class="tab-btn" data-tab="deposit">Deposit (${(user.historyDeposit || []).length})</button>
                 <button type="button" class="tab-btn" data-tab="order">Order (${(user.historyOrder || []).length})</button>
-                <button type="button" class="tab-btn" data-tab="otp">Riwayat OTP (${otpHistory.length})</button>
+                <button type="button" class="tab-btn" data-tab="otp">OTP (${otpHistory.length})</button>
             </div>
             <div id="info" class="tab-content active">
                 <dl class="detail-grid">
@@ -1275,63 +1316,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     <dt>Username</dt><dd>@${escapeHtml(user.username || '-')}</dd>
                     <dt>Email</dt><dd>${escapeHtml(user.email || '-')}</dd>
                     <dt>Telepon</dt><dd>${escapeHtml(user.nomor || '-')}</dd>
-                    <dt>Role</dt><dd style="text-transform: uppercase;">${escapeHtml(user.role || 'user')}</dd>
-                    <dt>Daftar</dt><dd>${formatDate(user.tanggalDaftar)}</dd>
+                    <dt>Role</dt><dd>${escapeHtml(user.role || 'user')}</dd>
+                    <dt>Saldo</dt><dd>${formatRupiah(user.saldo)}</dd>
                     <dt>Verifikasi H2H</dt>
                     <dd>
-                        ${user.isVerified
-                            ? '<span class="status-badge status-success">Aktif</span>'
-                            : '<span class="status-badge status-failed">Tidak Aktif</span>'}
-                        <button type="button" class="action-btn ${user.isVerified ? 'unverify-btn' : 'verify-btn'}" style="margin-left:0.5rem;" onclick="toggleVerificationFromModal('${escapeHtml(user.username)}')">
-                            <i class="bi ${user.isVerified ? 'bi-x-circle' : 'bi-patch-check'}"></i> ${user.isVerified ? 'Nonaktifkan' : 'Aktifkan'}
+                        <button type="button" class="action-btn ${user.isVerified ? 'unverify-btn' : 'verify-btn'}" onclick="toggleVerificationFromModal('${escapeHtml(user.username)}')">
+                            ${user.isVerified ? 'Nonaktifkan' : 'Aktifkan'}
                         </button>
                     </dd>
                     <dt>OTP Aktif</dt>
-                    <dd>
-                        ${otpData && otpData.hasOtp ? `
-                            <div class="rekap-box" style="margin-top:0; padding:0.75rem;">
-                                <div class="otp-code" style="text-align:center; margin-bottom:0.5rem;">${escapeHtml(otpData.otpCode)}</div>
-                                <div style="font-size:0.8rem;">Aktivitas: <b>${escapeHtml(otpData.aktifitas || '-')}</b> • Sisa: <b>${escapeHtml(otpData.waktuSisaMenit ?? 0)}m</b></div>
-                                <button type="button" class="action-btn delete-btn" style="margin-top:0.5rem;" onclick="clearActiveOtpFromModal('${escapeHtml(user.username)}')">
-                                    <i class="bi bi-trash"></i> Hapus OTP
-                                </button>
-                            </div>
-                        ` : `<span style="color:var(--ink-muted);">Tidak ada OTP aktif</span>`}
-                    </dd>
+                    <dd>${otpData && otpData.hasOtp ? `<code>${escapeHtml(otpData.otpCode)}</code> (${escapeHtml(otpData.waktuSisaMenit ?? 0)}m)` : '-'}</dd>
                 </dl>
-
-                <div class="rekap-box">
-                    <h4 class="comic-title" style="margin:0 0 0.65rem; font-size:1.15rem;">Rekapan Finansial</h4>
-                    <dl class="detail-grid">
-                        <dt>Saldo</dt><dd>${formatRupiah(user.saldo)}</dd>
-                        <dt>Coin</dt><dd>${escapeHtml(user.coin || 0)}</dd>
-                        <dt>Deposit Sukses</dt><dd>${formatRupiah(totalDepositSuccess)}</dd>
-                        <dt>Order Sukses</dt><dd>${formatRupiah(totalOrderSuccess)}</dd>
-                    </dl>
-                </div>
-
                 <div class="rekap-box" style="background:#FEFCE8;">
-                    <h4 class="comic-title" style="margin:0 0 0.65rem; font-size:1.15rem;">Edit Saldo & Coin</h4>
                     <form id="editBalanceForm">
-                        <div class="form-group"><label for="newSaldo">Saldo Baru</label><input type="number" id="newSaldo" value="${escapeHtml(user.saldo || 0)}" step="1"></div>
-                        <div class="form-group"><label for="newCoin">Coin Baru</label><input type="number" id="newCoin" value="${escapeHtml(user.coin || 0)}" step="1"></div>
+                        <div class="form-group"><label>Saldo Baru</label><input type="number" id="newSaldo" value="${escapeHtml(user.saldo || 0)}" step="1"></div>
+                        <div class="form-group"><label>Coin Baru</label><input type="number" id="newCoin" value="${escapeHtml(user.coin || 0)}" step="1"></div>
                         <button type="submit" class="save-btn"><i class="bi bi-save-fill"></i> Simpan Saldo & Coin</button>
                     </form>
                 </div>
-
-                <div class="rekap-box" style="background:var(--c-red-soft);">
-                    <h4 class="comic-title" style="margin:0 0 0.35rem; font-size:1.15rem; color:#991B1B;">Zona Berbahaya</h4>
-                    <p style="margin:0 0 0.7rem; font-size:0.84rem; font-weight:700; color:#7F1D1D;">Menghapus user tidak bisa dibatalkan.</p>
-                    <button type="button" class="action-btn delete-btn" onclick="deleteUserFromModal('${escapeHtml(user.username)}')">
-                        <i class="bi bi-trash-fill"></i> Hapus User Ini
-                    </button>
-                </div>
             </div>
-            <div id="deposit" class="tab-content">${renderHistoryTable(user.historyDeposit, ['ID', 'Metode', 'Nominal', 'Saldo Diterima', 'Status'])}</div>
-            <div id="order" class="tab-content">${renderHistoryTable(user.historyOrder, ['ID', 'Layanan', 'Target', 'Harga', 'Status'])}</div>
-            <div id="otp" class="tab-content">${renderOtpHistory(otpHistory)}</div>
+            <div id="deposit" class="tab-content">${renderHistoryTable(user.historyDeposit, true)}</div>
+            <div id="order" class="tab-content">${renderHistoryTable(user.historyOrder, false)}</div>
+            <div id="otp" class="tab-content">${otpHistory.map(o => `<div class="otp-history-item"><b>${escapeHtml(o.otpCode)}</b> • ${escapeHtml(o.aktifitas || '-')} • ${formatDate(o.createdAt)}</div>`).join('') || '-'}</div>
         `;
-
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
@@ -1339,16 +1346,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(e.target.dataset.tab).classList.add('active');
             });
         });
-
         document.getElementById('editBalanceForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const newSaldo = document.getElementById('newSaldo').value;
-            const newCoin = document.getElementById('newCoin').value;
             try {
                 const response = await fetch('/admin/user/update-balance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user.username, newSaldo, newCoin })
+                    body: JSON.stringify({
+                        username: user.username,
+                        newSaldo: document.getElementById('newSaldo').value,
+                        newCoin: document.getElementById('newCoin').value
+                    })
                 });
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
@@ -1363,88 +1371,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast(error.message, false);
             }
         });
-
         userModal.classList.add('active');
         modalOverlay.classList.add('active');
-    };
-
-    const renderOtpHistory = (otpHistory) => {
-        if (!otpHistory || otpHistory.length === 0) {
-            return `<p style="text-align:center; color: var(--ink-muted); font-weight:700; padding: 2rem 0;">Tidak ada riwayat OTP.</p>`;
-        }
-        return otpHistory.map(otp => `
-            <div class="otp-history-item">
-                <div class="otp-history-header">
-                    <span class="otp-code-display">${escapeHtml(otp.otpCode)}</span>
-                    <span class="status-badge ${otp.isExpired ? 'status-failed' : 'status-success'}">${otp.isExpired ? 'Expired' : 'Active'}</span>
-                </div>
-                <div style="font-size:0.84rem; font-weight:700;">
-                    <div>Aktivitas: ${escapeHtml(otp.aktifitas || '-')} • Nomor: ${escapeHtml(otp.nomor || '-')}</div>
-                    <div>Dibuat: ${formatDate(otp.createdAt)} • Exp: ${formatDate(otp.expiresAt)}</div>
-                </div>
-            </div>
-        `).join('');
     };
 
     window.toggleVerificationFromModal = async (username) => {
         if (await toggleVerification(username)) closeModal();
     };
-    window.deleteUserFromModal = (username) => {
-        closeModal();
-        deleteUser(username);
-    };
-    window.clearActiveOtpFromModal = async (username) => {
-        await clearActiveOtp(username);
-        closeModal();
-    };
 
-    const renderHistoryTable = (history, headers) => {
-        if (!history || history.length === 0) {
-            return `<p style="text-align:center; color: var(--ink-muted); font-weight:700; padding: 2rem 0;">Tidak ada riwayat.</p>`;
-        }
-        const isDeposit = headers.includes('Saldo Diterima');
-        return `
-            <div class="table-responsive">
-                <table class="users-table">
-                    <thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>
-                    <tbody>
-                        ${history.slice().reverse().map(item => `
-                            <tr>
-                                <td>${escapeHtml(item.id)}</td>
-                                <td>${escapeHtml(isDeposit ? item.metode : item.layanan)}</td>
-                                <td>${isDeposit ? formatRupiah(item.nominal) : escapeHtml(item.target)}</td>
-                                <td>${isDeposit ? formatRupiah(item.get_balance) : formatRupiah(item.price)}</td>
-                                <td><span class="status-badge status-${escapeHtml((item.status || '').toLowerCase())}">${escapeHtml(item.status)}</span></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+    const renderHistoryTable = (history, isDeposit) => {
+        if (!history || history.length === 0) return `<p style="text-align:center; padding:1.5rem; font-weight:700;">Tidak ada riwayat.</p>`;
+        return `<div class="table-responsive"><table class="users-table"><thead><tr><th>ID</th><th>Item</th><th>Nominal/Target</th><th>Nilai</th><th>Status</th></tr></thead><tbody>${
+            history.slice().reverse().map(item => `<tr>
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(isDeposit ? item.metode : item.layanan)}</td>
+                <td>${isDeposit ? formatRupiah(item.nominal) : escapeHtml(item.target)}</td>
+                <td>${isDeposit ? formatRupiah(item.get_balance) : formatRupiah(item.price)}</td>
+                <td><span class="status-badge status-${escapeHtml((item.status || '').toLowerCase())}">${escapeHtml(item.status)}</span></td>
+            </tr>`).join('')
+        }</tbody></table></div>`;
     };
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredUsers = allUsersData.filter(user =>
-            (user.fullname || '').toLowerCase().includes(searchTerm) ||
-            (user.username || '').toLowerCase().includes(searchTerm)
-        );
-        renderTable(filteredUsers);
+        const q = e.target.value.toLowerCase();
+        renderTable(allUsersData.filter(u =>
+            (u.fullname || '').toLowerCase().includes(q) ||
+            (u.username || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q)
+        ));
     });
 
-    const loadPage = async () => {
+    (async () => {
         try {
-            const response = await fetch('/admin/data/users');
-            const users = await response.json();
+            const users = await (await fetch('/admin/data/users')).json();
             allUsersData = Array.isArray(users) ? users : [];
             renderTable(allUsersData);
-        } catch (error) {
-            console.error('Gagal mengambil data pengguna:', error);
-            document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color:#991B1B; font-weight:800;">Gagal memuat data. Periksa koneksi dan coba lagi.</td></tr>`;
+        } catch (err) {
+            document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#991B1B; font-weight:800;">Gagal memuat data.</td></tr>`;
         }
-    };
-
-    loadPage();
+    })();
 });
 </script>
 </body>

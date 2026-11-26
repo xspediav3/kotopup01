@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Deposits - FelixTopUp Comic Admin</title>
+    <title>Global Deposits - Xs-Pedia Comic Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,7 +124,7 @@ a {
 
 .brand-text {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 1.75rem;
     letter-spacing: 1.5px;
     text-shadow: 2px 2px 0px var(--ink-black);
     line-height: 1;
@@ -147,23 +147,24 @@ a {
 
 .sidebar-nav {
     list-style: none;
-    padding: 0.9rem 0.8rem;
+    padding: 0.85rem 0.8rem;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.48rem;
     flex: 1;
+    overflow-y: auto;
 }
 
 .nav-item .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.7rem 0.9rem;
+    gap: 0.68rem;
+    padding: 0.66rem 0.88rem;
     background: var(--bg-panel);
     color: var(--ink-black);
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     border: 3px solid var(--ink-black);
     border-radius: 11px;
     box-shadow: var(--comic-shadow-sm);
@@ -183,7 +184,7 @@ a {
 
 .nav-item.logout {
     margin-top: auto;
-    padding-top: 0.7rem;
+    padding-top: 0.65rem;
     border-top: 3px dashed var(--ink-black);
 }
 
@@ -394,7 +395,7 @@ a {
     gap: 0.45rem;
 }
 
-.comic-input, .search-input, .action-input, .action-select {
+.comic-input, .search-input, .action-input, .action-select, .comic-textarea {
     border: 2.5px solid var(--ink-black);
     border-radius: 9px;
     padding: 0.45rem 0.7rem;
@@ -407,7 +408,7 @@ a {
     outline: none;
 }
 
-.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus {
+.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus, .comic-textarea:focus {
     background: #FEFCE8;
 }
 
@@ -437,7 +438,7 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
     background-color: var(--c-blue);
     color: #FFFFFF;
     border: 2.5px solid var(--ink-black);
@@ -466,9 +467,8 @@ a {
 .action-btn.verify-btn { background-color: var(--c-cyan); color: var(--ink-black); }
 .action-btn.unverify-btn { background-color: var(--c-yellow); color: var(--ink-black); }
 .action-btn.edit-btn { background-color: var(--c-green); color: #fff; }
-.save-btn { background-color: var(--c-green); color: #fff; padding: 0.6rem 1.15rem; font-size: 0.88rem; }
+.save-btn { background-color: var(--c-green); color: #fff; padding: 0.62rem 1.2rem; font-size: 0.9rem; }
 
-/* Compact High-Density Table */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -612,6 +612,116 @@ a {
 .status-pending { background-color: var(--c-yellow-soft); color: #78350F; }
 .status-failed, .status-cancel, .status-expired { background-color: var(--c-red-soft); color: #991B1B; }
 
+/* Notification Composer Grid */
+.notif-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.form-group {
+    margin-bottom: 0.85rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.form-group textarea {
+    min-height: 135px;
+    resize: vertical;
+}
+
+.mode-pills {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.mode-pill-btn {
+    flex: 1;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    border: 2.5px solid var(--ink-black);
+    background: var(--bg-cream);
+    color: var(--ink-black);
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.mode-pill-btn.active {
+    background: var(--c-yellow);
+}
+
+.recipient-box {
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-cream);
+    padding: 0.8rem;
+    max-height: 290px;
+    overflow-y: auto;
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.recipient-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 2px solid var(--ink-black);
+    margin-bottom: 0.45rem;
+    cursor: pointer;
+}
+
+.recipient-item:last-child {
+    margin-bottom: 0;
+}
+
+.recipient-item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--ink-black);
+    cursor: pointer;
+}
+
+.rekap-box {
+    background-color: var(--bg-cream);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+    border: 3px solid var(--ink-black);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -744,39 +854,6 @@ a {
     word-break: break-word;
 }
 
-.rekap-box {
-    background-color: var(--bg-cream);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    margin-top: 1rem;
-    border: 3px solid var(--ink-black);
-    box-shadow: 3px 3px 0px var(--ink-black);
-}
-
-.form-group {
-    margin-bottom: 0.8rem;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 800;
-    font-size: 0.82rem;
-    margin-bottom: 0.3rem;
-    text-transform: uppercase;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.9rem;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    background: var(--bg-panel);
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
 .otp-code {
     font-family: monospace;
     font-size: 1.2rem;
@@ -860,6 +937,7 @@ a {
     .sidebar.active { transform: translateX(0); }
     .content-wrapper { width: 100%; margin-left: 0; }
     .sidebar-toggle-btn { display: grid; }
+    .notif-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -880,7 +958,7 @@ a {
             <div class="brand-lockup">
                 <div class="brand-badge"><i class="bi bi-lightning-charge-fill"></i></div>
                 <div>
-                    <div class="brand-text">FelixTopUp</div>
+                    <div class="brand-text">Xs-Pedia</div>
                     <span class="brand-sub">Comic Admin HQ</span>
                 </div>
             </div>
@@ -890,7 +968,7 @@ a {
             <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="bi bi-people-fill"></i> Global User</a></li>
             <li class="nav-item"><a class="nav-link active" href="/admin/deposit"><i class="bi bi-wallet2"></i> Global Deposit</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/order"><i class="bi bi-cart-check-fill"></i> Global Order</a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clipboard-data-fill"></i> Rekap Transaksi</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/notif-member"><i class="bi bi-megaphone-fill"></i> Notif Member</a></li>
             <li class="nav-item logout"><a class="nav-link" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>
     </nav>
@@ -901,79 +979,79 @@ a {
                 <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Menu"><i class="bi bi-list"></i></button>
                 <span class="comic-title" style="font-size: 1.3rem;">Manajemen Deposit</span>
             </div>
-            <span class="caption-tag"><i class="bi bi-wallet2"></i> Deposit Center</span>
+            <span class="caption-tag"><i class="bi bi-bell-fill"></i> Xs-Pedia Panel</span>
         </header>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-heading comic-title">
-                    Global Deposit
-                    <span class="caption-tag"><i class="bi bi-stars"></i> Comic Edition</span>
-                </h1>
+    <h1 class="page-heading comic-title">
+        Global Deposit
+        <span class="caption-tag"><i class="bi bi-wallet2"></i> Xs-Pedia</span>
+    </h1>
+</div>
+
+<section class="dashboard-grid">
+    <article class="stat-card theme-success">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Total Deposit Sukses</div>
+                <div class="card-value" id="totalDepositSuccess">Rp 0</div>
             </div>
+            <div class="card-icon-box"><i class="bi bi-check-circle-fill"></i></div>
+        </div>
+    </article>
 
-            <section class="dashboard-grid">
-                <article class="stat-card theme-success">
-                    <div class="card-top-strip"></div>
-                    <div class="card-body">
-                        <div>
-                            <div class="card-title">Total Deposit Sukses</div>
-                            <div class="card-value" id="totalDepositSuccess">Rp 0</div>
-                        </div>
-                        <div class="card-icon-box"><i class="bi bi-check-circle-fill"></i></div>
-                    </div>
-                </article>
-
-                <article class="stat-card theme-secondary">
-                    <div class="card-top-strip"></div>
-                    <div class="card-body">
-                        <div>
-                            <div class="card-title">Total Deposit Lainnya</div>
-                            <div class="card-value" id="totalDepositOther">Rp 0</div>
-                        </div>
-                        <div class="card-icon-box"><i class="bi bi-hourglass-split"></i></div>
-                    </div>
-                </article>
-
-                <article class="stat-card theme-primary">
-                    <div class="card-top-strip"></div>
-                    <div class="card-body">
-                        <div>
-                            <div class="card-title">Total Semua Deposit</div>
-                            <div class="card-value" id="totalAllDeposit">Rp 0</div>
-                        </div>
-                        <div class="card-icon-box"><i class="bi bi-wallet-fill"></i></div>
-                    </div>
-                </article>
-            </section>
-
-            <div class="comic-panel" style="padding: 1rem;">
-                <div class="card-header">
-                    <h3 class="comic-title">Riwayat Semua Deposit</h3>
-                    <div class="search-bar">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cari ID Deposit atau Username...">
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Metode</th>
-                                <th>Nominal</th>
-                                <th>Saldo Didapat</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="depositsTableBody">
-                            <tr><td colspan="7" style="text-align:center; padding: 2rem;"><span class="spinner"></span> Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+    <article class="stat-card theme-secondary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Total Deposit Lainnya</div>
+                <div class="card-value" id="totalDepositOther">Rp 0</div>
             </div>
+            <div class="card-icon-box"><i class="bi bi-hourglass-split"></i></div>
+        </div>
+    </article>
+
+    <article class="stat-card theme-primary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Total Semua Deposit</div>
+                <div class="card-value" id="totalAllDeposit">Rp 0</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-wallet-fill"></i></div>
+        </div>
+    </article>
+</section>
+
+<div class="comic-panel" style="padding: 1rem;">
+    <div class="card-header">
+        <h3 class="comic-title">Riwayat Semua Deposit</h3>
+        <div class="search-bar">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Cari ID Deposit atau Username...">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Metode</th>
+                    <th>Nominal</th>
+                    <th>Saldo Didapat</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="depositsTableBody">
+                <tr><td colspan="7" style="text-align:center; padding: 2rem;"><span class="spinner"></span> Memuat data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
         </main>
     </div>
 </div>
@@ -984,7 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = document.getElementById('modalOverlay');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-
     const toggleSidebar = () => {
         sidebar.classList.toggle('active');
         modalOverlay.classList.toggle('active');
@@ -996,10 +1073,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n || 0);
-    const escapeHtml = (str) => {
-        if (str === null || str === undefined) return '';
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    };
+    const escapeHtml = (str) => String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     const showToast = (message, isSuccess = true) => {
         const container = document.getElementById('toast-container');
@@ -1007,7 +1081,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.className = 'toast-message';
         toast.textContent = message;
         toast.style.backgroundColor = isSuccess ? 'var(--c-green)' : 'var(--c-red)';
-        toast.style.color = '#FFFFFF';
         container.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
@@ -1029,12 +1102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!result.success) throw new Error(result.message);
             showToast(result.message, true);
             selectElement.dataset.originalStatus = newStatus;
-
-            const depositToUpdate = allDeposits.find(d => d.id === depositId);
-            if (depositToUpdate) {
-                depositToUpdate.status = newStatus;
-                renderPage(allDeposits);
-            }
+            const d = allDeposits.find(x => x.id === depositId);
+            if (d) { d.status = newStatus; renderPage(allDeposits); }
         } catch (error) {
             showToast(error.message, false);
             selectElement.value = originalStatus;
@@ -1063,16 +1132,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         <option value="cancel" ${item.status === 'cancel' ? 'selected' : ''}>Cancel</option>
                         <option value="expired" ${item.status === 'expired' ? 'selected' : ''}>Expired</option>
                     </select>
-                    <button type="button" class="action-btn save-status-btn" data-user-id="${escapeHtml(item.userId)}" data-deposit-id="${escapeHtml(item.id)}" title="Simpan Status"><i class="bi bi-check-lg"></i></button>
+                    <button type="button" class="action-btn save-status-btn" data-user-id="${escapeHtml(item.userId)}" data-deposit-id="${escapeHtml(item.id)}"><i class="bi bi-check-lg"></i></button>
                 </td>
             </tr>
         `).join('');
 
-        document.querySelectorAll('.save-status-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
+        document.querySelectorAll('.save-status-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
                 const { userId, depositId } = e.currentTarget.dataset;
-                const selectElement = e.currentTarget.previousElementSibling;
-                updateStatus(userId, depositId, selectElement);
+                updateStatus(userId, depositId, e.currentTarget.previousElementSibling);
             });
         });
     };
@@ -1080,11 +1148,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderPage = (deposits) => {
         let totalSuccess = 0, totalOther = 0;
         deposits.forEach(d => {
-            if (d.status === 'success') {
-                totalSuccess += d.get_balance || 0;
-            } else {
-                totalOther += d.nominal || 0;
-            }
+            if (d.status === 'success') totalSuccess += d.get_balance || 0;
+            else totalOther += d.nominal || 0;
         });
         document.getElementById('totalDepositSuccess').textContent = formatRupiah(totalSuccess);
         document.getElementById('totalDepositOther').textContent = formatRupiah(totalOther);
@@ -1093,34 +1158,28 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = allDeposits.filter(d =>
-            String(d.id || '').toLowerCase().includes(searchTerm) ||
-            String(d.username || '').toLowerCase().includes(searchTerm)
-        );
-        renderTable(filtered);
+        const q = e.target.value.toLowerCase();
+        renderTable(allDeposits.filter(d =>
+            String(d.id || '').toLowerCase().includes(q) ||
+            String(d.username || '').toLowerCase().includes(q)
+        ));
     });
 
-    const loadData = async () => {
+    (async () => {
         try {
             const users = await (await fetch('/admin/data/users')).json();
             const deposits = [];
             users.forEach(user => {
                 if (Array.isArray(user.historyDeposit)) {
-                    user.historyDeposit.forEach(depo => {
-                        deposits.push({ ...depo, userId: user._id, username: user.username });
-                    });
+                    user.historyDeposit.forEach(depo => deposits.push({ ...depo, userId: user._id, username: user.username }));
                 }
             });
             allDeposits = deposits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             renderPage(allDeposits);
         } catch (error) {
-            console.error('Gagal memuat data deposit:', error);
-            document.getElementById('depositsTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 2rem; color:#991B1B; font-weight:800;">Gagal memuat data.</td></tr>`;
+            document.getElementById('depositsTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#991B1B; font-weight:800;">Gagal memuat data.</td></tr>`;
         }
-    };
-
-    loadData();
+    })();
 });
 </script>
 </body>
