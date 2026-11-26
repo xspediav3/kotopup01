@@ -710,31 +710,27 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID diperlukan." });
     }
 
-    const userHistory = await User.findOne(
-      {
-        _id: user._id,
-        $or: [
-          { "historyDeposit.id": id },
-          { "historyDeposit.trx_id": id },
-          { "historyDeposit.provider_id": id },
-          { "historyDeposit.ditz_id": id }
-        ]
-      },
-      { "historyDeposit.$": 1 }
+    const historyList = Array.isArray(user.historyDeposit) ? user.historyDeposit : [];
+    const targetItem = historyList.find(
+      (item) =>
+        String(item?.id || "") === String(id) ||
+        String(item?.trx_id || "") === String(id) ||
+        String(item?.provider_id || "") === String(id) ||
+        String(item?.ditz_id || "") === String(id)
     );
 
-    if (!userHistory || !userHistory.historyDeposit.length) {
+    if (!targetItem) {
       return res.status(404).json({ success: false, message: "Data transaksi tidak ditemukan." });
     }
 
-    const currentData = userHistory.historyDeposit[0];
-    const currentStatus = String(currentData.status || "pending").toLowerCase();
-    const displayTrxId = String(currentData.trx_id || currentData.reff_id || currentData.id || id);
+    const currentStatus = String(targetItem.status || "pending").toLowerCase();
+    const displayTrxId = String(targetItem.trx_id || targetItem.reff_id || targetItem.id || id);
+    const ditzId = String(targetItem.provider_id || targetItem.ditz_id || targetItem.id || id);
 
     if (!["pending", "processing"].includes(currentStatus)) {
       return res.status(400).json({
         success: false,
-        message: `Transaksi tidak bisa dibatalkan karena status sudah ${currentData.status}.`
+        message: `Transaksi tidak bisa dibatalkan karena status sudah ${targetItem.status}.`
       });
     }
 
@@ -748,9 +744,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    // Prioritaskan id asli Ditznesia (UUID) sesuai parameter GET /deposit/cancel
-    const targetPaymentId = String(currentData.provider_id || currentData.ditz_id || currentData.id || id);
-    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
+    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -803,25 +797,20 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const dbTargetId = currentData.id || id;
-    await editHistoryDeposit(user._id, dbTargetId, "cancelled");
-
-    await User.updateOne(
-      { _id: user._id, "historyDeposit.id": dbTargetId },
-      {
-        $set: {
-          "historyDeposit.$.provider_status": rawCancelStatus || "batal"
-        }
-      }
-    );
+    targetItem.status = "cancelled";
+    targetItem.provider_status = rawCancelStatus || "batal";
+    user.markModified("historyDeposit");
+    await user.save();
 
     return res.status(200).json({
       success: true,
       message: result?.message || "Deposit berhasil dibatalkan di Ditznesia.",
       data: {
-        id: dbTargetId,
+        id: targetItem.id || ditzId,
         trx_id: displayTrxId,
         reff_id: displayTrxId,
+        ditz_id: ditzId,
+        provider_id: ditzId,
         status: "cancelled"
       }
     });
@@ -830,6 +819,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
+
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
