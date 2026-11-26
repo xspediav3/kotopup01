@@ -1195,6 +1195,47 @@
             font-family: var(--vp-font-heading);
         }
 
+        .vp-category-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .vp-category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+        .vp-category-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            max-width: 100%;
+            padding: 0.38rem 0.75rem;
+            border: 1px solid rgba(34, 197, 94, 0.38);
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(34,197,94,.14), rgba(16,185,129,.07));
+            color: var(--vp-primary);
+            font-size: .76rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: .02em;
+            white-space: nowrap;
+            box-shadow: 0 3px 12px rgba(34,197,94,.10), inset 0 0 0 1px rgba(255,255,255,.08);
+        }
+        .vp-category-role .bi { font-size: .85rem; }
+        [data-theme="dark"] .vp-category-role {
+            background: linear-gradient(135deg, rgba(34,197,94,.2), rgba(16,185,129,.1));
+            border-color: rgba(74,222,128,.42);
+            color: #86efac;
+        }
+        @media (max-width: 420px) {
+            .vp-category-title { gap: .5rem; flex-wrap: wrap; }
+            .vp-category-role { font-size: .7rem; padding: .34rem .6rem; }
+        }
+
         .vp-sidebar-overlay {
             position: fixed;
             top: 0;
@@ -2575,7 +2616,13 @@
                     </section>
 <section class="vp-section content-loaded vp-category-section" style="animation-delay: 0.2s;">
                         <div class="vp-category-heading mb-3">
-                            <h4 class="mb-0 fw-bold">Category Produk</h4>
+                            <div class="vp-category-title">
+                                <h4 class="mb-0 fw-bold">Category Produk</h4>
+                                <span class="vp-category-role" id="categoryUserRole" aria-label="Role pengguna">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                    <span>Memuat role...</span>
+                                </span>
+                            </div>
                         </div>
                         <div class="vp-service-grid" id="popularServicesGrid">
                             <a href="/produk-detail?category=Games" class="vp-service-item">
@@ -2683,7 +2730,7 @@
                         <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
                             <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">Email</a></li>
+                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">Ema</a></li>
                             <li><i class="bi bi-telegram"></i> <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
@@ -3087,9 +3134,15 @@
             if (userSaldoEl) {
                 userSaldoEl.textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
             }
+            const roleValue = String(user.role || user.level || user.user_role || 'User').trim();
+            const formattedRole = roleValue ? roleValue.charAt(0).toUpperCase() + roleValue.slice(1) : 'User';
             const userRoleEl = document.getElementById('userRole');
-            if (userRoleEl && user.role) {
-                userRoleEl.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            if (userRoleEl) userRoleEl.textContent = formattedRole;
+            const categoryRoleEl = document.getElementById('categoryUserRole');
+            if (categoryRoleEl) {
+                const roleText = categoryRoleEl.querySelector('span');
+                if (roleText) roleText.textContent = formattedRole;
+                categoryRoleEl.title = `Role akun: ${formattedRole}`;
             }
             
             const saldoTopbar = document.getElementById('userSaldoTopbar');
