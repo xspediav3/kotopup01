@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notif Member - Xs-Pedia Comic Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --sidebar-width: 268px;
+    --topbar-height: 74px;
+    --comic-border: 3.5px solid #111319;
+    --comic-shadow: 5px 5px 0px #111319;
+    --comic-shadow-sm: 3px 3px 0px #111319;
+    --comic-shadow-lg: 8px 8px 0px #111319;
+
+    --bg-cream: #FFFDF5;
+    --bg-panel: #FFFFFF;
+    --ink-black: #111319;
+    --ink-muted: #4A5568;
+
+    --c-blue: #3B82F6;
+    --c-blue-soft: #DBEAFE;
+    --c-green: #10B981;
+    --c-green-soft: #D1FAE5;
+    --c-yellow: #FBBF24;
+    --c-yellow-soft: #FEF3C7;
+    --c-cyan: #06B6D4;
+    --c-cyan-soft: #CFFAFE;
+    --c-red: #EF4444;
+    --c-red-soft: #FEE2E2;
+    --c-purple: #8B5CF6;
+    --c-purple-soft: #EDE9FE;
+    --c-orange: #F97316;
+    --c-orange-soft: #FFEDD5;
+    --c-slate: #64748B;
+    --c-slate-soft: #F1F5F9;
+
+    --font-display: 'Bangers', cursive, sans-serif;
+    --font-comic: 'Comic Neue', 'Plus Jakarta Sans', sans-serif;
+    --font-ui: 'Plus Jakarta Sans', sans-serif;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-ui);
+    background-color: var(--bg-cream);
+    background-image: radial-gradient(#111319 1.1px, transparent 1.1px);
+    background-size: 18px 18px;
+    color: var(--ink-black);
+    font-size: 0.94rem;
+    line-height: 1.4;
+    overflow-x: hidden;
+}
+
+.comic-title {
+    font-family: var(--font-display);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--c-yellow);
+    border-right: var(--comic-border);
+    z-index: 1030;
+    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0px 0px rgba(17, 19, 25, 0.12);
+}
+
+.sidebar-brand {
+    padding: 1.15rem 1.2rem;
+    background: var(--c-blue);
+    color: #FFFFFF;
+    border-bottom: var(--comic-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.brand-badge {
+    width: 40px;
+    height: 40px;
+    background: var(--c-yellow);
+    color: var(--ink-black);
+    border: 3px solid var(--ink-black);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1.3rem;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    transform: rotate(-4deg);
+}
+
+.brand-text {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 0px var(--ink-black);
+    line-height: 1;
+}
+
+.brand-sub {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    background: var(--ink-black);
+    color: var(--c-yellow);
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-top: 4px;
+    width: fit-content;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0.85rem 0.8rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.48rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.68rem;
+    padding: 0.66rem 0.88rem;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    font-weight: 800;
+    font-size: 0.88rem;
+    border: 3px solid var(--ink-black);
+    border-radius: 11px;
+    box-shadow: var(--comic-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.nav-item .nav-link:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--ink-black);
+    background: var(--c-cyan-soft);
+}
+
+.nav-item .nav-link.active {
+    background: var(--c-orange);
+    color: #FFFFFF;
+}
+
+.nav-item.logout {
+    margin-top: auto;
+    padding-top: 0.65rem;
+    border-top: 3px dashed var(--ink-black);
+}
+
+.nav-item.logout .nav-link {
+    background: var(--c-red-soft);
+    color: #991B1B;
+}
+
+.nav-item.logout .nav-link:hover {
+    background: var(--c-red);
+    color: #FFFFFF;
+}
+
+.content-wrapper {
+    width: calc(100% - var(--sidebar-width));
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.24s ease, width 0.24s ease;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    height: var(--topbar-height);
+    background-color: var(--bg-panel);
+    border-bottom: var(--comic-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1010;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-toggle-btn {
+    background: var(--c-yellow);
+    border: 3px solid var(--ink-black);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--ink-black);
+    display: none;
+    place-items: center;
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.sidebar-toggle-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px var(--ink-black);
+}
+
+.main-content {
+    padding: 1.5rem;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-bottom: 1.2rem;
+}
+
+.page-heading {
+    margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.05;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.caption-tag {
+    background: var(--c-yellow);
+    border: 2.5px solid var(--ink-black);
+    box-shadow: 2.5px 2.5px 0px var(--ink-black);
+    padding: 0.2rem 0.65rem;
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.comic-panel {
+    background: var(--bg-panel);
+    border: var(--comic-border);
+    border-radius: 15px;
+    box-shadow: var(--comic-shadow);
+    padding: 1.2rem;
+    margin-bottom: 1.4rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    margin-bottom: 1.4rem;
+}
+
+.stat-card {
+    background-color: var(--bg-panel);
+    border: var(--comic-border);
+    border-radius: 14px;
+    box-shadow: var(--comic-shadow);
+    overflow: hidden;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.stat-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px var(--ink-black);
+}
+
+.card-top-strip {
+    height: 9px;
+    border-bottom: 3px solid var(--ink-black);
+}
+
+.stat-card .card-body {
+    padding: 1rem 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.stat-card .card-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.35rem 0;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 2px solid var(--ink-black);
+}
+
+.stat-card .card-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--ink-black);
+    line-height: 1.15;
+}
+
+.card-icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    border: 3px solid var(--ink-black);
+    box-shadow: 2.5px 2.5px 0px var(--ink-black);
+    display: grid;
+    place-items: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.theme-success .card-top-strip, .theme-success .card-icon-box { background: var(--c-green); color: #fff; }
+.theme-success .card-title { background: var(--c-green-soft); color: #065F46; }
+
+.theme-secondary .card-top-strip, .theme-secondary .card-icon-box { background: var(--c-slate); color: #fff; }
+.theme-secondary .card-title { background: var(--c-slate-soft); color: #1E293B; }
+
+.theme-primary .card-top-strip, .theme-primary .card-icon-box { background: var(--c-blue); color: #fff; }
+.theme-primary .card-title { background: var(--c-blue-soft); color: #1E3A8A; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px dashed var(--ink-black);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.form-inline-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.comic-input, .search-input, .action-input, .action-select, .comic-textarea {
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.45rem 0.7rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.86rem;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+    outline: none;
+}
+
+.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus, .comic-textarea:focus {
+    background: #FEFCE8;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.4rem 0.7rem;
+    background: var(--bg-panel);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--ink-black);
+    min-width: 190px;
+}
+
+.action-btn, .save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background-color: var(--c-blue);
+    color: #FFFFFF;
+    border: 2.5px solid var(--ink-black);
+    padding: 0.42rem 0.72rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.8rem;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    white-space: nowrap;
+}
+
+.action-btn:hover, .save-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3.5px 3.5px 0px var(--ink-black);
+}
+
+.action-btn:active, .save-btn:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1px 1px 0px var(--ink-black);
+}
+
+.action-btn.delete-btn { background-color: var(--c-red); color: #fff; }
+.action-btn.verify-btn { background-color: var(--c-cyan); color: var(--ink-black); }
+.action-btn.unverify-btn { background-color: var(--c-yellow); color: var(--ink-black); }
+.action-btn.edit-btn { background-color: var(--c-green); color: #fff; }
+.save-btn { background-color: var(--c-green); color: #fff; padding: 0.62rem 1.2rem; font-size: 0.9rem; }
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-panel);
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.data-table, .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.86rem;
+}
+
+.data-table th, .data-table td,
+.users-table th, .users-table td {
+    padding: 0.52rem 0.68rem;
+    border-bottom: 1.5px solid #E2E8F0;
+    vertical-align: middle;
+}
+
+.data-table th, .users-table th {
+    background: var(--ink-black);
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.data-table tbody tr:nth-child(even),
+.users-table tbody tr:nth-child(even) {
+    background: #FFFDF7;
+}
+
+.data-table tbody tr:hover,
+.users-table tbody tr:hover {
+    background: var(--c-yellow-soft);
+}
+
+.data-table tbody tr:last-child td,
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-cell-main {
+    font-weight: 800;
+    color: var(--ink-black);
+    line-height: 1.15;
+}
+
+.user-cell-sub {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+}
+
+.otp-compact-inline {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.otp-mini-code {
+    font-family: monospace;
+    font-weight: 800;
+    background: var(--c-green-soft);
+    color: #065F46;
+    border: 1.5px solid var(--ink-black);
+    padding: 1px 5px;
+    border-radius: 5px;
+}
+
+.otp-mini-del {
+    background: var(--c-red-soft);
+    color: #991B1B;
+    border: 1.5px solid var(--ink-black);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.otp-mini-del:hover {
+    background: var(--c-red);
+    color: #fff;
+}
+
+.row-actions-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    white-space: nowrap;
+}
+
+.row-actions-compact .action-btn {
+    padding: 0.26rem 0.48rem;
+    font-size: 0.74rem;
+    margin-right: 0;
+}
+
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+}
+
+.action-select {
+    padding: 0.28rem 0.42rem;
+    font-size: 0.78rem;
+}
+
+.action-input {
+    max-width: 120px;
+    padding: 0.28rem 0.48rem;
+    font-size: 0.78rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.16rem 0.48rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border-radius: 999px;
+    border: 2px solid var(--ink-black);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-success { background-color: var(--c-green-soft); color: #065F46; }
+.status-pending { background-color: var(--c-yellow-soft); color: #78350F; }
+.status-failed, .status-cancel, .status-expired { background-color: var(--c-red-soft); color: #991B1B; }
+
+/* Notification Composer Grid */
+.notif-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.form-group {
+    margin-bottom: 0.85rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    background: var(--bg-panel);
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.form-group textarea {
+    min-height: 135px;
+    resize: vertical;
+}
+
+.mode-pills {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.mode-pill-btn {
+    flex: 1;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    border: 2.5px solid var(--ink-black);
+    background: var(--bg-cream);
+    color: var(--ink-black);
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.mode-pill-btn.active {
+    background: var(--c-yellow);
+}
+
+.recipient-box {
+    border: 3px solid var(--ink-black);
+    border-radius: 12px;
+    background: var(--bg-cream);
+    padding: 0.8rem;
+    max-height: 290px;
+    overflow-y: auto;
+    box-shadow: var(--comic-shadow-sm);
+}
+
+.recipient-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 2px solid var(--ink-black);
+    margin-bottom: 0.45rem;
+    cursor: pointer;
+}
+
+.recipient-item:last-child {
+    margin-bottom: 0;
+}
+
+.recipient-item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--ink-black);
+    cursor: pointer;
+}
+
+.rekap-box {
+    background-color: var(--bg-cream);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+    border: 3px solid var(--ink-black);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 19, 25, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1029;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    z-index: 1050;
+    background: var(--bg-panel);
+    border: 4px solid var(--ink-black);
+    border-radius: 16px;
+    width: 94%;
+    max-width: 880px;
+    box-shadow: var(--comic-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal.active, .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal.active {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--c-yellow);
+    border-bottom: 3.5px solid var(--ink-black);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.modal-close-btn {
+    background: var(--c-red);
+    color: #FFFFFF;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--ink-black);
+    display: grid;
+    place-items: center;
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    max-height: 78vh;
+}
+
+.modal-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.15rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 3px dashed var(--ink-black);
+}
+
+.tab-btn {
+    background: var(--bg-cream);
+    border: 2.5px solid var(--ink-black);
+    border-radius: 9px;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--ink-black);
+    box-shadow: 2px 2px 0px var(--ink-black);
+}
+
+.tab-btn.active {
+    background: var(--ink-black);
+    color: var(--c-yellow);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 165px 1fr;
+    gap: 0.55rem 1.1rem;
+    align-items: start;
+}
+
+.detail-grid dt {
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.detail-grid dd {
+    margin: 0;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.otp-code {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: var(--bg-panel);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 2.5px dashed var(--ink-black);
+}
+
+.otp-history-item {
+    padding: 0.85rem 1rem;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 11px;
+    margin-bottom: 0.75rem;
+    background: var(--bg-cream);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.otp-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.otp-code-display {
+    font-family: monospace;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ink-black);
+}
+
+#toast-container {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toast-message {
+    background-color: var(--ink-black);
+    color: #FFFFFF;
+    padding: 0.75rem 1.15rem;
+    border: 3px solid var(--ink-black);
+    border-radius: 11px;
+    box-shadow: var(--comic-shadow-sm);
+    font-weight: 800;
+    font-size: 0.86rem;
+    opacity: 0;
+    transform: translateY(-14px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.spinner {
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 3px solid #E2E8F0;
+    border-top-color: var(--ink-black);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spinner-border 0.75s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 992px) {
+    .sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); }
+    .sidebar.active { transform: translateX(0); }
+    .content-wrapper { width: 100%; margin-left: 0; }
+    .sidebar-toggle-btn { display: grid; }
+    .notif-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .main-content, .topbar { padding: 0.9rem; }
+    .page-heading { font-size: 1.8rem; }
+    .detail-grid { grid-template-columns: 1fr; gap: 0.35rem; }
+    .card-header { flex-direction: column; align-items: stretch; }
+    .search-bar input { min-width: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="modal-overlay" id="modalOverlay"></div>
+<div class="page-wrapper">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-lockup">
+                <div class="brand-badge"><i class="bi bi-lightning-charge-fill"></i></div>
+                <div>
+                    <div class="brand-text">Xs-Pedia</div>
+                    <span class="brand-sub">Comic Admin HQ</span>
+                </div>
+            </div>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item"><a class="nav-link" href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="bi bi-people-fill"></i> Global User</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/deposit"><i class="bi bi-wallet2"></i> Global Deposit</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/order"><i class="bi bi-cart-check-fill"></i> Global Order</a></li>
+            <li class="nav-item"><a class="nav-link active" href="/admin/notif-member"><i class="bi bi-megaphone-fill"></i> Notif Member</a></li>
+            <li class="nav-item logout"><a class="nav-link" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="content-wrapper">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Menu"><i class="bi bi-list"></i></button>
+                <span class="comic-title" style="font-size: 1.3rem;">Notifikasi Member</span>
+            </div>
+            <span class="caption-tag"><i class="bi bi-bell-fill"></i> Xs-Pedia Panel</span>
+        </header>
+
+        <main class="main-content">
+            <div class="page-header">
+    <h1 class="page-heading comic-title">
+        Notif Member
+        <span class="caption-tag"><i class="bi bi-envelope-paper-fill"></i> Gmail API Sender</span>
+    </h1>
+</div>
+
+<section class="dashboard-grid">
+    <article class="stat-card theme-primary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Total Member Ber-Gmail</div>
+                <div class="card-value" id="totalMemberGmailCount">0</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-envelope-check-fill"></i></div>
+        </div>
+    </article>
+
+    <article class="stat-card theme-success">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Target Terpilih</div>
+                <div class="card-value" id="selectedTargetCount">0 Gmail</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-send-check-fill"></i></div>
+        </div>
+    </article>
+
+    <article class="stat-card theme-secondary">
+        <div class="card-top-strip"></div>
+        <div class="card-body">
+            <div>
+                <div class="card-title">Subject Default</div>
+                <div class="card-value" style="font-size: 1.05rem;">Pesan Web Xs-Pedia</div>
+            </div>
+            <div class="card-icon-box"><i class="bi bi-tag-fill"></i></div>
+        </div>
+    </article>
+</section>
+
+<div class="comic-panel">
+    <div class="card-header">
+        <h3 class="comic-title">Susun & Kirim Notifikasi Member</h3>
+        <span class="caption-tag" id="modeBadge">Mode: Pilih Gmail</span>
+    </div>
+
+    <form id="notifMemberForm" class="notif-grid">
+        <div>
+            <div class="form-group">
+                <label for="notifSubject">Subjek Email</label>
+                <input type="text" id="notifSubject" name="subject" value="Pesan Web Xs-Pedia" placeholder="Pesan Web Xs-Pedia" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mode Tujuan Kirim</label>
+                <div class="mode-pills">
+                    <button type="button" class="mode-pill-btn active" id="modeSelectedBtn" data-mode="selected">
+                        <i class="bi bi-check2-square"></i> Pilih Gmail Tertentu
+                    </button>
+                    <button type="button" class="mode-pill-btn" id="modeAllBtn" data-mode="all">
+                        <i class="bi bi-globe2"></i> Kirim Untuk Semua
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notifMessage">Isi Pesan Notifikasi</label>
+                <textarea id="notifMessage" name="message" placeholder="Tulis isi pesan notifikasi untuk member Xs-Pedia di sini..." required></textarea>
+            </div>
+
+            <div class="rekap-box" style="margin-top:0.5rem;">
+                <div style="font-size:0.82rem; font-weight:800; margin-bottom:0.5rem;">
+                    Ringkasan Pengiriman: <span id="summaryText" style="color:var(--c-blue);">Belum ada gmail dipilih</span>
+                </div>
+                <button type="submit" class="save-btn" id="sendNotifBtn" style="width:100%;">
+                    <i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group" style="margin-bottom:0.55rem;">
+                <label>Daftar Gmail Member</label>
+                <div style="display:flex; gap:0.45rem; flex-wrap:wrap; margin-bottom:0.55rem;">
+                    <div class="search-bar" style="flex:1; min-width:180px;">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="gmailFilterInput" placeholder="Cari gmail atau username...">
+                    </div>
+                    <button type="button" class="action-btn" id="selectAllBtn" style="background:var(--c-cyan); color:var(--ink-black);">Pilih Semua</button>
+                    <button type="button" class="action-btn" id="clearSelectionBtn" style="background:var(--c-slate);">Reset</button>
+                </div>
+            </div>
+
+            <div class="recipient-box" id="recipientListBox">
+                <div style="text-align:center; padding:1.5rem;"><span class="spinner"></span> Memuat daftar gmail member...</div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="comic-panel" style="padding: 1rem;">
+    <div class="card-header">
+        <h3 class="comic-title">Log Pengiriman Notifikasi</h3>
+        <span class="caption-tag" id="logCountBadge">0 Log</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Subjek</th>
+                    <th>Tujuan</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="notifLogsBody">
+                <tr><td colspan="4" style="text-align:center; padding:1.25rem; font-weight:700; color:var(--ink-muted);">Belum ada pengiriman pada sesi ini.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+        </main>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let membersWithEmail = [];
+    let selectedEmails = new Set();
+    let sendMode = 'selected'; // 'selected' | 'all'
+    let sessionLogs = [];
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const toggleSidebar = () => {
+        sidebar.classList.toggle('active');
+        modalOverlay.classList.toggle('active');
+    };
+    sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    sidebar.addEventListener('click', (e) => e.stopPropagation());
+    modalOverlay.addEventListener('click', () => {
+        if (sidebar.classList.contains('active')) toggleSidebar();
+    });
+
+    const escapeHtml = (str) => String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    const showToast = (message, isSuccess = true) => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = message;
+        toast.style.backgroundColor = isSuccess ? 'var(--c-green)' : 'var(--c-red)';
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 220);
+        }, 3200);
+    };
+
+    const updateCounters = () => {
+        document.getElementById('totalMemberGmailCount').textContent = membersWithEmail.length;
+        const count = sendMode === 'all' ? membersWithEmail.length : selectedEmails.size;
+        document.getElementById('selectedTargetCount').textContent = `${count} Gmail`;
+        document.getElementById('modeBadge').textContent = sendMode === 'all' ? 'Mode: Kirim Untuk Semua' : 'Mode: Pilih Gmail';
+        document.getElementById('summaryText').textContent = sendMode === 'all'
+            ? `Akan dikirim ke SEMUA member (${membersWithEmail.length} Gmail)`
+            : `Akan dikirim ke ${selectedEmails.size} Gmail terpilih`;
+    };
+
+    const renderRecipientList = (filterText = '') => {
+        const box = document.getElementById('recipientListBox');
+        const q = filterText.trim().toLowerCase();
+        const filtered = membersWithEmail.filter(m =>
+            m.email.toLowerCase().includes(q) ||
+            (m.username || '').toLowerCase().includes(q) ||
+            (m.fullname || '').toLowerCase().includes(q)
+        );
+
+        if (filtered.length === 0) {
+            box.innerHTML = `<div style="text-align:center; padding:1rem; font-weight:700; color:var(--ink-muted);">Tidak ada gmail member yang cocok.</div>`;
+            return;
+        }
+
+        const isAllMode = sendMode === 'all';
+        box.innerHTML = filtered.map(m => {
+            const checked = isAllMode || selectedEmails.has(m.email);
+            return `
+                <label class="recipient-item" style="${isAllMode ? 'opacity:0.85;' : ''}">
+                    <div style="display:flex; align-items:center; gap:0.55rem; min-width:0;">
+                        <input type="checkbox" class="gmail-checkbox" data-email="${escapeHtml(m.email)}" ${checked ? 'checked' : ''} ${isAllMode ? 'disabled' : ''}>
+                        <div style="min-width:0;">
+                            <div class="user-cell-main" style="font-size:0.84rem; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.email)}</div>
+                            <div class="user-cell-sub">@${escapeHtml(m.username || '-')} • ${escapeHtml(m.fullname || '-')}</div>
+                        </div>
+                    </div>
+                    <span class="caption-tag" style="padding:0.12rem 0.45rem; font-size:0.68rem;">Gmail</span>
+                </label>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.gmail-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const email = e.currentTarget.dataset.email;
+                if (e.currentTarget.checked) selectedEmails.add(email);
+                else selectedEmails.delete(email);
+                updateCounters();
+            });
+        });
+    };
+
+    const renderLogs = () => {
+        const tbody = document.getElementById('notifLogsBody');
+        document.getElementById('logCountBadge').textContent = `${sessionLogs.length} Log`;
+        if (sessionLogs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:1.25rem; font-weight:700; color:var(--ink-muted);">Belum ada pengiriman pada sesi ini.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = sessionLogs.map(log => `
+            <tr>
+                <td>${escapeHtml(log.time)}</td>
+                <td><strong>${escapeHtml(log.subject)}</strong></td>
+                <td>${escapeHtml(log.targetSummary)}</td>
+                <td><span class="status-badge ${log.ok ? 'status-success' : 'status-failed'}">${escapeHtml(log.statusText)}</span></td>
+            </tr>
+        `).join('');
+    };
+
+    const setMode = (mode) => {
+        sendMode = mode;
+        document.getElementById('modeSelectedBtn').classList.toggle('active', mode === 'selected');
+        document.getElementById('modeAllBtn').classList.toggle('active', mode === 'all');
+        renderRecipientList(document.getElementById('gmailFilterInput').value);
+        updateCounters();
+    };
+
+    document.getElementById('modeSelectedBtn').addEventListener('click', () => setMode('selected'));
+    document.getElementById('modeAllBtn').addEventListener('click', () => setMode('all'));
+
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+        if (sendMode === 'all') return;
+        const q = document.getElementById('gmailFilterInput').value.trim().toLowerCase();
+        membersWithEmail
+            .filter(m => m.email.toLowerCase().includes(q) || (m.username || '').toLowerCase().includes(q))
+            .forEach(m => selectedEmails.add(m.email));
+        renderRecipientList(q);
+        updateCounters();
+    });
+
+    document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+        if (sendMode === 'all') return;
+        selectedEmails.clear();
+        renderRecipientList(document.getElementById('gmailFilterInput').value);
+        updateCounters();
+    });
+
+    document.getElementById('gmailFilterInput').addEventListener('input', (e) => {
+        renderRecipientList(e.target.value);
+    });
+
+    document.getElementById('notifMemberForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const subject = document.getElementById('notifSubject').value.trim() || 'Pesan Web Xs-Pedia';
+        const message = document.getElementById('notifMessage').value.trim();
+
+        if (!message) {
+            showToast('Isi pesan notifikasi tidak boleh kosong.', false);
+            return;
+        }
+
+        const targets = sendMode === 'all'
+            ? membersWithEmail.map(m => m.email)
+            : Array.from(selectedEmails);
+
+        if (targets.length === 0) {
+            showToast('Pilih minimal satu alamat Gmail tujuan atau pilih "Kirim Untuk Semua".', false);
+            return;
+        }
+
+        const btn = document.getElementById('sendNotifBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner" style="width:1rem;height:1rem;border-width:2px;"></span> Mengirim via Gmail API...';
+
+        try {
+            const response = await fetch('/admin/notif-member/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sendToAll: sendMode === 'all',
+                    emails: targets,
+                    subject,
+                    message
+                })
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || 'Gagal mengirim notifikasi.');
+
+            showToast(result.message || `Notifikasi terkirim ke ${targets.length} Gmail.`, true);
+            sessionLogs.unshift({
+                time: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+                subject,
+                targetSummary: sendMode === 'all' ? `Semua Member (${targets.length} Gmail)` : `${targets.length} Gmail terpilih`,
+                ok: true,
+                statusText: 'Terkirim'
+            });
+            renderLogs();
+            document.getElementById('notifMessage').value = '';
+        } catch (err) {
+            showToast(err.message, false);
+            sessionLogs.unshift({
+                time: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+                subject,
+                targetSummary: sendMode === 'all' ? `Semua Member (${targets.length} Gmail)` : `${targets.length} Gmail terpilih`,
+                ok: false,
+                statusText: 'Gagal'
+            });
+            renderLogs();
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang';
+        }
+    });
+
+    (async () => {
+        try {
+            const res = await fetch('/admin/data/users');
+            const users = await res.json();
+            const seen = new Set();
+            membersWithEmail = (Array.isArray(users) ? users : [])
+                .filter(u => u && typeof u.email === 'string' && u.email.trim().length > 0)
+                .filter(u => {
+                    const clean = u.email.trim().toLowerCase();
+                    if (seen.has(clean)) return false;
+                    seen.add(clean);
+                    return true;
+                })
+                .map(u => ({
+                    email: u.email.trim(),
+                    username: u.username || '',
+                    fullname: u.fullname || ''
+                }));
+
+            renderRecipientList();
+            updateCounters();
+        } catch (err) {
+            document.getElementById('recipientListBox').innerHTML = `<div style="text-align:center; padding:1rem; color:#991B1B; font-weight:800;">Gagal memuat daftar gmail member.</div>`;
+        }
+    })();
+});
+</script>
+</body>
+</html>
