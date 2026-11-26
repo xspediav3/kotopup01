@@ -89,6 +89,45 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
     });
   }
 });
+// ================= DAFTAR METODE DEPOSIT =================
+router.post("/deposit/metode", requireLogin, async (req, res) => {
+  try {
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
+    const role = req.session.role || "user";
+
+    let feePersen =
+      role === "reseller"
+        ? (process.env.FEE_PERCENT_RESELLER || "0.7")
+        : (process.env.FEE_PERCENT_USER || "1.5");
+
+    const metodeFormatted = [
+      {
+        metode: "qris",
+        type: "ewallet",
+        name: "QRIS All Payment (Otomatis)",
+        min: 1000,
+        max: 5000000,
+        fee: 0,
+        fee_persen: feePersen,
+        status: "aktif",
+        img_url: `${fullUrl}/media/metode/qrisfast.png`,
+      },
+    ];
+
+    return res.status(200).json({
+      success: true,
+      message: "Daftar metode deposit Ditznesia",
+      metode: metodeFormatted,
+    });
+  } catch (error) {
+    console.error("Error deposit/metode:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengambil metode.",
+    });
+  }
+});
 
 // ================= BUAT TRANSAKSI DEPOSIT (DITZNESIA) =================
 router.post("/deposit/create", requireLogin, async (req, res) => {
@@ -129,37 +168,47 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const totalBayarRequest = parsedNominal + kodeUnik;
     const saldoDiterima = parsedNominal;
 
-    let result;
+    const createUrl = `${DITZ_BASE}/deposit/create?apikey=${encodeURIComponent(DITZ_API_KEY)}&nominal=${totalBayarRequest}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    let response;
     try {
-      const ditzRes = await axios.get(`${DITZ_BASE}/deposit/create`, {
-        params: {
-          apikey: DITZ_API_KEY,
-          nominal: totalBayarRequest
-        },
-        timeout: 15000,
+      response = await fetch(createUrl, {
+        method: "GET",
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        }
+        },
+        signal: controller.signal
       });
-      result = ditzRes.data;
-    } catch (axiosErr) {
-      console.error("Ditznesia Create Error:", axiosErr?.response?.data || axiosErr.message);
+    } catch (fetchError) {
+      console.error("Ditznesia Create Fetch Error:", fetchError?.message || fetchError);
       return res.status(502).json({
         success: false,
-        message: axiosErr?.response?.data?.message || "Koneksi server ke Ditznesia gagal."
+        message: "Koneksi server ke Ditznesia gagal."
       });
+    } finally {
+      clearTimeout(timeoutId);
     }
 
-    if (!result || typeof result !== "object") {
+    const responseText = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(responseText);
+    } catch (jsonError) {
+      console.error("Ditznesia Create Invalid Response (Bukan JSON):", responseText.slice(0, 500));
       return res.status(502).json({
         success: false,
-        message: "Server Ditznesia mengembalikan respons tidak valid."
+        message: "Server Ditznesia mengembalikan respons yang bukan JSON."
       });
     }
 
     const paymentData = result?.data || result?.deposit || result;
     const isSuccess =
+      response.ok &&
       result?.success !== false &&
       result?.status !== false &&
       Boolean(paymentData?.id || paymentData?.invoice_id || paymentData?.trx_id);
@@ -174,7 +223,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
     const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
 
-    // id asli Ditznesia dipakai untuk cek status / cancel; trx_id dipakai untuk tampilan
+    // id asli Ditznesia untuk cek status/cancel; trx_id untuk ditampilkan
     const ditzId = String(paymentData.id || paymentData.invoice_id || paymentData.trx_id);
     const ditzTrxId = String(paymentData.trx_id || paymentData.reff_id || ditzId);
 
@@ -277,13 +326,19 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         }
 
         const checkId = String(latestDeposit.provider_id || latestDeposit.id || ditzId);
-        const checkRes = await axios.get(`${DITZ_BASE}/deposit/status`, {
-          params: { apikey: DITZ_API_KEY, id: checkId },
-          timeout: 10000,
-          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
+        const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(checkId)}`;
+        const checkRes = await fetch(detailUrl, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0"
+          }
         });
 
-        const providerTrx = checkRes.data?.data || checkRes.data?.deposit || checkRes.data;
+        if (!checkRes.ok) return;
+
+        const checkData = await checkRes.json();
+        const providerTrx = checkData?.data || checkData?.deposit || checkData;
         if (!providerTrx || !providerTrx.status) return;
 
         const rawProviderStatus = String(providerTrx.status).toLowerCase();
@@ -417,7 +472,6 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
 
-    // id asli Ditznesia untuk query API; trx_id untuk ditampilkan
     const ditzId = String(localData.provider_id || localData.id || id);
     const ditzTrxId = String(localData.trx_id || localData.reff_id || ditzId);
 
@@ -470,29 +524,29 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
     let providerTrx = null;
     try {
-      const detailRes = await axios.get(`${DITZ_BASE}/deposit/status`, {
-        params: {
-          apikey: DITZ_API_KEY,
-          id: ditzId
-        },
-        timeout: 12000,
+      const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
+      const detailRes = await fetch(detailUrl, {
+        method: "GET",
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
         }
       });
 
-      const payload = detailRes.data?.data || detailRes.data?.deposit || detailRes.data;
-      if (
-        detailRes.data?.success !== false &&
-        detailRes.data?.status !== false &&
-        payload &&
-        (payload.status || payload.id || payload.trx_id)
-      ) {
-        providerTrx = payload;
+      if (detailRes.ok) {
+        const detailData = await detailRes.json();
+        const payload = detailData?.data || detailData?.deposit || detailData;
+        if (
+          detailData?.success !== false &&
+          detailData?.status !== false &&
+          payload &&
+          (payload.status || payload.id || payload.trx_id)
+        ) {
+          providerTrx = payload;
+        }
       }
     } catch (err) {
-      console.error("Gagal cek status Ditznesia:", err?.response?.data || err.message);
+      console.error("Gagal cek status Ditznesia:", err?.message || err);
     }
 
     if (providerTrx) {
@@ -686,20 +740,20 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
 
     let cancelMessage = "Deposit berhasil dibatalkan.";
     try {
-      const cancelRes = await axios.get(`${DITZ_BASE}/deposit/cancel`, {
-        params: {
-          apikey: DITZ_API_KEY,
-          id: ditzId
-        },
-        timeout: 12000,
+      const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
+      const cancelRes = await fetch(cancelUrl, {
+        method: "GET",
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
         }
       });
-      cancelMessage = cancelRes.data?.message || cancelMessage;
+      if (cancelRes.ok) {
+        const cancelJson = await cancelRes.json().catch(() => null);
+        cancelMessage = cancelJson?.message || cancelMessage;
+      }
     } catch (cancelErr) {
-      console.error("Ditznesia Cancel Warning:", cancelErr?.response?.data || cancelErr.message);
+      console.error("Ditznesia Cancel Warning:", cancelErr?.message || cancelErr);
     }
 
     await User.updateOne(
