@@ -711,7 +711,15 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const userHistory = await User.findOne(
-      { _id: user._id, "historyDeposit.id": id },
+      {
+        _id: user._id,
+        $or: [
+          { "historyDeposit.id": id },
+          { "historyDeposit.trx_id": id },
+          { "historyDeposit.provider_id": id },
+          { "historyDeposit.ditz_id": id }
+        ]
+      },
       { "historyDeposit.$": 1 }
     );
 
@@ -720,9 +728,10 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
-    const displayTrxId = String(currentData.trx_id || currentData.reff_id || id);
+    const currentStatus = String(currentData.status || "pending").toLowerCase();
+    const displayTrxId = String(currentData.trx_id || currentData.reff_id || currentData.id || id);
 
-    if (currentData.status !== "pending") {
+    if (!["pending", "processing"].includes(currentStatus)) {
       return res.status(400).json({
         success: false,
         message: `Transaksi tidak bisa dibatalkan karena status sudah ${currentData.status}.`
@@ -739,8 +748,12 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const targetPaymentId = currentData.provider_id || id;
+    // Prioritaskan id asli Ditznesia (UUID) sesuai parameter GET /deposit/cancel
+    const targetPaymentId = String(currentData.provider_id || currentData.ditz_id || currentData.id || id);
     const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     let response;
     try {
@@ -749,14 +762,17 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        }
+        },
+        signal: controller.signal
       });
     } catch (fetchError) {
       console.error("Ditznesia Cancel Fetch Error:", fetchError);
       return res.status(502).json({
         success: false,
-        message: "Koneksi server ke Ditznesia gagal."
+        message: "Koneksi server ke Ditznesia gagal saat membatalkan deposit."
       });
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     const responseText = await response.text();
@@ -772,27 +788,48 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    await editHistoryDeposit(user._id, id, "cancelled");
+    const cancelData = result?.data || result?.deposit || result;
+    const rawCancelStatus = String(cancelData?.status || "").toLowerCase();
+    const isCancelConfirmed =
+      response.ok &&
+      result?.success !== false &&
+      result?.status !== false &&
+      (!rawCancelStatus || ["batal", "cancel", "cancelled", "berhasil", "success", "sukses"].includes(rawCancelStatus));
+
+    if (!isCancelConfirmed) {
+      return res.status(400).json({
+        success: false,
+        message: result?.message || result?.error || cancelData?.message || "Ditznesia gagal membatalkan deposit."
+      });
+    }
+
+    const dbTargetId = currentData.id || id;
+    await editHistoryDeposit(user._id, dbTargetId, "cancelled");
+
+    await User.updateOne(
+      { _id: user._id, "historyDeposit.id": dbTargetId },
+      {
+        $set: {
+          "historyDeposit.$.provider_status": rawCancelStatus || "batal"
+        }
+      }
+    );
 
     return res.status(200).json({
       success: true,
-      message: result?.message || "Deposit berhasil dibatalkan.",
+      message: result?.message || "Deposit berhasil dibatalkan di Ditznesia.",
       data: {
-        id: id,
+        id: dbTargetId,
         trx_id: displayTrxId,
         reff_id: displayTrxId,
         status: "cancelled"
       }
     });
-
   } catch (error) {
     console.error("Cancel Deposit Error:", error);
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
-
-
-
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
