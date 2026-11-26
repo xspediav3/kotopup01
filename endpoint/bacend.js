@@ -710,27 +710,21 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID diperlukan." });
     }
 
-    const historyList = Array.isArray(user.historyDeposit) ? user.historyDeposit : [];
-    const targetItem = historyList.find(
-      (item) =>
-        String(item?.id || "") === String(id) ||
-        String(item?.trx_id || "") === String(id) ||
-        String(item?.provider_id || "") === String(id) ||
-        String(item?.ditz_id || "") === String(id)
+    const userHistory = await User.findOne(
+      { _id: user._id, "historyDeposit.id": id },
+      { "historyDeposit.$": 1 }
     );
 
-    if (!targetItem) {
+    if (!userHistory || !userHistory.historyDeposit.length) {
       return res.status(404).json({ success: false, message: "Data transaksi tidak ditemukan." });
     }
 
-    const currentStatus = String(targetItem.status || "pending").toLowerCase();
-    const displayTrxId = String(targetItem.trx_id || targetItem.reff_id || targetItem.id || id);
-    const ditzId = String(targetItem.provider_id || targetItem.ditz_id || targetItem.id || id);
+    const currentData = userHistory.historyDeposit[0];
 
-    if (!["pending", "processing"].includes(currentStatus)) {
+    if (currentData.status !== "pending") {
       return res.status(400).json({
         success: false,
-        message: `Transaksi tidak bisa dibatalkan karena status sudah ${targetItem.status}.`
+        message: `Transaksi tidak bisa dibatalkan karena status sudah ${currentData.status}.`
       });
     }
 
@@ -744,10 +738,8 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const targetPaymentId = currentData.provider_id || id;
+    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
 
     let response;
     try {
@@ -756,17 +748,14 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        },
-        signal: controller.signal
+        }
       });
     } catch (fetchError) {
       console.error("Ditznesia Cancel Fetch Error:", fetchError);
       return res.status(502).json({
         success: false,
-        message: "Koneksi server ke Ditznesia gagal saat membatalkan deposit."
+        message: "Koneksi server ke Ditznesia gagal."
       });
-    } finally {
-      clearTimeout(timeoutId);
     }
 
     const responseText = await response.text();
@@ -782,44 +771,23 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const cancelData = result?.data || result?.deposit || result;
-    const rawCancelStatus = String(cancelData?.status || "").toLowerCase();
-    const isCancelConfirmed =
-      response.ok &&
-      result?.success !== false &&
-      result?.status !== false &&
-      (!rawCancelStatus || ["batal", "cancel", "cancelled", "berhasil", "success", "sukses"].includes(rawCancelStatus));
-
-    if (!isCancelConfirmed) {
-      return res.status(400).json({
-        success: false,
-        message: result?.message || result?.error || cancelData?.message || "Ditznesia gagal membatalkan deposit."
-      });
-    }
-
-    targetItem.status = "cancelled";
-    targetItem.provider_status = rawCancelStatus || "batal";
-    user.markModified("historyDeposit");
-    await user.save();
+    await editHistoryDeposit(user._id, id, "cancelled");
 
     return res.status(200).json({
       success: true,
-      message: result?.message || "Deposit berhasil dibatalkan di Ditznesia.",
+      message: result?.message || "Deposit berhasil dibatalkan.",
       data: {
-        id: targetItem.id || ditzId,
-        trx_id: displayTrxId,
-        reff_id: displayTrxId,
-        ditz_id: ditzId,
-        provider_id: ditzId,
+        id: id,
+        trx_id: id,
         status: "cancelled"
       }
     });
+
   } catch (error) {
     console.error("Cancel Deposit Error:", error);
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
-
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
 router.get("/produk", requireLogin, async (req, res) => {
