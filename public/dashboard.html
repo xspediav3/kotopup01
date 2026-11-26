@@ -12,13 +12,13 @@
     <meta property="og:title" content="Dashboard">
     <meta property="og:description" content="Platform topup terpercaya dengan berbagai layanan digital">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="#">
+    <meta property="og:url" content="https://xspedia.my.id/">
     <meta property="og:image" content="/media/logo.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Dashboard">
     <meta name="twitter:description" content="Platform topup terpercaya dengan berbagai layanan digital">
     <meta name="twitter:image" content="/media/logo.png">
-    <link rel="canonical" href="#">
+    <link rel="canonical" href="https://xspedia.my.id/">
     <link rel="icon" type="image/png" sizes="32x32" href="/media/banner.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/media/banner.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/media/banner.png">
@@ -2067,6 +2067,170 @@
             .footer-community { align-items: flex-start; flex-direction: column; }
         }
 
+    
+
+        /* ===== Lively game tiles with four-corner strokes ===== */
+        .vp-service-grid {
+            gap: .85rem;
+        }
+
+        .vp-service-item {
+            isolation: isolate;
+            position: relative;
+            min-height: 118px;
+            padding: 1rem .75rem .9rem;
+            border: 1.5px solid rgba(34, 197, 94, .28);
+            border-radius: 19px;
+            background: linear-gradient(150deg, #ffffff 0%, #f3fff6 100%);
+            box-shadow: 0 7px 18px rgba(22, 101, 52, .07), inset 0 1px 0 rgba(255,255,255,.95);
+            overflow: hidden;
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+
+        /* A slim inner outline keeps the card edge visible on bright backgrounds. */
+        .vp-service-item::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            z-index: -1;
+            border: 1px solid rgba(34, 197, 94, .10);
+            border-radius: 14px;
+            pointer-events: none;
+        }
+
+        /* Four short L-shaped corner strokes. */
+        .vp-service-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: .95;
+            background:
+                linear-gradient(#16a34a, #16a34a) left 8px top 8px / 15px 2px no-repeat,
+                linear-gradient(#16a34a, #16a34a) left 8px top 8px / 2px 15px no-repeat,
+                linear-gradient(#22c55e, #22c55e) right 8px top 8px / 15px 2px no-repeat,
+                linear-gradient(#22c55e, #22c55e) right 8px top 8px / 2px 15px no-repeat,
+                linear-gradient(#22c55e, #22c55e) left 8px bottom 8px / 15px 2px no-repeat,
+                linear-gradient(#22c55e, #22c55e) left 8px bottom 8px / 2px 15px no-repeat,
+                linear-gradient(#15803d, #15803d) right 8px bottom 8px / 15px 2px no-repeat,
+                linear-gradient(#15803d, #15803d) right 8px bottom 8px / 2px 15px no-repeat;
+        }
+
+        .vp-service-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(22, 163, 74, .62);
+            background: linear-gradient(150deg, #ffffff 0%, #e7fbea 100%);
+            box-shadow: 0 12px 25px rgba(22, 163, 74, .15), 0 0 0 3px rgba(74, 222, 128, .10);
+            color: #166534;
+        }
+
+        .vp-service-item:active {
+            transform: translateY(-1px) scale(.985);
+        }
+
+        .vp-service-item .icon-wrapper {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto .7rem;
+            border: 2px solid rgba(255,255,255,.95);
+            outline: 1px solid rgba(22, 163, 74, .24);
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(255,255,255,.92) 0 5%, transparent 6%),
+                linear-gradient(145deg, #bbf7d0 0%, #4ade80 48%, #0d9488 100%);
+            box-shadow: 0 7px 16px rgba(16, 185, 129, .22), inset 0 1px 2px rgba(255,255,255,.75);
+            overflow: hidden;
+            position: relative;
+            transition: transform .22s ease, box-shadow .22s ease;
+        }
+
+        .vp-service-item:hover .icon-wrapper {
+            transform: translateY(-2px) rotate(-3deg) scale(1.04);
+            background: linear-gradient(145deg, #86efac 0%, #22c55e 52%, #047857 100%);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, .30);
+        }
+
+        .vp-service-item .icon-wrapper .bi {
+            color: #065f46;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 1px rgba(255,255,255,.45));
+            transition: color .22s ease, transform .22s ease;
+        }
+
+        .vp-service-item:hover .icon-wrapper .bi {
+            color: #ffffff;
+            transform: scale(1.08);
+        }
+
+        .vp-service-item .icon-wrapper img,
+        .vp-service-item img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .vp-service-item .service-name {
+            position: relative;
+            z-index: 3;
+            color: #166534;
+            font-family: var(--vp-font-heading);
+            font-size: .82rem;
+            font-weight: 800;
+            letter-spacing: .1px;
+            line-height: 1.3;
+            text-shadow: 0 1px 0 rgba(255,255,255,.85);
+        }
+
+        [data-theme="dark"] .vp-service-item {
+            background: linear-gradient(150deg, #1d3324 0%, #17271d 100%);
+            border-color: rgba(74, 222, 128, .34);
+            box-shadow: 0 8px 20px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.04);
+        }
+
+        [data-theme="dark"] .vp-service-item::before {
+            border-color: rgba(74, 222, 128, .12);
+        }
+
+        [data-theme="dark"] .vp-service-item .service-name {
+            color: #bbf7d0;
+            text-shadow: none;
+        }
+
+        [data-theme="dark"] .vp-service-item:hover {
+            background: linear-gradient(150deg, #24452f 0%, #1b3324 100%);
+            border-color: rgba(74, 222, 128, .7);
+        }
+
+        @media (max-width: 767.98px) {
+            .vp-service-grid { gap: .65rem; }
+            .vp-service-item {
+                min-height: 108px;
+                padding: .85rem .55rem .8rem;
+                border-radius: 17px;
+            }
+            .vp-service-item .icon-wrapper {
+                width: 52px;
+                height: 52px;
+                border-radius: 16px;
+                margin-bottom: .58rem;
+            }
+            .vp-service-item .service-name { font-size: .74rem; }
+            /* Keep the order status label intact now that its Detail column is gone. */
+            #latestOrderHistoryBody td:last-child {
+                margin-top: 0;
+                padding: .5rem 0;
+                border-top: 0;
+            }
+            #latestOrderHistoryBody td:last-child::before {
+                content: attr(data-label);
+                margin-bottom: .25rem;
+            }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -2216,10 +2380,7 @@
                         </div>
                     </section>
 <section class="vp-section content-loaded" style="animation-delay: 0.2s;">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="mb-0 fw-bold" style="font-family: var(--vp-font-heading); color: var(--vp-dark); font-size: 1.15rem;">
-                                Category Produk
-                            </h4>
+                        <div class="d-flex justify-content-end align-items-center mb-3">
                             <div class="vp-service-toggle-wrapper" id="serviceToggleAction" role="button" aria-label="Toggle popular services">
                                 <i class="bi bi-grid-fill" id="serviceToggleIcon"></i>
                                 <span class="toggle-text" id="serviceToggleText">Lihat Semua</span>
@@ -2245,7 +2406,7 @@
                                         <th>Nominal</th>
                                         <th>Metode</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th>Pembatalan</th>
                                     </tr>
                                 </thead>
                                 <tbody id="latestDepositHistoryBody">
@@ -2270,12 +2431,11 @@
                                         <th>Layanan</th>
                                         <th>Target</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="latestOrderHistoryBody">
                                      <tr>
-                                        <td colspan="5" class="text-center">
+                                        <td colspan="4" class="text-center">
                                             <div class="vp-loading-shimmer" style="width: 100%; height: 40px;"></div>
                                         </td>
                                     </tr>
@@ -2332,9 +2492,9 @@
                     <div class="footer-link-card">
                         <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
-                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/628231090429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">xspedia@gmail.com</a></li>
+                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
                 </div>
@@ -2342,9 +2502,9 @@
                 <div class="footer-community">
                     <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
-                        <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                        <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-                        <a href="mailto:astrapterodactyl@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
+                        <a href="https://wa.me/628231090429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:xspedia@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </footer>
@@ -2816,10 +2976,9 @@
                         <td data-label="Nominal">Rp ${deposit.get_balance.toLocaleString('id-ID')}</td>
                         <td data-label="Metode">${deposit.metode || '-'}</td>
                         <td data-label="Status">${statusBadge}</td>
-                        <td data-label="Aksi">
+                        <td data-label="Pembatalan">
                             <div class="action-buttons">
-                                <button class="btn btn-primary btn-sm" onclick="showDepositDetail('${deposit.id}')">Detail</button>
-                                ${deposit.status === 'pending' ? `<button class="btn btn-outline-secondary btn-sm" onclick="cancelDeposit('${deposit.id}')">Batal</button>` : ''}
+                                ${deposit.status === 'pending' ? `<button class="btn btn-outline-secondary btn-sm" onclick="cancelDeposit('${deposit.id}')">Batal</button>` : '<span class="text-muted">—</span>'}
                             </div>
                         </td>
                     `;
@@ -2828,7 +2987,7 @@
             }
 
             if (latestOrders.length === 0) {
-                orderTbody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada data order.</td></tr>';
+                orderTbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada data order.</td></tr>';
             } else {
                 latestOrders.forEach(order => {
                     const row = document.createElement('tr');
@@ -2849,11 +3008,6 @@
                         <td data-label="Layanan">${order.layanan || '-'}</td>
                         <td data-label="Target">${order.target || '-'}</td>
                         <td data-label="Status">${statusBadge}</td>
-                        <td data-label="Aksi">
-                            <div class="action-buttons">
-                                <button class="btn btn-primary btn-sm" onclick="showOrderDetail('${order.id}')">Detail</button>
-                            </div>
-                        </td>
                     `;
                     orderTbody.appendChild(row);
                 });
