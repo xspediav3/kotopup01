@@ -1604,6 +1604,469 @@
             .mobile-bottom-nav { display: none !important; }
         }
 
+
+        /* ===== Riwayat transaksi: horizontal swipe cards on mobile ===== */
+        @media (max-width: 767.98px) {
+            .vp-history-section {
+                padding: 1.05rem .9rem 1rem;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(34, 197, 94, .16);
+                box-shadow: 0 9px 24px rgba(22, 101, 52, .055);
+            }
+
+            .vp-history-section .section-title {
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+                margin-bottom: .9rem;
+                font-size: 1.04rem;
+                letter-spacing: -.25px;
+            }
+
+            .vp-history-section .section-title::before {
+                content: '';
+                display: block;
+                width: 5px;
+                height: 23px;
+                flex: 0 0 5px;
+                border-radius: 99px;
+                background: linear-gradient(180deg, #4ade80, #15803d);
+            }
+
+            .vp-history-table-container {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: .1rem 0 .35rem;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(34, 197, 94, .45) rgba(34, 197, 94, .08);
+            }
+
+            .vp-history-table-container::-webkit-scrollbar { height: 5px; }
+            .vp-history-table-container::-webkit-scrollbar-track {
+                background: rgba(34, 197, 94, .08);
+                border-radius: 99px;
+            }
+            .vp-history-table-container::-webkit-scrollbar-thumb {
+                background: rgba(34, 197, 94, .42);
+                border-radius: 99px;
+            }
+
+            .vp-history-table {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                overflow: visible;
+                border: 0;
+                border-spacing: 0;
+            }
+
+            .vp-history-table thead { display: none !important; }
+
+            .vp-history-table tbody {
+                display: flex;
+                align-items: stretch;
+                gap: .75rem;
+                width: max-content;
+                min-width: 100%;
+                padding: .1rem .05rem .35rem;
+            }
+
+            .vp-history-table tbody tr {
+                display: flex;
+                flex: 0 0 min(83vw, 320px);
+                flex-direction: column;
+                width: min(83vw, 320px);
+                min-width: 250px;
+                margin: 0;
+                padding: .85rem .95rem .9rem;
+                border: 1px solid var(--vp-border-color);
+                border-left: 3px solid #4ade80;
+                border-radius: 17px;
+                background: linear-gradient(150deg, var(--vp-card-bg) 0%, rgba(236, 253, 243, .55) 100%);
+                box-shadow: 0 5px 16px rgba(22, 101, 52, .07);
+                scroll-snap-align: start;
+            }
+
+            [data-theme="dark"] .vp-history-table tbody tr {
+                background: linear-gradient(150deg, #17251b 0%, #1b3022 100%);
+                border-left-color: #4ade80;
+            }
+
+            .vp-history-table tbody tr:hover {
+                transform: none;
+                box-shadow: 0 7px 18px rgba(22, 101, 52, .1);
+            }
+
+            .vp-history-table tbody td {
+                display: grid;
+                grid-template-columns: 82px minmax(0, 1fr);
+                align-items: center;
+                gap: .55rem;
+                width: 100%;
+                padding: .48rem 0;
+                border: 0;
+                text-align: left;
+                color: var(--vp-dark);
+                font-size: .79rem;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            .vp-history-table tbody td::before {
+                display: block;
+                margin: 0;
+                color: var(--vp-text-muted);
+                font-size: .62rem;
+                font-weight: 800;
+                letter-spacing: .45px;
+                line-height: 1.35;
+            }
+
+            .vp-history-table tbody td:first-child {
+                color: var(--vp-primary-dark);
+                font-weight: 800;
+            }
+
+            .vp-history-table tbody td:last-child {
+                display: block;
+                margin-top: .45rem;
+                padding: .75rem 0 0;
+                border-top: 1px solid var(--vp-border-color);
+            }
+
+            .vp-history-table tbody td:last-child::before {
+                content: 'AKSI';
+                margin-bottom: .5rem;
+            }
+
+            .vp-history-table .action-buttons {
+                display: flex;
+                flex-direction: row;
+                justify-content: stretch;
+                flex-wrap: nowrap;
+                gap: .5rem;
+            }
+
+            .vp-history-table .action-buttons .btn {
+                flex: 1 1 0;
+                width: auto;
+                min-width: 0;
+                padding: .58rem .7rem;
+                border-radius: 10px;
+                font-size: .76rem;
+            }
+
+            .vp-history-table .status-badge {
+                justify-self: start;
+                padding: .32rem .65rem;
+                border-radius: 999px;
+            }
+
+            /* Loading / empty-state row spans the swipe area as one panel. */
+            .vp-history-table tbody tr:has(td[colspan]) {
+                flex-basis: calc(100vw - 3.5rem);
+                width: calc(100vw - 3.5rem);
+                min-width: 0;
+                justify-content: center;
+                border-left-width: 1px;
+                background: var(--vp-card-bg);
+            }
+
+            .vp-history-table tbody tr:has(td[colspan]) td {
+                display: block;
+                text-align: center;
+            }
+
+            .vp-history-table tbody tr:has(td[colspan]) td::before { display: none; }
+
+            .vp-history-table-container::after {
+                content: 'Geser ke samping untuk melihat riwayat lainnya';
+                display: block;
+                padding: .15rem .1rem 0;
+                color: var(--vp-text-muted);
+                text-align: center;
+                font-size: .65rem;
+                font-weight: 600;
+                letter-spacing: .1px;
+            }
+
+            .history-view-all {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: .45rem;
+                margin-top: .7rem;
+                padding: .72rem .9rem;
+                border: 1px solid rgba(34, 197, 94, .22);
+                border-radius: 13px;
+                background: linear-gradient(135deg, #effcf2 0%, #dcfce7 100%);
+                color: #15803d;
+                font-size: .82rem;
+                font-weight: 800;
+                text-decoration: none;
+            }
+
+            .history-view-all::after {
+                content: '\2192';
+                font-size: 1rem;
+                transition: transform .2s ease;
+            }
+
+            .history-view-all:active::after { transform: translateX(3px); }
+        }
+
+        /* ===== Footer: compact, clean green dashboard panel ===== */
+        footer.dashboard-footer {
+            display: grid;
+            grid-template-columns: minmax(220px, .9fr) minmax(0, 1.8fr);
+            align-items: stretch;
+            gap: 1rem;
+            margin: 0 8px 8px;
+            padding: 1rem;
+            width: calc(100% - 16px);
+            border: 1px solid var(--vp-border-color);
+            border-radius: 22px;
+            background: linear-gradient(145deg, #ffffff 0%, #f5fff7 100%);
+            box-shadow: 0 10px 28px rgba(22, 101, 52, .07);
+            color: var(--vp-dark);
+        }
+
+        [data-theme="dark"] footer.dashboard-footer {
+            background: linear-gradient(145deg, #17251b 0%, #1b3022 100%);
+            border-color: var(--vp-border-color);
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            padding: 1rem;
+            border: 1px solid rgba(34, 197, 94, .15);
+            border-radius: 17px;
+            background: linear-gradient(145deg, #edfff2 0%, #f8fff9 100%);
+        }
+
+        [data-theme="dark"] .footer-brand {
+            background: linear-gradient(145deg, #1d3826 0%, #192a20 100%);
+            border-color: var(--vp-border-color);
+        }
+
+        .footer-brand-top {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .footer-brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%);
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 12px rgba(22, 163, 74, .2);
+        }
+
+        .footer-brand-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: .08rem;
+            min-width: 0;
+        }
+
+        .footer-brand-copy .footer-logo-name { margin: 0; }
+        .footer-brand-copy .footer-logo-name-text {
+            color: #166534;
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        [data-theme="dark"] .footer-brand-copy .footer-logo-name-text { color: #86efac; }
+
+        .footer-brand-kicker {
+            color: #3f8a59;
+            font-size: .57rem;
+            font-weight: 800;
+            letter-spacing: 1.05px;
+        }
+
+        .footer-brand .footer-description {
+            max-width: none;
+            margin: 1rem 0;
+            color: var(--vp-text-muted);
+            font-size: .79rem;
+            line-height: 1.7;
+        }
+
+        .footer-brand .footer-copyright {
+            width: 100%;
+            margin: 0;
+            padding-top: .7rem;
+            border-top: 1px solid rgba(34, 197, 94, .16);
+            color: var(--vp-text-muted);
+            font-size: .66rem;
+            line-height: 1.5;
+        }
+
+        .footer-links-section {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-content: stretch;
+            gap: .65rem;
+            min-width: 0;
+        }
+
+        .footer-link-card {
+            min-width: 0;
+            padding: .95rem .8rem;
+            border: 1px solid var(--vp-border-color);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .82);
+        }
+
+        [data-theme="dark"] .footer-link-card { background: rgba(255, 255, 255, .035); }
+
+        .footer-link-card .footer-section-title {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0 0 .7rem;
+            color: #16803d;
+            font-size: .74rem;
+            font-weight: 800;
+        }
+
+        [data-theme="dark"] .footer-link-card .footer-section-title { color: #86efac; }
+        .footer-link-card .footer-section-title i { font-size: .85rem; }
+
+        .footer-link-card ul {
+            display: grid;
+            gap: .48rem;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .footer-link-card li {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0;
+            color: var(--vp-text-muted);
+            font-size: .75rem;
+            line-height: 1.4;
+        }
+
+        .footer-link-card li > i {
+            flex: 0 0 14px;
+            color: #22a052;
+            font-size: .78rem;
+        }
+
+        .footer-link-card li a {
+            color: var(--vp-text-muted);
+            font-size: .73rem;
+            overflow-wrap: anywhere;
+            text-decoration: none;
+            transition: color .2s ease, transform .2s ease;
+        }
+
+        .footer-link-card li a:hover {
+            color: var(--vp-primary-dark);
+            transform: translateX(2px);
+        }
+
+        .footer-community {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+            padding: .75rem .25rem 0;
+            border-top: 1px solid var(--vp-border-color);
+        }
+
+        .footer-community-label {
+            color: var(--vp-text-muted);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .footer-social-links {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .footer-social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin: 0;
+            border: 1px solid rgba(34, 197, 94, .18);
+            border-radius: 12px;
+            background: var(--vp-card-bg);
+            color: #16803d;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform .2s ease, background .2s ease;
+        }
+
+        .footer-social-links a:hover {
+            transform: translateY(-2px);
+            background: var(--vp-primary-light);
+            color: var(--vp-primary-dark);
+        }
+
+        @media (max-width: 991.98px) {
+            footer.dashboard-footer {
+                grid-template-columns: 1fr;
+                gap: .75rem;
+                margin: 0 6px 8px;
+                padding: .75rem;
+                width: calc(100% - 12px);
+                border-radius: 20px;
+            }
+
+            .footer-links-section {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: .6rem;
+                width: 100%;
+            }
+
+            .footer-link-card { padding: .85rem .75rem; }
+            .footer-link-card:nth-child(3) { grid-column: 1 / -1; }
+            .footer-link-card:nth-child(3) ul {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: .5rem;
+            }
+            .footer-link-card:nth-child(3) li { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 390px) {
+            .footer-link-card { padding: .78rem .62rem; }
+            .footer-link-card .footer-section-title { font-size: .7rem; }
+            .footer-link-card li a { font-size: .68rem; }
+            .footer-community { align-items: flex-start; flex-direction: column; }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -1825,23 +2288,30 @@
                 </main>
             </div>
             
-            <footer>
-                <div class="footer-left">
-                    <a href="/dashboard" class="footer-logo-name">
-                        <span class="footer-logo-name-text">Dashboard</span>
-                    </a>
-                    <div class="footer-description">
-                        <i class="bi bi-info-circle-fill"></i>
-                        Layanan digital dalam satu tempat, cepat dan mudah digunakan.
+            <footer class="dashboard-footer">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-brand-top">
+                            <span class="footer-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <div class="footer-brand-copy">
+                                <a href="/dashboard" class="footer-logo-name">
+                                    <span class="footer-logo-name-text">Dashboard</span>
+                                </a>
+                                <span class="footer-brand-kicker">PLATFORM LAYANAN DIGITAL</span>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            Satu tempat untuk mengelola saldo, transaksi, dan berbagai kebutuhan digital dengan lebih praktis.
+                        </p>
                     </div>
                     <div class="footer-copyright">
-                        © <span id="currentYear"></span>. Semua hak dilindungi.
+                        © <span id="currentYear"></span> Dashboard. Seluruh hak cipta dilindungi.
                     </div>
                 </div>
-                
+
                 <div class="footer-links-section">
-                    <div>
-                        <span class="footer-section-title">Navigasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-compass-fill"></i> Navigasi</span>
                         <ul>
                             <li><a href="/dashboard">Beranda</a></li>
                             <li><a href="/deposit">Deposit</a></li>
@@ -1849,8 +2319,8 @@
                             <li><a href="/price-list">Daftar Harga</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Informasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-grid-1x2-fill"></i> Informasi</span>
                         <ul>
                             <li><a href="/profile">Profil Pengguna</a></li>
                             <li><a href="/api-key-page">API Key</a></li>
@@ -1859,8 +2329,8 @@
                             <li><a href="#">Kebijakan Privasi</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Kontak Kami</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
                             <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
                             <li><i class="bi bi-envelope-fill"></i> <a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
@@ -1868,12 +2338,13 @@
                         </ul>
                     </div>
                 </div>
-                
-                <div class="footer-right">
+
+                <div class="footer-community">
+                    <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
-                        <a href="#" aria-label="Saluran"><i class="bi bi-whatsapp"></i></a>
-                        <a href="#" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-                        <a href="#" aria-label="Group"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:astrapterodactyl@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </footer>
