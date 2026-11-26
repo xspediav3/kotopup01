@@ -223,7 +223,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
     const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
 
-    // id asli Ditznesia untuk cek status/cancel; trx_id untuk ditampilkan
+    // ditzId (UUID paling atas dari Ditznesia) untuk cek status & cancel
+    // ditzTrxId (trx_id INV...) untuk ditampilkan ke user
     const ditzId = String(paymentData.id || paymentData.invoice_id || paymentData.trx_id);
     const ditzTrxId = String(paymentData.trx_id || paymentData.reff_id || ditzId);
 
@@ -257,9 +258,10 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const initialStatus = ["berhasil", "paid", "success", "sukses"].includes(rawStatus) ? "success" : rawStatus;
 
     const historyDataForDb = {
-      id: ditzId,
+      id: ditzTrxId,
       trx_id: ditzTrxId,
       reff_id: ditzTrxId,
+      ditz_id: ditzId,
       nominal: parsedNominal,
       tambahan: kodeUnik,
       kode_unik: kodeUnik,
@@ -289,9 +291,11 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        id: ditzId,
+        id: ditzTrxId,
         trx_id: ditzTrxId,
         reff_id: ditzTrxId,
+        ditz_id: ditzId,
+        provider_id: ditzId,
         metode: "QRIS",
         nominal: parsedNominal,
         kode_unik: kodeUnik,
@@ -313,7 +317,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const intervalId = setInterval(async () => {
       try {
         const latestHistory = await User.findOne(
-          { _id: user._id, "historyDeposit.id": ditzId },
+          { _id: user._id, "historyDeposit.id": ditzTrxId },
           { "historyDeposit.$": 1 }
         );
 
@@ -325,7 +329,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           return;
         }
 
-        const checkId = String(latestDeposit.provider_id || latestDeposit.id || ditzId);
+        const checkId = String(latestDeposit.provider_id || latestDeposit.ditz_id || ditzId);
         const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(checkId)}`;
         const checkRes = await fetch(detailUrl, {
           method: "GET",
@@ -346,8 +350,6 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           ? "success"
           : rawProviderStatus;
 
-        const resolvedTrxId = String(providerTrx.trx_id || latestDeposit.trx_id || ditzTrxId);
-
         if (providerStatus === "success") {
           let pTime = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
           if (typeof pTime === "number") {
@@ -359,7 +361,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
               _id: user._id,
               historyDeposit: {
                 $elemMatch: {
-                  id: ditzId,
+                  id: ditzTrxId,
                   status: { $in: ["pending", "processing"] }
                 }
               }
@@ -367,10 +369,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
             {
               $set: {
                 "historyDeposit.$.status": "success",
-                "historyDeposit.$.trx_id": resolvedTrxId,
-                "historyDeposit.$.reff_id": resolvedTrxId,
                 "historyDeposit.$.provider_id": String(providerTrx.id || checkId),
-                "historyDeposit.$.provider_reference_id": resolvedTrxId,
+                "historyDeposit.$.ditz_id": String(providerTrx.id || checkId),
                 "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
                 "historyDeposit.$.provider_status": rawProviderStatus || "success",
                 "historyDeposit.$.provider_time": pTime
@@ -382,20 +382,26 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           );
 
           if (updateResult.modifiedCount > 0) {
-            console.log(`Deposit SUCCESS ${resolvedTrxId}`);
+            console.log(`Deposit SUCCESS ${ditzTrxId}`);
           }
           clearInterval(intervalId);
           return;
         }
 
-        if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
-          const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
+        if (["failed", "expired", "cancel", "cancelled", "batal", "gagal"].includes(providerStatus)) {
+          const mappedStatus =
+            providerStatus === "batal" || providerStatus === "cancelled"
+              ? "cancel"
+              : providerStatus === "gagal"
+              ? "failed"
+              : providerStatus;
+
           await User.updateOne(
             {
               _id: user._id,
               historyDeposit: {
                 $elemMatch: {
-                  id: ditzId,
+                  id: ditzTrxId,
                   status: { $in: ["pending", "processing"] }
                 }
               }
@@ -403,8 +409,6 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
             {
               $set: {
                 "historyDeposit.$.status": mappedStatus,
-                "historyDeposit.$.trx_id": resolvedTrxId,
-                "historyDeposit.$.reff_id": resolvedTrxId,
                 "historyDeposit.$.provider_status": rawProviderStatus
               }
             }
@@ -455,8 +459,9 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         _id: user._id,
         $or: [
           { "historyDeposit.id": id },
+          { "historyDeposit.trx_id": id },
           { "historyDeposit.provider_id": id },
-          { "historyDeposit.trx_id": id }
+          { "historyDeposit.ditz_id": id }
         ]
       },
       { "historyDeposit.$": 1 }
@@ -472,8 +477,9 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
 
-    const ditzId = String(localData.provider_id || localData.id || id);
-    const ditzTrxId = String(localData.trx_id || localData.reff_id || ditzId);
+    // ditzId asli dari Ditznesia untuk query API; ditzTrxId untuk tampilan
+    const ditzId = String(localData.provider_id || localData.ditz_id || id);
+    const ditzTrxId = String(localData.trx_id || localData.id || ditzId);
 
     // ================= STATUS TERMINAL =================
     if (!["pending", "processing"].includes(localStatus)) {
@@ -485,9 +491,11 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       return res.status(200).json({
         success: true,
         data: {
-          id: ditzId,
+          id: ditzTrxId,
           trx_id: ditzTrxId,
           reff_id: ditzTrxId,
+          ditz_id: ditzId,
+          provider_id: ditzId,
           nominal,
           kode_unik: kodeUnik,
           tambahan: kodeUnik,
@@ -503,7 +511,6 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           created_at: localData.created_at || null,
           expires_at: localData.provider_expires_at || null,
           paid_at: localData.provider_time || null,
-          provider_id: ditzId,
           provider_reference_id: ditzTrxId,
           provider_amount: Number(localData.provider_amount) || totalAmount,
           provider_status: localData.provider_status || null,
@@ -522,6 +529,9 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       });
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     let providerTrx = null;
     try {
       const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
@@ -530,11 +540,13 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        }
+        },
+        signal: controller.signal
       });
 
       if (detailRes.ok) {
-        const detailData = await detailRes.json();
+        const rawText = await detailRes.text();
+        const detailData = JSON.parse(rawText);
         const payload = detailData?.data || detailData?.deposit || detailData;
         if (
           detailData?.success !== false &&
@@ -547,6 +559,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       }
     } catch (err) {
       console.error("Gagal cek status Ditznesia:", err?.message || err);
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     if (providerTrx) {
@@ -556,7 +570,6 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         : rawProviderStatus;
 
       const pId = String(providerTrx.id || providerTrx.invoice_id || ditzId);
-      const pTrxId = String(providerTrx.trx_id || providerTrx.reff_id || ditzTrxId);
 
       let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
       if (typeof pPaidAt === "number") {
@@ -582,10 +595,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           {
             $set: {
               "historyDeposit.$.status": "success",
-              "historyDeposit.$.trx_id": pTrxId,
-              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
-              "historyDeposit.$.provider_reference_id": pTrxId,
+              "historyDeposit.$.ditz_id": pId,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
               "historyDeposit.$.provider_status": rawProviderStatus || "success",
               "historyDeposit.$.provider_time": pPaidAt,
@@ -600,8 +611,14 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         if (updateResult.modifiedCount > 0) {
           localStatus = "success";
         }
-      } else if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
-        const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
+      } else if (["failed", "expired", "cancel", "cancelled", "batal", "gagal"].includes(providerStatus)) {
+        const mappedStatus =
+          providerStatus === "batal" || providerStatus === "cancelled"
+            ? "cancel"
+            : providerStatus === "gagal"
+            ? "failed"
+            : providerStatus;
+
         const updateResult = await User.updateOne(
           {
             _id: user._id,
@@ -615,10 +632,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           {
             $set: {
               "historyDeposit.$.status": mappedStatus,
-              "historyDeposit.$.trx_id": pTrxId,
-              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
-              "historyDeposit.$.provider_reference_id": pTrxId,
+              "historyDeposit.$.ditz_id": pId,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
               "historyDeposit.$.provider_status": rawProviderStatus,
               "historyDeposit.$.provider_time": pPaidAt,
@@ -641,8 +656,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     localData = refreshedUser?.historyDeposit?.[0] || localData;
     localStatus = String(localData.status || localStatus || "pending").toLowerCase();
 
-    const finalDitzId = String(localData.provider_id || localData.id || ditzId);
-    const finalTrxId = String(localData.trx_id || localData.reff_id || ditzTrxId);
+    const finalDitzId = String(localData.provider_id || localData.ditz_id || ditzId);
+    const finalTrxId = String(localData.trx_id || localData.id || ditzTrxId);
 
     const nominal = Number(localData.nominal) || 0;
     const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
@@ -652,9 +667,11 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        id: finalDitzId,
+        id: finalTrxId,
         trx_id: finalTrxId,
         reff_id: finalTrxId,
+        ditz_id: finalDitzId,
+        provider_id: finalDitzId,
         nominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
@@ -670,7 +687,6 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         created_at: localData.created_at || null,
         expires_at: localData.provider_expires_at || null,
         paid_at: localData.provider_time || null,
-        provider_id: finalDitzId,
         provider_reference_id: finalTrxId,
         provider_amount: Number(localData.provider_amount) || totalAmount,
         provider_status: localData.provider_status || null,
@@ -705,8 +721,9 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
         _id: user._id,
         $or: [
           { "historyDeposit.id": id },
+          { "historyDeposit.trx_id": id },
           { "historyDeposit.provider_id": id },
-          { "historyDeposit.trx_id": id }
+          { "historyDeposit.ditz_id": id }
         ]
       },
       { "historyDeposit.$": 1 }
@@ -717,8 +734,8 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
-    const ditzId = String(currentData.provider_id || currentData.id || id);
-    const ditzTrxId = String(currentData.trx_id || currentData.reff_id || ditzId);
+    const ditzId = String(currentData.provider_id || currentData.ditz_id || id);
+    const ditzTrxId = String(currentData.trx_id || currentData.id || ditzId);
     const currentStatus = String(currentData.status || "pending").toLowerCase();
 
     if (!["pending", "processing"].includes(currentStatus)) {
@@ -738,6 +755,9 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     let cancelMessage = "Deposit berhasil dibatalkan.";
     try {
       const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
@@ -746,14 +766,18 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        }
+        },
+        signal: controller.signal
       });
       if (cancelRes.ok) {
-        const cancelJson = await cancelRes.json().catch(() => null);
+        const cancelText = await cancelRes.text();
+        const cancelJson = JSON.parse(cancelText);
         cancelMessage = cancelJson?.message || cancelMessage;
       }
     } catch (cancelErr) {
       console.error("Ditznesia Cancel Warning:", cancelErr?.message || cancelErr);
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     await User.updateOne(
@@ -761,10 +785,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       {
         $set: {
           "historyDeposit.$.status": "cancelled",
-          "historyDeposit.$.trx_id": ditzTrxId,
-          "historyDeposit.$.reff_id": ditzTrxId,
-          "historyDeposit.$.provider_id": ditzId,
-          "historyDeposit.$.provider_status": "cancelled"
+          "historyDeposit.$.provider_status": "batal"
         }
       }
     );
@@ -773,9 +794,11 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       success: true,
       message: cancelMessage,
       data: {
-        id: ditzId,
+        id: ditzTrxId,
         trx_id: ditzTrxId,
         reff_id: ditzTrxId,
+        ditz_id: ditzId,
+        provider_id: ditzId,
         status: "cancelled"
       }
     });
@@ -784,6 +807,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
+
 
 
 
@@ -875,6 +899,92 @@ router.get("/produk-provider", requireLogin, async (req, res) => {
       success: false,
       message: errData?.message || "Gagal memproses data produk game.",
       error: errData || error.message,
+    });
+  }
+});
+const axios = require("axios"); // atau gunakan fetch / cloudscraper sesuai kebutuhan
+
+const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
+const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+// 0. Daftar harga layanan / produk topup (disesuaikan ke Ditznesia /tp-products)
+router.post("/layanan/price-list", requireLogin, async (req, res) => {
+  const user = await User.findById(req.session.userId);
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "User tidak ditemukan atau sesi tidak valid.",
+    });
+  }
+
+  const { code, game, provider } = req.body;
+  const selectedGame = game || provider;
+
+  try {
+    const params = { apikey: DITZ_API_KEY };
+    if (selectedGame) {
+      params.game = selectedGame;
+    }
+
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
+      params,
+    });
+
+    const rawData = response.data?.data || response.data || [];
+    let products = Array.isArray(rawData) ? rawData : [];
+
+    if (selectedGame) {
+      products = products.filter(
+        (item) =>
+          String(item.game || "").toLowerCase() ===
+          String(selectedGame).toLowerCase()
+      );
+    }
+
+    if (code) {
+      products = products.filter(
+        (item) => String(item.code) === String(code)
+      );
+    }
+
+    const modifiedData = products.map((item) => {
+      const originalPrice = parseInt(item.price, 10) || 0;
+      let modifiedPrice = originalPrice;
+      if (user.role === "user") {
+        modifiedPrice = originalPrice + 600;
+      } else if (user.role === "reseller") {
+        modifiedPrice = originalPrice + 260;
+      }
+
+      return {
+        code: item.code,
+        name: item.name,
+        category: item.game || item.category || null,
+        type: item.type || "topup_game",
+        provider: item.game || item.provider || null,
+        price: modifiedPrice.toString(),
+        price_original: item.price_original ?? null,
+        flash: item.flash ?? null,
+        need_zone: Boolean(item.need_zone),
+        check_name: Boolean(item.check_name),
+        note: item.note || null,
+        status: item.status || "available",
+        img_url: item.img_url || null,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: modifiedData,
+    });
+  } catch (error) {
+    const apiError = error.response?.data;
+    return res.status(500).json({
+      success: false,
+      message:
+        apiError?.message ||
+        "Terjadi kesalahan internal saat memproses permintaan.",
+      error: apiError || error.message,
     });
   }
 });
