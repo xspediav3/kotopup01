@@ -14,7 +14,7 @@ const qs = require("qs");
 const path = require("path");
 const app = express();
 app.set("trust proxy", 1);
-const footer = 'FelixTopUp'
+const footer = 'XS-Pedia'
 const ATLAN_API_KEY = process.env.ATLAN_API_KEY;
 const BASE_URL = "https://atlantich2h.com";
 
@@ -93,6 +93,19 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
+const pendingRegisterSchema = new mongoose.Schema({
+  fullname: String,
+  username: String,
+  nomor: String,
+  email: String,
+  password: String,
+  profileUrl: String,
+  otpCode: String,
+  otpCodeExpired: Date,
+  createdAt: { type: Date, default: Date.now, expires: 900 },
+});
+const PendingRegister = mongoose.model("PendingRegister", pendingRegisterSchema);
+
 const User = mongoose.model("User", userSchema);
 
 app.use(express.json());
@@ -170,7 +183,7 @@ async function getCurrentUser(userId) {
       fullname: "Admin Felix",
       username: "Felix",
       nomor: "-",
-      email: "admin@Felixtopup.com",
+      email: "admin@xs-pedia.my.id",
       profileUrl: "https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg",
       saldo: 0,
       coin: 0,
@@ -313,7 +326,7 @@ function generateApiKey() {
   const randomPart =
     Math.random().toString(36).substring(2, 10) +
     Math.random().toString(36).substring(2, 10);
-  return `Rikyshop_${randomPart}`;
+  return `Xspedia_${randomPart}`;
 }
 
 function generateReferralCode(username) {
@@ -343,52 +356,157 @@ app.get("/auth/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-app.post("/auth/register", async (req, res) => {
+function normalizePhoneId(raw) {
+  const digits = String(raw || "").replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("62")) return digits;
+  if (digits.startsWith("0")) return "62" + digits.slice(1);
+  return "62" + digits;
+}
+
+function maskEmailAddress(email) {
+  const [local, domain] = String(email || "").split("@");
+  if (!domain) return email;
+  if (local.length <= 2) return `${local[0] || "*"}***@${domain}`;
+  return `${local.slice(0, 2)}***${local.slice(-1)}@${domain}`;
+}
+
+app.post("/auth/register/request-otp", async (req, res) => {
   try {
-    const existingUser = await User.findOne({ username: req.body.username });
+    const fullname = String(req.body.fullname || "").trim();
+    const username = String(req.body.username || "").trim();
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const nomor = normalizePhoneId(req.body.nomor);
+    const password = String(req.body.password || "");
+    const profileUrl = String(req.body.profileUrl || "").trim();
+
+    if (!fullname || !username || !email || !nomor || !password) {
+      return res.status(400).json({ success: false, message: "Semua kolom wajib diisi" });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: "Password minimal 8 karakter" });
+    }
+
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ error: "Username already exists" });
+      return res.status(400).json({ success: false, message: "Username sudah terdaftar" });
     }
-    const existingEmail = await User.findOne({ email: req.body.email });
+    const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res.status(400).json({ success: false, message: "Email sudah digunakan" });
     }
-    const existingNomor = await User.findOne({ nomor: req.body.nomor });
+    const existingNomor = await User.findOne({ $or: [{ nomor }, { nomor: req.body.nomor }] });
     if (existingNomor) {
-      return res.status(400).json({ error: "Nomor telepon already exists" });
+      return res.status(400).json({ success: false, message: "Nomor telepon sudah digunakan" });
     }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpCodeExpired = new Date(Date.now() + 5 * 60 * 1000);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await PendingRegister.deleteMany({ $or: [{ email }, { username }] });
+    await PendingRegister.create({
+      fullname,
+      username,
+      nomor,
+      email,
+      password: hashedPassword,
+      profileUrl:
+        profileUrl ||
+        "https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg",
+      otpCode,
+      otpCodeExpired,
+    });
+
+    try {
+      await sendPurposeOtpEmail(email, otpCode, username, "register_account", {
+        email,
+        profileUrl,
+      });
+    } catch (mailErr) {
+      console.error("Gagal kirim OTP pendaftaran ke Gmail:", mailErr);
+      await PendingRegister.deleteMany({ email });
+      return res.status(500).json({ success: false, message: mailTransportErrorMessage(mailErr) });
+    }
+
+    return res.json({
+      success: true,
+      message: `Kode OTP pendaftaran telah dikirim ke ${email}`,
+      maskedEmail: maskEmailAddress(email),
+    });
+  } catch (error) {
+    console.error("Register request OTP error:", error);
+    return res.status(500).json({ success: false, message: "Gagal memproses pendaftaran" });
+  }
+});
+
+app.post(["/auth/register/verify-otp", "/auth/register"], async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const otp = String(req.body.otp || "").trim();
+
+    if (!otp) {
+      // Forward to request-otp if client posted directly without OTP
+      return res.status(400).json({
+        success: false,
+        requireOtp: true,
+        message: "Silakan masukkan kode OTP yang dikirim ke Gmail Anda",
+      });
+    }
+
+    const pending = await PendingRegister.findOne({ email });
+    if (!pending) {
+      return res.status(400).json({
+        success: false,
+        message: "Data pendaftaran tidak ditemukan atau sudah kadaluarsa. Silakan daftar ulang.",
+      });
+    }
+    if (pending.otpCode !== otp) {
+      return res.status(400).json({ success: false, message: "Kode OTP tidak cocok" });
+    }
+    if (!pending.otpCodeExpired || pending.otpCodeExpired < new Date()) {
+      return res.status(400).json({ success: false, message: "Kode OTP sudah kadaluarsa" });
+    }
+
     let apiKey = generateApiKey();
     let apiKeyExists = await User.findOne({ apiKey });
     while (apiKeyExists) {
       apiKey = generateApiKey();
       apiKeyExists = await User.findOne({ apiKey });
     }
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
     const newUser = new User({
-      fullname: req.body.fullname,
-      username: req.body.username,
-      nomor: req.body.nomor,
-      email: req.body.email,
-      password: hashedPassword,
-      profileUrl:
-        req.body.profileUrl ||
-        "https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg",
+      fullname: pending.fullname,
+      username: pending.username,
+      nomor: pending.nomor,
+      email: pending.email,
+      password: pending.password,
+      profileUrl: pending.profileUrl,
       saldo: 0,
       coin: 0,
-      apiKey: apiKey,
+      apiKey,
       tanggalDaftar: new Date(),
       role: "user",
-      isVerified: false,
+      isVerified: true,
       lastLogin: new Date(),
-      referralCode: generateReferralCode(req.body.username),
+      referralCode: generateReferralCode(pending.username),
       history: [],
     });
+
     await newUser.save();
-    res.redirect("/auth/login");
+    await PendingRegister.deleteMany({ email });
+
+    return res.json({
+      success: true,
+      message: "Pendaftaran berhasil! Akun XS-Pedia Anda sudah aktif.",
+    });
   } catch (error) {
-    res
-      .status(400)
-      .json({ error: "Registration failed", message: error.message });
+    console.error("Verify register OTP error:", error);
+    return res.status(400).json({
+      success: false,
+      error: "Registration failed",
+      message: error.message,
+    });
   }
 });
 
@@ -670,66 +788,134 @@ app.post("/profile/update-photo", requireLogin, uploadMemory.single("photo"), as
 });
 
 app.post("/get/forgot-password", async (req, res) => {
-  const { nomor } = req.body;
-  if (!nomor) {
-    return res.status(400).json({ success: false, message: "Nomor telepon harus diisi" });
+  const identifier = String(req.body.identifier || req.body.email || req.body.nomor || "").trim();
+  if (!identifier) {
+    return res.status(400).json({
+      success: false,
+      message: "Masukkan alamat Gmail, username, atau nomor telepon terdaftar",
+    });
   }
   try {
-    const normalizedNomor = nomor.startsWith("62") ? nomor : "62" + nomor.substring(1);
-    const user = await User.findOne({ nomor: normalizedNomor });
+    const normalizedNomor = normalizePhoneId(identifier);
+    const queryOr = [
+      { email: identifier.toLowerCase() },
+      { username: identifier },
+      { nomor: identifier },
+    ];
+    if (normalizedNomor) {
+      queryOr.push({ nomor: normalizedNomor });
+    }
+
+    const user = await User.findOne({ $or: queryOr });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User tidak ditemukan awali nomor dengan 62" });
+      return res.status(404).json({
+        success: false,
+        message: "Akun tidak ditemukan. Periksa kembali Gmail, username, atau nomor Anda.",
+      });
     }
-    const now = new Date();
-    if (user.otpCodeExpired && user.otpCodeExpired <= new Date(now - 5 * 60 * 1000)) {
-      await User.updateOne(
-        { nomor: normalizedNomor },
-        { $set: { otpCode: null, otpCodeExpired: null } }
-      );
+    if (!user.email) {
+      return res.status(400).json({
+        success: false,
+        message: "Akun ini belum memiliki alamat Gmail terdaftar.",
+      });
     }
+
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-    await User.findOneAndUpdate(
-      { nomor: normalizedNomor },
+
+    await User.updateOne(
+      { _id: user._id },
       {
-        otpCode,
-        otpCodeExpired: otpExpiry,
-        aktifitas: 'Rest Password',
-      },
-      { new: true, upsert: false }
+        $set: {
+          otpCode,
+          otpCodeExpired: otpExpiry,
+          passwordOtp: otpCode,
+          passwordOtpExpired: otpExpiry,
+          aktifitas: "Rest Password",
+        },
+      }
     );
-    return res.json({ success: true, message: "OTP berhasil dikirim", otp: otpCode });
+
+    try {
+      await sendPurposeOtpEmail(user.email, otpCode, user.username, "forgot_password", {
+        accountId: `${user.username} (${maskEmailAddress(user.email)})`,
+        profileUrl: user.profileUrl,
+      });
+    } catch (mailErr) {
+      console.error("Gagal kirim OTP lupa password ke Gmail:", mailErr);
+      await User.updateOne(
+        { _id: user._id },
+        { $unset: { otpCode: "", otpCodeExpired: "", passwordOtp: "", passwordOtpExpired: "" } }
+      );
+      return res.status(500).json({
+        success: false,
+        message: mailTransportErrorMessage(mailErr),
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Kode OTP reset password telah dikirim ke Gmail ${maskEmailAddress(user.email)}`,
+      maskedEmail: maskEmailAddress(user.email),
+      accountIdentifier: user.email,
+    });
   } catch (error) {
-    console.error("Error generate OTP:", error);
-    return res.status(500).json({ success: false, message: "Gagal generate OTP" });
+    console.error("Error generate forgot-password OTP:", error);
+    return res.status(500).json({ success: false, message: "Gagal memproses permintaan OTP" });
   }
 });
 
 app.post("/auth/reset-password", async (req, res) => {
-  const { nomor, otp, newPassword } = req.body;
-  if (!nomor || !otp || !newPassword) {
+  const identifier = String(
+    req.body.identifier || req.body.accountIdentifier || req.body.email || req.body.nomor || ""
+  ).trim();
+  const otp = String(req.body.otp || "").trim();
+  const newPassword = String(req.body.newPassword || "");
+
+  if (!identifier || !otp || !newPassword) {
     return res.status(400).json({ success: false, message: "Semua field harus diisi" });
   }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ success: false, message: "Password baru minimal 8 karakter" });
+  }
+
   try {
-    const user = await User.findOne({ nomor });
+    const normalizedNomor = normalizePhoneId(identifier);
+    const queryOr = [
+      { email: identifier.toLowerCase() },
+      { username: identifier },
+      { nomor: identifier },
+    ];
+    if (normalizedNomor) {
+      queryOr.push({ nomor: normalizedNomor });
+    }
+
+    const user = await User.findOne({ $or: queryOr });
     if (!user) {
       return res.status(400).json({ success: false, message: "User tidak ditemukan" });
     }
-    if (user.otpCode !== otp) {
-      return res.status(400).json({ success: false, message: "OTP tidak cocok" });
+    const validOtp = user.otpCode || user.passwordOtp;
+    const validExp = user.otpCodeExpired || user.passwordOtpExpired;
+    if (!validOtp || String(validOtp) !== otp) {
+      return res.status(400).json({ success: false, message: "Kode OTP tidak cocok" });
     }
-    if (!user.otpCodeExpired || user.otpCodeExpired < new Date()) {
-      return res.status(400).json({ success: false, message: "OTP sudah kadaluarsa" });
+    if (!validExp || new Date(validExp) < new Date()) {
+      return res.status(400).json({ success: false, message: "Kode OTP sudah kadaluarsa" });
     }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.otpCode = null;
-    user.otpCodeExpired = null;
+    user.otpCode = undefined;
+    user.otpCodeExpired = undefined;
+    user.passwordOtp = undefined;
+    user.passwordOtpExpired = undefined;
+    user.authVersion = (user.authVersion || 0) + 1;
     await user.save();
-    res.json({ success: true, message: "Password berhasil direset" });
+
+    return res.json({ success: true, message: "Password berhasil direset! Silakan login dengan password baru." });
   } catch (error) {
     console.error("Error reset password:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -1123,7 +1309,7 @@ function renderComicEmailCard({
           </td>
           <td valign="top" align="center" width="88" style="background:#fef9c3;border:2.5px solid #111827;box-shadow:3px 3px 0 #111827;border-radius:12px;padding:6px;">
             <img src="${safeChibiUrl}" alt="Foto Chibi" width="74" height="74" style="display:block;width:74px;height:74px;object-fit:cover;border-radius:8px;border:2px solid #111827;" />
-            <div style="font-size:10px;font-weight:800;color:#111827;margin-top:4px;">FELIX BOT</div>
+            <div style="font-size:10px;font-weight:800;color:#111827;margin-top:4px;">XS-PEDIA BOT</div>
           </td>
         </tr>
       </table>
@@ -1144,11 +1330,62 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   const waktuReq = formatWibTime(new Date());
   const chibiUrl = resolveChibiImageUrl(meta.chibiUrl || meta.profileUrl || "");
 
+  if (purpose === "register_account") {
+    const emailTarget = meta.email || "-";
+    return {
+      subject: "Kode OTP Pendaftaran Akun Baru - XS-Pedia",
+      toastMessage: "Kode OTP pendaftaran sudah dikirim ke Gmail Anda",
+      chibiUrl,
+      text: `Selamat Datang di XS-Pedia!\nHalo ${safeUser}, kode OTP aktivasi akun baru Anda: ${otpCode}\nEmail: ${emailTarget}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
+      html: renderComicEmailCard({
+        badge: "DAFTAR AKUN BARU",
+        title: "Aktivasi Akun XS-Pedia",
+        greeting: `Halo ${safeUser}!`,
+        message: "Satu langkah lagi! Masukkan kode OTP di bawah ini untuk menyelesaikan pendaftaran akun baru Anda di XS-Pedia.",
+        metaRows: [
+          { label: "Username", value: safeUser },
+          { label: "Email Terdaftar", value: emailTarget },
+          { label: "Waktu Pendaftaran", value: waktuReq },
+        ],
+        otpCode,
+        chibiUrl,
+        footerNote: "Kode aktivasi berlaku selama 5 menit. Jangan berikan kode ini kepada siapa pun demi keamanan akun Anda.",
+        accentColor: "#38bdf8",
+        badgeBg: "#fef08a",
+      }),
+    };
+  }
+
+  if (purpose === "forgot_password") {
+    const accountId = meta.accountId || safeUser;
+    return {
+      subject: "Kode OTP Reset Password - XS-Pedia",
+      toastMessage: "Kode OTP reset password sudah dikirim ke Gmail Anda",
+      chibiUrl,
+      text: `Permintaan Lupa Password XS-Pedia\nHalo ${safeUser}, kode OTP reset password Anda: ${otpCode}\nAkun: ${accountId}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
+      html: renderComicEmailCard({
+        badge: "LUPA PASSWORD",
+        title: "Reset Kata Sandi Akun",
+        greeting: `Halo ${safeUser}!`,
+        message: "Kami menerima permintaan pemulihan kata sandi untuk akun XS-Pedia Anda. Gunakan kode OTP berikut untuk membuat password baru.",
+        metaRows: [
+          { label: "Akun / Kontak", value: accountId },
+          { label: "Waktu Permintaan", value: waktuReq },
+        ],
+        otpCode,
+        chibiUrl,
+        footerNote: "Kode berlaku selama 5 menit. Jika Anda tidak merasa meminta reset password, abaikan email ini.",
+        accentColor: "#fb923c",
+        badgeBg: "#fef08a",
+      }),
+    };
+  }
+
   if (purpose === "logout_device") {
     const who = meta.who || safeUser;
     const ip = meta.ip || "-";
     return {
-      subject: "Kode OTP Keluarkan Perangkat - Felix TopUp",
+      subject: "Kode OTP Keluarkan Perangkat - XS-Pedia",
       toastMessage: "Kode OTP Keluarkan Perangkat sudah dikirim ke email Anda",
       chibiUrl,
       text: `Konfirmasi Keluarkan Perangkat\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nPerangkat/Akun: ${who}\nIP: ${ip}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
@@ -1156,7 +1393,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
         badge: "KEAMANAN SESI",
         title: "Konfirmasi Keluarkan Perangkat",
         greeting: `Halo ${safeUser}!`,
-        message: "Kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun Felix TopUp Anda.",
+        message: "Kami menerima permintaan untuk mengeluarkan perangkat dari sesi login akun XS-Pedia Anda.",
         metaRows: [
           { label: "Perangkat / Akun", value: who },
           { label: "Alamat IP", value: ip },
@@ -1176,7 +1413,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
       meta.changedSummary ||
       (meta.field && meta.value ? `${meta.field}: ${meta.value}` : meta.field || meta.value || "Perubahan data profil");
     return {
-      subject: "Kode OTP Ubah Profil - Felix TopUp",
+      subject: "Kode OTP Ubah Profil - XS-Pedia",
       toastMessage: "Kode OTP Ubah Profil sudah dikirim ke email Anda",
       chibiUrl,
       text: `Verifikasi Ubah Profil\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nDetail: ${detailPerubahan}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
@@ -1184,7 +1421,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
         badge: "VERIFIKASI PROFIL",
         title: "Verifikasi Ubah Profil",
         greeting: `Halo ${safeUser}!`,
-        message: "Gunakan kode OTP di bawah ini untuk mengonfirmasi perubahan data profil pada akun Felix TopUp Anda.",
+        message: "Gunakan kode OTP di bawah ini untuk mengonfirmasi perubahan data profil pada akun XS-Pedia Anda.",
         metaRows: [
           { label: "Detail Perubahan", value: detailPerubahan },
           { label: "Waktu Permintaan", value: waktuReq },
@@ -1199,7 +1436,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   }
 
   return {
-    subject: "Kode Ganti Password - Felix TopUp",
+    subject: "Kode Ganti Password - XS-Pedia",
     toastMessage: "Kode OTP Ganti Password sudah dikirim ke email Anda",
     chibiUrl,
     text: `Ganti Password\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
@@ -1207,7 +1444,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
       badge: "GANTI PASSWORD",
       title: "Verifikasi Ganti Password",
       greeting: `Halo ${safeUser}!`,
-      message: "Gunakan kode OTP di bawah ini untuk melanjutkan proses penggantian password akun Felix TopUp Anda.",
+      message: "Gunakan kode OTP di bawah ini untuk melanjutkan proses penggantian password akun XS-Pedia Anda.",
       metaRows: [{ label: "Waktu Permintaan", value: waktuReq }],
       otpCode,
       chibiUrl,
@@ -1219,7 +1456,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
 }
 
 async function sendViaWebhookOrSmtp({ to, subject, html, text, chibiUrl = "" }) {
-  const senderName = process.env.WEBHOOK_SENDER_NAME || "Felix TopUp";
+  const senderName = process.env.WEBHOOK_SENDER_NAME || "XS-Pedia";
   const secret = process.env.WEBHOOK_MAIL_SECRET || "";
   const webhookUrl = String(process.env.WEBHOOK_MAIL_URL || "").trim();
   const finalChibiUrl = resolveChibiImageUrl(chibiUrl);
@@ -1378,7 +1615,7 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
         message: "Email server belum diatur: isi WEBHOOK_MAIL_URL & WEBHOOK_MAIL_SECRET atau EMAIL_USER & EMAIL_PASS",
       });
     }
-    const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
+    const subject = String(req.body?.subject || "Notifikasi Akun - XS-Pedia");
     const rawText = String(req.body?.text || "Ada aktivitas pada akun Anda.");
     const chibiUrl = resolveChibiImageUrl(req.body?.chibiUrl || req.body?.chibi_url || user?.profileUrl || "");
     const html = renderComicEmailCard({
@@ -1389,7 +1626,7 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
       metaRows: [{ label: "Waktu Tercatat", value: formatWibTime(new Date()) }],
       otpCode: "",
       chibiUrl,
-      footerNote: "Notifikasi otomatis dari sistem Felix TopUp.",
+      footerNote: "Notifikasi otomatis dari sistem XS-Pedia.",
       accentColor: "#93c5fd",
       badgeBg: "#fef08a",
     });
@@ -1519,7 +1756,7 @@ async function sendVerificationEmail(toEmail, otpCode, username) {
 
   await sendViaWebhookOrSmtp({
     to: toEmail,
-    subject: "Kode Verifikasi Email - Felix TopUp",
+    subject: "Kode Verifikasi Email - XS-Pedia",
     html,
     text: `Verifikasi Email\nKode OTP: ${otpCode}\nKode berlaku 5 menit.`,
   });
