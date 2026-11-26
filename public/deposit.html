@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Riky Shop TopUp Dashboard - Halaman Deposit Saldo">
-    <meta name="keywords" content="deposit, topup, saldo, Riky Shop">
-    <meta name="author" content="Riky Shop">
+    <meta name="description" content="Xiao-Store TopUp Dashboard - Halaman Deposit Saldo">
+    <meta name="keywords" content="deposit, topup, saldo, Xiao-Storetopup">
+    <meta name="author" content="Xiao-Store TopUp">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#EC4899">
+    <meta name="theme-color" content="#2fd35a">
     <link rel="icon" type="image/png" sizes="32x32" href="/media/banner.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/media/banner.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/media/banner.png">
     <link rel="manifest" href="/manifest.json">
-    <title>Deposit Saldo - Riky Shop</title>
+    <title>Deposit Saldo - Xiao-Store TopUp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         :root {
-            --primary-hue: 335;
+            --primary-hue: 140;
             --vp-primary: hsl(var(--primary-hue), 85%, 60%);
             --vp-primary-rgb: 240, 56, 131;
             --vp-primary-light: hsl(var(--primary-hue), 85%, 96%);
@@ -1025,6 +1025,73 @@
             padding: 5px;
             background-color: white;
         }
+
+        /* === QRIS FULL BACKGROUND COMPOSITE === */
+        .qris-composite-wrap {
+            width: min(100%, 560px);
+            margin: 1rem auto 0;
+            text-align: center;
+        }
+
+        .qris-composite {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1087 / 1536;
+            overflow: hidden;
+            border: 3px solid #000;
+            border-radius: 28px;
+            background: #fff url('https://files.catbox.moe/ix1tqb.png') center center / 100% 100% no-repeat;
+            box-shadow: 5px 5px 0 rgba(0,0,0,.85);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .qris-composite .qris-overlay {
+            position: absolute;
+            left: 50%;
+            top: 53.2%;
+            width: 40%;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
+            transform: translate(-50%, -50%);
+            object-fit: contain;
+            display: block;
+            border: 0 !important;
+            border-radius: 14px !important;
+            padding: 0 !important;
+            background: #fff;
+            box-shadow: 0 8px 18px rgba(0,0,0,.22);
+            pointer-events: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+
+        .qris-download-btn {
+            width: 100%;
+            margin-top: 1.1rem;
+            font-weight: 800;
+        }
+
+        .qris-download-note {
+            margin: .6rem auto 0;
+            color: var(--vp-text-muted);
+            font-size: .85rem;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 575.98px) {
+            .qris-composite-wrap {
+                width: 100%;
+            }
+            .qris-composite {
+                border-radius: 24px;
+            }
+            .qris-composite .qris-overlay {
+                width: 40%;
+                border-radius: 12px !important;
+            }
+        }
         .payment-actions {
             margin-top: 1.5rem;
             display: flex;
@@ -1254,13 +1321,69 @@
             background: linear-gradient(90deg, #30363d 25%, rgba(139, 148, 158, 0.3) 50%, #30363d 75%);
         }
     </style>
+
+<style>
+/* ==== COMIC GREEN OVERRIDE ==== */
+body{
+  background:
+    radial-gradient(circle at 6px 6px, rgba(0,0,0,.08) 1px, transparent 1.2px) 0 0/14px 14px,
+    #eafff0 !important;
+  font-family:"Comic Neue","Comic Sans MS","Trebuchet MS",system-ui !important;
+}
+:root{
+  --vp-primary:#2fd35a !important;
+  --vp-primary-dark:#1aa845 !important;
+  --vp-primary-light:#c8ffd8 !important;
+}
+.vp-section,.vp-sidebar,.vp-topbar,footer,.card,.modal-content{
+  border:3px solid #000 !important;
+  box-shadow:6px 6px 0 rgba(0,0,0,.8) !important;
+  border-radius:18px !important;
+}
+.btn{
+  border:3px solid #000 !important;
+  box-shadow:4px 4px 0 #000 !important;
+  font-weight:800;
+  text-transform:uppercase;
+}
+.btn:active{
+  transform:translate(3px,3px);
+  box-shadow:1px 1px 0 #000 !important;
+}
+.vp-section-title{
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+input,select{
+  border:3px solid #000 !important;
+}
+</style>
+
+
+<style>
+/* ==== HORIZONTAL HISTORY FIX ==== */
+@media (max-width: 767.98px){
+  .vp-history-table tbody{
+    display:flex !important;
+    overflow-x:auto;
+    gap:12px;
+    padding-bottom:10px;
+  }
+  .vp-history-table tbody tr{
+    min-width:260px;
+    flex:0 0 auto;
+    margin-bottom:0 !important;
+  }
+}
+</style>
+
 </head>
 <body data-theme="light">
     <div class="vp-wrapper">
         <nav class="vp-sidebar" id="vpSidebar">
             <div class="vp-sidebar-header">
-                <img src="/media/logo.png" alt="Riky Shop Logo" class="vp-sidebar-header-logo">
-                <a class="vp-sidebar-brand-text" href="/dashboard">Riky Shop</a>
+                <img src="/media/logo.png" alt="Xiao-Store TopUp Logo" class="vp-sidebar-header-logo">
+                <a class="vp-sidebar-brand-text" href="/dashboard">Xiao-Store TopUp</a>
             </div>
             <div class="vp-sidebar-menu">
                 <ul class="nav flex-column">
@@ -1277,44 +1400,20 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/order">
-                            <i class="bi bi-cart-check-fill"></i>
-                            <span>Order</span>
-                        </a>
-                    </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="/price-list">
-                            <i class="bi bi-tags-fill"></i>
-                            <span>List Harga</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/mutation-deposit">
                             <i class="bi bi-cash-stack"></i>
                             <span>Mutasi Deposit</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/mutation-order">
-                            <i class="bi bi-receipt-cutoff"></i>
-                            <span>Mutasi Order</span>
+                        <a class="nav-link" href="/gmail">
+                            <i class="bi bi-code-slash"></i>
+                            <span>Alight Motion Pro</span>
                         </a>
                     </li>
                 </ul>
                 <div class="vp-sidebar-heading">User Settings</div>
                 <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/profile">
-                            <i class="bi bi-person-fill"></i>
-                            <span>Profil</span>
-                        </a>
-                    </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="/api-key-page">
-                            <i class="bi bi-key-fill"></i>
-                            <span>API Key</span>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/docs">
                             <i class="bi bi-code-slash"></i>
@@ -1344,8 +1443,8 @@
                         <i class="bi bi-arrows-fullscreen fs-5"></i>
                     </a>
                     <a href="/dashboard" class="vp-topbar-brand-link" id="topbarBrand">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="vp-topbar-logo">
-                        <span class="vp-topbar-brand-text">Riky Shop</span>
+                        <img src="/media/logo.png" alt="Xiao-Store TopUp Logo" class="vp-topbar-logo">
+                        <span class="vp-topbar-brand-text">Xiao-Store TopUp</span>
                     </a>
                 </div>
                 
@@ -1367,7 +1466,7 @@
                     </div>
                     <div class="dropdown vp-profile-dropdown">
                         <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://via.placeholder.com/150/EC4899/FFFFFF?Text=C" alt="User" id="userProfileImageNav">
+                            <img src="https://via.placeholder.com/150/2fd35a/FFFFFF?Text=C" alt="User" id="userProfileImageNav">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <li><h6 class="dropdown-header" id="userFullnameNavDropdown">Nama Pengguna</h6></li>
@@ -1437,15 +1536,15 @@
             <footer>
                 <div class="footer-left">
                     <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">Riky Shop</span>
+                        <img src="/media/logo.png" alt="Xiao-Store TopUp Logo" class="footer-logo-name-img">
+                        <span class="footer-logo-name-text">Xiao-Store TopUp</span>
                     </a>
                     <div class="footer-description">
                         <i class="bi bi-info-circle-fill"></i>
-                        Riky Shop adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        Xiao-Store TopUp adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
                     </div>
                      <div class="footer-copyright">
-                        Riky Shop © <span id="currentYear"></span>. All Rights Reserved.
+                        Xiao-Store TopUp © <span id="currentYear"></span>. All Rights Reserved.
                     </div>
                 </div>
                 
@@ -1598,15 +1697,159 @@
         }
 
         function formatCurrency(amount) {
-            return `Rp${parseInt(amount).toLocaleString('id-ID')}`;
+            const value = Number(amount);
+            return `Rp${(Number.isFinite(value) ? Math.round(value) : 0).toLocaleString('id-ID')}`;
+        }
+
+        function getDepositFee(data) {
+            const fee = Number(data?.fee);
+            return Number.isFinite(fee) && fee >= 0 ? Math.round(fee) : 0;
+        }
+
+        function getDepositTotal(data) {
+            const explicitTotal = Number(data?.total_amount);
+            if (Number.isFinite(explicitTotal) && explicitTotal > 0) {
+                return Math.round(explicitTotal);
+            }
+            const nominal = Number(data?.nominal) || 0;
+            return Math.round(nominal + getDepositFee(data));
+        }
+
+        function getDepositBalance(data) {
+            const balance = Number(data?.get_balance);
+            if (Number.isFinite(balance) && balance >= 0) {
+                return Math.round(balance);
+            }
+            return Math.max(Number(data?.nominal) || 0, 0);
+        }
+
+        function normalizeDepositStatus(status) {
+            return String(status || 'pending').trim().toLowerCase();
         }
 
         function formatDateTime(dateString) {
             if (!dateString) return '-';
             const date = new Date(dateString);
-            return date.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
         
+
+        const QRIS_BACKGROUND_URL = 'https://files.catbox.moe/ix1tqb.png';
+
+        function qrisCompositeHtml(qrUrl, suffix = '') {
+            const safeQrUrl = String(qrUrl || '').replace(/"/g, '&quot;');
+            const downloadName = `QRIS-${String(suffix || 'deposit').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
+            const safeDownloadName = downloadName.replace(/'/g, "\\'");
+            return `
+                <div class="qris-composite-wrap">
+                    <div class="qris-composite" aria-label="QRIS dengan background">
+                        <img class="qris-overlay" src="${safeQrUrl}" alt="QR Code Pembayaran" draggable="false" loading="eager">
+                    </div>
+                    <button type="button" class="btn btn-success qris-download-btn"
+                        onclick="downloadQRISWithBackground('${safeQrUrl}', '${safeDownloadName}')">
+                        <i class="bi bi-download me-2"></i>Download QRIS + Background
+                    </button>
+                    <div class="qris-download-note">
+                        QR Code akan menyatu dengan seluruh background asli saat diunduh.
+                    </div>
+                </div>`;
+        }
+
+        // Proxy gambar agar canvas tidak terkena CORS/tainted canvas saat download di Android/Chrome.
+        function getCanvasImageUrl(url) {
+            const value = String(url || '').trim();
+            if (!value) throw new Error('URL gambar QRIS kosong.');
+            return `https://images.weserv.nl/?url=${encodeURIComponent(value)}&output=png`;
+        }
+
+        function loadImageForCanvas(url, useProxy = true) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Gagal memuat gambar untuk proses download.'));
+                img.src = useProxy ? getCanvasImageUrl(url) : url;
+            });
+        }
+
+        async function downloadQRISWithBackground(qrUrl, fileName = 'QRIS-deposit.png') {
+            const button = document.activeElement;
+            const originalText = button && button.classList && button.classList.contains('qris-download-btn') ? button.innerHTML : '';
+
+            try {
+                if (button && button.classList && button.classList.contains('qris-download-btn')) {
+                    button.disabled = true;
+                    button.innerHTML = '<span class=\"spinner-border spinner-border-sm me-2\"></span>Memproses...';
+                }
+
+                // Background asli + QR diproses melalui proxy CORS-safe agar canvas bisa diekspor.
+                const [bg, qr] = await Promise.all([
+                    loadImageForCanvas(QRIS_BACKGROUND_URL, true),
+                    loadImageForCanvas(qrUrl, true)
+                ]);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 1087;
+                canvas.height = 1536;
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Browser tidak mendukung Canvas.');
+
+                // Gambar seluruh background dalam ukuran asli 1087 x 1536.
+                ctx.drawImage(bg, 0, 0, 1087, 1536);
+
+                // QR tetap berada di area kotak abu-abu pada background asli.
+                const qrSize = 420;
+                const qrX = (1087 - qrSize) / 2;
+                const qrY = 554 + ((527 - qrSize) / 2);
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,.22)';
+                ctx.shadowBlur = 18;
+                ctx.shadowOffsetY = 8;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(qrX - 4, qrY - 4, qrSize + 8, qrSize + 8);
+                ctx.restore();
+
+                ctx.drawImage(qr, qrX, qrY, qrSize, qrSize);
+
+                // Gunakan Blob + object URL supaya download lebih stabil di Android Chrome.
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob((result) => {
+                        if (result) resolve(result);
+                        else reject(new Error('Gagal membuat file PNG.'));
+                    }, 'image/png', 1.0);
+                });
+
+                const blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName || 'QRIS-deposit.png';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                // Beri waktu browser memulai download sebelum URL dihapus.
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            } catch (error) {
+                console.error('Download QRIS composite error:', error);
+                alert('Download QRIS gagal diproses. Coba tekan tombol sekali lagi.');
+            } finally {
+                if (button && button.classList && button.classList.contains('qris-download-btn')) {
+                    button.disabled = false;
+                    button.innerHTML = originalText || '<i class=\"bi bi-download me-2\"></i>Download QRIS + Background';
+                }
+            }
+        }
+
         function renderPaymentDetails(data, containerId) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -1628,11 +1871,11 @@
                     </div>
                     <div class="payment-detail-item">
                         <span class="label fw-bold">Total Pembayaran:</span>
-                        <span class="value fw-bold text-primary">${formatCurrency(data.nominal)}</span>
+                        <span class="value fw-bold text-primary">${formatCurrency(getDepositTotal(data))}</span>
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Saldo Diterima:</span>
-                        <span class="value">${formatCurrency(data.get_balance)}</span>
+                        <span class="value">${formatCurrency(getDepositBalance(data))}</span>
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Metode:</span>
@@ -1640,7 +1883,7 @@
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Status:</span>
-                        <span class="value status-${data.status.toLowerCase()}">${data.status}</span>
+                        <span class="value status-${normalizeDepositStatus(data.status)}">${data.status || '-'}</span>
                     </div>`;
 
             if (data.tujuan) {
@@ -1658,13 +1901,21 @@
                     </div>`;
             }
 
-            if (data.qr_image && data.status === 'pending') {
-                paymentInfoHtml += `
-                    <div class="qr-code-container">
-                        <p class="mb-2">Silakan scan QR Code di bawah ini:</p>
-                        <img src="${data.qr_image}" alt="QR Code Pembayaran">
-                    </div>`;
-            }
+// Gunakan pengecekan null-safe agar tidak crash jika data belum siap
+if (data && data.qr_image) {
+    // Tambahkan pengecekan status yang lebih fleksibel
+    const currentStatus = data.status ? data.status.toString().toLowerCase() : '';
+    
+    if (currentStatus === 'pending') {
+        paymentInfoHtml += `
+            <div class="qr-code-container">
+                <p class="mb-2" style="font-weight: bold;">Silakan scan QR Code di bawah ini:</p>
+                ${qrisCompositeHtml(data.qr_image, data.id || 'deposit')}
+                <p class="mt-2 text-muted" style="font-size: 12px;">Berlaku selama 15 menit</p>
+            </div>`;
+    }
+}
+
             
             if (data.expired_at) {
                  paymentInfoHtml += `
@@ -1676,7 +1927,7 @@
             paymentInfoHtml += `</div>`;
             
             paymentInfoHtml += `<div class="payment-actions">`;
-            if (data.status === 'pending') {
+            if (normalizeDepositStatus(data.status) === 'pending') {
                 paymentInfoHtml += `<button class="btn btn-danger" onclick="cancelDeposit('${data.id}', true)">Batalkan Deposit</button>`;
             }
             paymentInfoHtml += `<button class="btn btn-info" onclick="checkDepositStatus('${data.id}', true)">Cek Status Pembayaran</button>`;
@@ -1755,15 +2006,16 @@
 
                 depositHistoryBody.innerHTML = '';
                 data.historyDeposit.slice().reverse().forEach(tx => {
+                    const status = normalizeDepositStatus(tx.status);
                     const row = depositHistoryBody.insertRow();
                     row.innerHTML = `
                         <td data-label="ID Transaksi">${tx.id}</td>
                         <td data-label="Nominal">${formatCurrency(tx.nominal)}</td>
-                        <td data-label="Metode">${tx.metode}</td>
-                        <td data-label="Status"><span class="status-badge status-${tx.status.toLowerCase()}">${tx.status}</span></td>
+                        <td data-label="Metode">${tx.metode || '-'}</td>
+                        <td data-label="Status"><span class="status-badge status-${status}">${tx.status || '-'}</span></td>
                         <td data-label="Tanggal">${formatDateTime(tx.created_at)}</td>
                         <td data-label="Aksi">
-                            <button class="btn btn-sm btn-primary" onclick="showDepositDetail('${tx.id}', '${tx.status}')">
+                            <button class="btn btn-sm btn-primary" onclick="showDepositDetail('${tx.id}')">
                                 <i class="bi bi-eye-fill"></i> Detail
                             </button>
                         </td>
@@ -1774,41 +2026,46 @@
                 console.error("Error fetching deposit history:", err);
             }
         }
-        
-        function showDepositDetail(depositId, status) {
+
+        async function showDepositDetail(depositId) {
             const modalBody = document.getElementById('depositDetailModalBody');
             const modalFooter = document.getElementById('depositDetailModalFooter');
             modalBody.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div> <p class="mt-2">Memuat detail...</p></div>';
             modalFooter.innerHTML = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>';
             depositDetailModal.show();
 
-            if (status === 'pending') {
-                 fetch('/api/history/deposit')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success && data.historyDeposit) {
-                            const depositData = data.historyDeposit.find(d => d.id === depositId);
-                            if (depositData) {
-                                renderModalContent(depositData, false);
-                            } else {
-                                modalBody.innerHTML = '<p class="text-danger text-center">Detail deposit tidak ditemukan.</p>';
-                            }
-                        } else {
-                             modalBody.innerHTML = '<p class="text-danger text-center">Gagal memuat detail deposit dari riwayat.</p>';
-                        }
-                    })
-                    .catch(err => {
-                        modalBody.innerHTML = `<p class="text-danger text-center">Error: ${err.message}</p>`;
-                    });
-            } else {
-                checkDepositStatus(depositId, false, true); 
+            try {
+                const res = await fetch('/api/history/deposit');
+                const data = await res.json();
+
+                if (!data.success || !Array.isArray(data.historyDeposit)) {
+                    throw new Error(data.message || 'Gagal memuat riwayat deposit.');
+                }
+
+                const depositData = data.historyDeposit.find(d => d.id === depositId);
+                if (!depositData) {
+                    modalBody.innerHTML = '<p class="text-danger text-center">Detail deposit tidak ditemukan.</p>';
+                    return;
+                }
+
+                // Render data DB terlebih dahulu. Status cancel/terminal tidak akan
+                // tertimpa oleh status provider yang masih pending.
+                renderModalContent(depositData, false);
+
+                const localStatus = normalizeDepositStatus(depositData.status);
+                if (localStatus === 'pending' || localStatus === 'processing') {
+                    await checkDepositStatus(depositId, false, true);
+                }
+            } catch (err) {
+                modalBody.innerHTML = `<p class="text-danger text-center">Error: ${err.message}</p>`;
             }
         }
 
         function renderModalContent(depositData, isFromApiCheck = false) {
             const modalBody = document.getElementById('depositDetailModalBody');
             const modalFooter = document.getElementById('depositDetailModalFooter');
-            
+            const status = normalizeDepositStatus(depositData?.status);
+
             let contentHtml = `
                 <div class="payment-details-card">
                     <div class="payment-detail-item">
@@ -1825,15 +2082,15 @@
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Biaya Admin:</span>
-                        <span class="value">${formatCurrency(depositData.fee)}</span>
+                        <span class="value">${formatCurrency(getDepositFee(depositData))}</span>
                     </div>
                     <div class="payment-detail-item">
                         <span class="label fw-bold">Total Pembayaran:</span>
-                        <span class="value fw-bold text-primary">${formatCurrency(depositData.nominal)}</span>
+                        <span class="value fw-bold text-primary">${formatCurrency(getDepositTotal(depositData))}</span>
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Saldo Diterima:</span>
-                        <span class="value">${formatCurrency(depositData.get_balance)}</span>
+                        <span class="value">${formatCurrency(getDepositBalance(depositData))}</span>
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Metode:</span>
@@ -1841,7 +2098,7 @@
                     </div>
                     <div class="payment-detail-item">
                         <span class="label">Status:</span>
-                        <span class="value status-${depositData.status.toLowerCase()}">${depositData.status}</span>
+                        <span class="value status-${status}">${depositData.status || '-'}</span>
                     </div>
                      <div class="payment-detail-item">
                         <span class="label">Tanggal Dibuat:</span>
@@ -1863,15 +2120,16 @@
                     </div>`;
             }
 
-            if (depositData.qr_image && depositData.status === 'pending') {
+            if (depositData && depositData.qr_image && status === 'pending') {
                 contentHtml += `
                     <div class="qr-code-container">
-                        <p class="mb-2">Silakan scan QR Code di bawah ini:</p>
-                        <img src="${depositData.qr_image}" alt="QR Code Pembayaran">
+                        <p class="mb-2" style="font-weight: bold;">Silakan scan QR Code di bawah ini:</p>
+                        ${qrisCompositeHtml(depositData.qr_image, depositData.id || 'deposit')}
+                        <p class="mt-2 text-muted" style="font-size: 11px;">Status: Menunggu Pembayaran</p>
                     </div>`;
             }
-            
-            if (depositData.expired_at && depositData.status === 'pending') {
+
+            if (depositData.expired_at && status === 'pending') {
                  contentHtml += `
                     <div class="payment-detail-item text-danger">
                         <span class="label">Bayar Sebelum:</span>
@@ -1882,10 +2140,10 @@
             modalBody.innerHTML = contentHtml;
 
             let footerHtml = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>`;
-            if (depositData.status === 'pending' || depositData.status === 'processing') {
+            if (status === 'pending' || status === 'processing') {
                  footerHtml += `<button type="button" class="btn btn-info" id="modalCheckStatusBtn" onclick="checkDepositStatus('${depositData.id}', false, true)">Cek Status (API)</button>`;
             }
-            if (depositData.status === 'pending') {
+            if (status === 'pending') {
                  footerHtml += `<button type="button" class="btn btn-danger" id="modalCancelBtn" onclick="cancelDeposit('${depositData.id}', false)">Batalkan Deposit</button>`;
             }
             modalFooter.innerHTML = footerHtml;
@@ -1924,7 +2182,7 @@
                     } else if (isFromModal) {
                         renderModalContent(result.data, true);
                     }
-                    if (result.data.status !== 'pending' && result.data.status !== 'processing') {
+                    if (normalizeDepositStatus(result.data.status) !== 'pending' && normalizeDepositStatus(result.data.status) !== 'processing') {
                          fetchDepositHistory(); 
                     }
                 } else {
@@ -2200,10 +2458,10 @@
                     if (data.user.profileUrl && data.user.profileUrl.startsWith('http')) {
                         profileImgNav.src = data.user.profileUrl;
                     } else {
-                        profileImgNav.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.fullname || 'C T')}&background=EC4899&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
+                        profileImgNav.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.fullname || 'C T')}&background=2fd35a&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
                     }
                     profileImgNav.onerror = function() {
-                        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.fullname || 'C T')}&background=EC4899&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
+                        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.fullname || 'C T')}&background=2fd35a&color=fff&size=36&font-size=0.5&bold=true&rounded=true`;
                     };
                 } else {
                      if (data.message && data.message.toLowerCase().includes("user not found")) {
