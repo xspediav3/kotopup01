@@ -989,7 +989,7 @@ app.post("/profile/regenerate-apikey", requireLogin, async (req, res) => {
   }
 });
 
-// ===== Email OTP & Notifikasi (Gaya Komik + Maskot Chibi SVG) =====
+// ===== Email OTP & Notifikasi (Gaya Komik + Foto/URL Chibi) =====
 const mailer = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -1049,32 +1049,20 @@ function formatWibTime(dateObj = new Date()) {
   }
 }
 
-function buildChibiMascotSvg(accentColor = "#22c55e") {
-  return `
-<svg width="78" height="78" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Maskot Chibi Felix TopUp">
-  <ellipse cx="42" cy="77" rx="22" ry="4.5" fill="#14231a" fill-opacity="0.18"/>
-  <!-- Telinga / Cap -->
-  <path d="M22 33C22 18.64 31.4 9 42 9C52.6 9 62 18.64 62 33H22Z" fill="${escapeHtml(accentColor)}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M40 16L45 24H37L42 32" stroke="#fef08a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Wajah Chibi -->
-  <rect x="20" y="29" width="44" height="34" rx="17" fill="#fffbeb" stroke="#111827" stroke-width="3"/>
-  <!-- Pipi merona -->
-  <ellipse cx="28" cy="48" rx="4.5" ry="2.6" fill="#fda4af"/>
-  <ellipse cx="56" cy="48" rx="4.5" ry="2.6" fill="#fda4af"/>
-  <!-- Mata -->
-  <circle cx="33" cy="43" r="4.2" fill="#111827"/>
-  <circle cx="31.7" cy="41.5" r="1.5" fill="#ffffff"/>
-  <circle cx="51" cy="43" r="4.2" fill="#111827"/>
-  <circle cx="49.7" cy="41.5" r="1.5" fill="#ffffff"/>
-  <!-- Senyum -->
-  <path d="M37.5 49.5C39.2 52 44.8 52 46.5 49.5" stroke="#111827" stroke-width="2.8" stroke-linecap="round"/>
-  <!-- Badan & tangan -->
-  <path d="M28 63H56L59 74H25L28 63Z" fill="#fef08a" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M26 65L16 58" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="15" cy="57" r="4" fill="#fffbeb" stroke="#111827" stroke-width="2.5"/>
-  <path d="M58 65L68 58" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="69" cy="57" r="4" fill="#fffbeb" stroke="#111827" stroke-width="2.5"/>
-</svg>`;
+function resolveChibiImageUrl(userProfileUrl = "") {
+  const envUrl = String(
+    process.env.CHIBI_MASCOT_URL ||
+      process.env.WEBHOOK_CHIBI_URL ||
+      process.env.EMAIL_CHIBI_URL ||
+      ""
+  ).trim();
+  if (/^https?:\/\//i.test(envUrl)) {
+    return envUrl;
+  }
+  if (/^https?:\/\//i.test(String(userProfileUrl || "").trim())) {
+    return String(userProfileUrl).trim();
+  }
+  return "https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg";
 }
 
 function renderComicEmailCard({
@@ -1085,6 +1073,7 @@ function renderComicEmailCard({
   metaRows = [],
   otpCode = "",
   footerNote,
+  chibiUrl = "",
   accentColor = "#22c55e",
   badgeBg = "#fef08a",
 }) {
@@ -1093,7 +1082,8 @@ function renderComicEmailCard({
   const safeGreeting = escapeHtml(greeting);
   const safeMessage = escapeHtml(message);
   const safeFooter = escapeHtml(footerNote);
-  const mascotSvg = buildChibiMascotSvg(accentColor);
+  const finalChibiUrl = resolveChibiImageUrl(chibiUrl);
+  const safeChibiUrl = escapeHtml(finalChibiUrl);
 
   const metaHtml =
     Array.isArray(metaRows) && metaRows.length > 0
@@ -1123,7 +1113,7 @@ function renderComicEmailCard({
       <div style="font-size:20px;font-weight:900;color:#111827;margin-top:6px;letter-spacing:0.2px;">${safeTitle}</div>
     </div>
 
-    <!-- Isi + Maskot Chibi -->
+    <!-- Isi + Foto Chibi -->
     <div style="padding:18px 18px 14px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:10px;">
         <tr>
@@ -1131,9 +1121,9 @@ function renderComicEmailCard({
             <div style="font-weight:800;font-size:15px;color:#111827;margin-bottom:6px;">${safeGreeting}</div>
             <div style="font-size:14px;line-height:1.55;color:#1f2937;">${safeMessage}</div>
           </td>
-          <td valign="top" align="center" width="84" style="background:#fef9c3;border:2.5px solid #111827;box-shadow:3px 3px 0 #111827;border-radius:12px;padding:4px;">
-            ${mascotSvg}
-            <div style="font-size:10px;font-weight:800;color:#111827;margin-top:2px;">FELIX BOT</div>
+          <td valign="top" align="center" width="88" style="background:#fef9c3;border:2.5px solid #111827;box-shadow:3px 3px 0 #111827;border-radius:12px;padding:6px;">
+            <img src="${safeChibiUrl}" alt="Foto Chibi" width="74" height="74" style="display:block;width:74px;height:74px;object-fit:cover;border-radius:8px;border:2px solid #111827;" />
+            <div style="font-size:10px;font-weight:800;color:#111827;margin-top:4px;">FELIX BOT</div>
           </td>
         </tr>
       </table>
@@ -1152,6 +1142,7 @@ function renderComicEmailCard({
 function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   const safeUser = username || "Pengguna";
   const waktuReq = formatWibTime(new Date());
+  const chibiUrl = resolveChibiImageUrl(meta.chibiUrl || meta.profileUrl || "");
 
   if (purpose === "logout_device") {
     const who = meta.who || safeUser;
@@ -1159,6 +1150,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
     return {
       subject: "Kode OTP Keluarkan Perangkat - Felix TopUp",
       toastMessage: "Kode OTP Keluarkan Perangkat sudah dikirim ke email Anda",
+      chibiUrl,
       text: `Konfirmasi Keluarkan Perangkat\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nPerangkat/Akun: ${who}\nIP: ${ip}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
       html: renderComicEmailCard({
         badge: "KEAMANAN SESI",
@@ -1171,6 +1163,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
           { label: "Waktu Permintaan", value: waktuReq },
         ],
         otpCode,
+        chibiUrl,
         footerNote: "Kode berlaku selama 5 menit. Jika Anda tidak meminta tindakan ini, segera ganti password akun Anda.",
         accentColor: "#fde047",
         badgeBg: "#ffffff",
@@ -1185,6 +1178,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
     return {
       subject: "Kode OTP Ubah Profil - Felix TopUp",
       toastMessage: "Kode OTP Ubah Profil sudah dikirim ke email Anda",
+      chibiUrl,
       text: `Verifikasi Ubah Profil\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nDetail: ${detailPerubahan}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
       html: renderComicEmailCard({
         badge: "VERIFIKASI PROFIL",
@@ -1196,6 +1190,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
           { label: "Waktu Permintaan", value: waktuReq },
         ],
         otpCode,
+        chibiUrl,
         footerNote: "Kode berlaku selama 5 menit. Jangan bagikan kode ini kepada siapa pun. Jika Anda tidak merasa mengajukan perubahan, abaikan email ini.",
         accentColor: "#4ade80",
         badgeBg: "#fef08a",
@@ -1206,6 +1201,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   return {
     subject: "Kode Ganti Password - Felix TopUp",
     toastMessage: "Kode OTP Ganti Password sudah dikirim ke email Anda",
+    chibiUrl,
     text: `Ganti Password\nHalo ${safeUser}, kode OTP Anda: ${otpCode}\nWaktu: ${waktuReq}\nKode berlaku 5 menit.`,
     html: renderComicEmailCard({
       badge: "GANTI PASSWORD",
@@ -1214,6 +1210,7 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
       message: "Gunakan kode OTP di bawah ini untuk melanjutkan proses penggantian password akun Felix TopUp Anda.",
       metaRows: [{ label: "Waktu Permintaan", value: waktuReq }],
       otpCode,
+      chibiUrl,
       footerNote: "Kode berlaku selama 5 menit. Jika Anda tidak meminta penggantian password, segera amankan akun Anda.",
       accentColor: "#86efac",
       badgeBg: "#fef08a",
@@ -1221,10 +1218,11 @@ function buildPurposeOtpTemplate(purpose, otpCode, username, meta = {}) {
   };
 }
 
-async function sendViaWebhookOrSmtp({ to, subject, html, text }) {
+async function sendViaWebhookOrSmtp({ to, subject, html, text, chibiUrl = "" }) {
   const senderName = process.env.WEBHOOK_SENDER_NAME || "Felix TopUp";
   const secret = process.env.WEBHOOK_MAIL_SECRET || "";
   const webhookUrl = String(process.env.WEBHOOK_MAIL_URL || "").trim();
+  const finalChibiUrl = resolveChibiImageUrl(chibiUrl);
 
   if (webhookUrl) {
     const payload = {
@@ -1237,6 +1235,9 @@ async function sendViaWebhookOrSmtp({ to, subject, html, text }) {
       html,
       text: text || subject,
       senderName,
+      chibiUrl: finalChibiUrl,
+      chibi_url: finalChibiUrl,
+      avatarUrl: finalChibiUrl,
     };
     const resp = await axios.post(webhookUrl, payload, {
       timeout: 15000,
@@ -1274,6 +1275,7 @@ async function sendPurposeOtpEmail(toEmail, otpCode, username, purpose = "reset_
     subject: tpl.subject,
     html: tpl.html,
     text: tpl.text,
+    chibiUrl: tpl.chibiUrl,
   });
 }
 
@@ -1288,6 +1290,7 @@ async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
     field: req.body?.field || "",
     value: req.body?.value || "",
     changedSummary: req.body?.changedSummary || req.body?.text || "",
+    chibiUrl: req.body?.chibiUrl || req.body?.chibi_url || "",
   };
 
   try {
@@ -1297,6 +1300,9 @@ async function handlePurposeOtpRequest(req, res, fallbackPurpose) {
     }
     if (!user.email) {
       return res.status(400).json({ success: false, message: "Email akun belum diatur" });
+    }
+    if (!meta.chibiUrl && user.profileUrl) {
+      meta.chibiUrl = user.profileUrl;
     }
 
     const now = Date.now();
@@ -1374,6 +1380,7 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
     }
     const subject = String(req.body?.subject || "Notifikasi Akun - Felix TopUp");
     const rawText = String(req.body?.text || "Ada aktivitas pada akun Anda.");
+    const chibiUrl = resolveChibiImageUrl(req.body?.chibiUrl || req.body?.chibi_url || user?.profileUrl || "");
     const html = renderComicEmailCard({
       badge: "INFO AKTIVITAS",
       title: subject,
@@ -1381,6 +1388,7 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
       message: rawText,
       metaRows: [{ label: "Waktu Tercatat", value: formatWibTime(new Date()) }],
       otpCode: "",
+      chibiUrl,
       footerNote: "Notifikasi otomatis dari sistem Felix TopUp.",
       accentColor: "#93c5fd",
       badgeBg: "#fef08a",
@@ -1391,6 +1399,7 @@ app.post("/profile/send-notification-email", requireLogin, async (req, res) => {
       subject,
       html,
       text: `${subject}\n\n${rawText}`,
+      chibiUrl,
     });
     return res.json({ success: true, message: "Notifikasi berhasil dikirim ke Gmail" });
   } catch (err) {
