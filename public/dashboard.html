@@ -2231,6 +2231,200 @@
             }
         }
 
+
+        /* ===== Polishing pass: category, history statuses and navigation ===== */
+        .vp-category-heading {
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            padding: .1rem .15rem .15rem;
+        }
+        .vp-category-heading h4 {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: .65rem;
+            color: var(--vp-dark);
+            font-family: var(--vp-font-heading);
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: -.35px;
+        }
+        .vp-category-heading h4::before {
+            content: "";
+            width: 5px;
+            height: 25px;
+            border-radius: 99px;
+            background: linear-gradient(180deg, #86efac, #16a34a);
+            box-shadow: 0 3px 10px rgba(22, 163, 74, .22);
+        }
+        .vp-category-section {
+            border: 1px solid rgba(34, 197, 94, .18);
+            box-shadow: 0 10px 28px rgba(22, 101, 52, .055);
+        }
+
+        .vp-sidebar-toggler {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(34, 197, 94, .24);
+            border-radius: 15px;
+            color: #16803d;
+            background: linear-gradient(145deg, #ffffff 0%, #e8f9ed 100%);
+            box-shadow: 0 5px 14px rgba(22, 163, 74, .10), inset 0 1px 0 rgba(255,255,255,.95);
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            cursor: pointer;
+        }
+        .vp-sidebar-toggler .bi {
+            font-size: 1.45rem;
+            line-height: 1;
+            transition: transform .2s ease;
+        }
+        .vp-sidebar-toggler:hover {
+            color: #ffffff;
+            background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 19px rgba(22, 163, 74, .24);
+        }
+        .vp-sidebar-toggler:active { transform: scale(.95); }
+        .vp-sidebar-toggler:focus-visible {
+            outline: 3px solid rgba(74, 222, 128, .35);
+            outline-offset: 3px;
+        }
+        [data-theme="dark"] .vp-sidebar-toggler {
+            color: #bbf7d0;
+            background: linear-gradient(145deg, #243b2b 0%, #17291d 100%);
+            border-color: rgba(74, 222, 128, .25);
+        }
+        .vp-sidebar {
+            background: linear-gradient(180deg, #ffffff 0%, #f1fbf4 100%);
+            border-right: 1px solid rgba(34, 197, 94, .18);
+            box-shadow: 12px 0 34px rgba(20, 83, 45, .10);
+        }
+        .vp-sidebar-header {
+            position: relative;
+            margin: 0 1rem 1rem;
+            padding: 1.1rem .8rem 1.25rem;
+            border: 1px solid rgba(34, 197, 94, .18);
+            border-radius: 18px;
+            background: linear-gradient(135deg, #effcf3 0%, #d9f8e2 100%);
+            box-shadow: 0 7px 18px rgba(22, 163, 74, .08);
+        }
+        .vp-sidebar-brand-text {
+            color: #15803d;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -.6px;
+        }
+        .vp-sidebar-menu { padding: 0 1rem 1rem; }
+        .vp-sidebar-menu .nav-link {
+            margin: .25rem 0;
+            padding: .82rem .95rem;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            font-weight: 700;
+            transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .vp-sidebar-menu .nav-link .bi { font-size: 1.1rem; }
+        .vp-sidebar-menu .nav-link:hover {
+            transform: translateX(3px);
+            border-color: rgba(34, 197, 94, .18);
+            box-shadow: 0 5px 14px rgba(22, 163, 74, .07);
+        }
+        .vp-sidebar-menu .nav-link.active {
+            background: linear-gradient(120deg, #e8f9ed 0%, #d7f7e1 100%);
+            color: #15803d;
+            border-color: rgba(34, 197, 94, .22);
+            box-shadow: inset 3px 0 0 #22c55e, 0 5px 14px rgba(22, 163, 74, .07);
+        }
+        [data-theme="dark"] .vp-sidebar {
+            background: linear-gradient(180deg, #17251b 0%, #101b14 100%);
+            border-right-color: rgba(74, 222, 128, .15);
+        }
+        [data-theme="dark"] .vp-sidebar-header {
+            background: linear-gradient(135deg, #213b29 0%, #182b1e 100%);
+            border-color: rgba(74, 222, 128, .18);
+        }
+        [data-theme="dark"] .vp-sidebar-brand-text { color: #86efac; }
+        [data-theme="dark"] .vp-sidebar-menu .nav-link.active {
+            background: linear-gradient(120deg, #24452f 0%, #1b3324 100%);
+            color: #86efac;
+            border-color: rgba(74, 222, 128, .2);
+        }
+        .vp-sidebar-overlay {
+            background: rgba(7, 25, 13, .48);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .history-status-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .45rem;
+        }
+        .history-status-group .status-badge { flex: 0 0 auto; }
+        .history-cancel-btn {
+            padding: .3rem .58rem;
+            border: 1px solid rgba(220, 53, 69, .22);
+            border-radius: 999px;
+            color: #b42332;
+            background: rgba(220, 53, 69, .06);
+            font-size: .7rem;
+            font-weight: 700;
+        }
+        .history-cancel-btn:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        .status-pending {
+            color: #946200;
+            background: rgba(255, 193, 7, .18);
+            border-color: rgba(255, 193, 7, .42);
+        }
+        .status-success {
+            color: #137a43;
+            background: rgba(25, 135, 84, .14);
+            border-color: rgba(25, 135, 84, .36);
+        }
+        .status-cancel,
+        .status-failed,
+        .status-expired {
+            color: #c62838;
+            background: rgba(220, 53, 69, .13);
+            border-color: rgba(220, 53, 69, .36);
+        }
+        [data-theme="dark"] .status-pending { color: #ffd76a; }
+        [data-theme="dark"] .status-success { color: #6ee7a0; }
+        [data-theme="dark"] .status-cancel,
+        [data-theme="dark"] .status-failed,
+        [data-theme="dark"] .status-expired { color: #ff8994; }
+
+        @media (max-width: 767.98px) {
+            .vp-history-table tbody td:last-child {
+                display: grid;
+                grid-template-columns: 82px minmax(0, 1fr);
+                align-items: center;
+                gap: .55rem;
+                margin-top: 0;
+                padding: .48rem 0;
+                border-top: 0;
+            }
+            .vp-history-table tbody td:last-child::before {
+                content: attr(data-label);
+                margin: 0;
+            }
+            .history-status-group { gap: .35rem; }
+            .history-cancel-btn { font-size: .66rem; padding: .28rem .48rem; }
+        }
+        @media (max-width: 390px) {
+            .vp-sidebar-toggler { width: 40px; height: 40px; border-radius: 13px; }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -2314,7 +2508,7 @@
         <div class="vp-main-container" id="vpMainContainer">
             <header class="vp-topbar">
                 <div class="vp-topbar-brand-toggler">
-                    <button class="vp-sidebar-toggler" id="vpSidebarToggler" type="button" aria-label="Toggle sidebar">
+                    <button class="vp-sidebar-toggler" id="vpSidebarToggler" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="vpSidebar">
                         <i class="bi bi-list"></i>
                     </button>
                     <a href="#" class="nav-link d-none d-md-inline-block" title="Mode Layar Penuh">
@@ -2379,12 +2573,9 @@
                             </button>
                         </div>
                     </section>
-<section class="vp-section content-loaded" style="animation-delay: 0.2s;">
-                        <div class="d-flex justify-content-end align-items-center mb-3">
-                            <div class="vp-service-toggle-wrapper" id="serviceToggleAction" role="button" aria-label="Toggle popular services">
-                                <i class="bi bi-grid-fill" id="serviceToggleIcon"></i>
-                                <span class="toggle-text" id="serviceToggleText">Lihat Semua</span>
-                            </div>
+<section class="vp-section content-loaded vp-category-section" style="animation-delay: 0.2s;">
+                        <div class="vp-category-heading mb-3">
+                            <h4 class="mb-0 fw-bold">Category Produk</h4>
                         </div>
                         <div class="vp-service-grid" id="popularServicesGrid">
                             <a href="/produk-detail?category=Games" class="vp-service-item">
@@ -2406,12 +2597,11 @@
                                         <th>Nominal</th>
                                         <th>Metode</th>
                                         <th>Status</th>
-                                        <th>Pembatalan</th>
                                     </tr>
                                 </thead>
                                 <tbody id="latestDepositHistoryBody">
                                     <tr>
-                                        <td colspan="5" class="text-center">
+                                        <td colspan="4" class="text-center">
                                             <div class="vp-loading-shimmer" style="width: 100%; height: 40px;"></div>
                                         </td>
                                     </tr>
@@ -2492,8 +2682,8 @@
                     <div class="footer-link-card">
                         <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/628231090429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">xspedia@gmail.com</a></li>
+                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">Email</a></li>
                             <li><i class="bi bi-telegram"></i> <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
@@ -2502,7 +2692,7 @@
                 <div class="footer-community">
                     <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
-                        <a href="https://wa.me/628231090429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
                         <a href="mailto:xspedia@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
@@ -2609,51 +2799,12 @@
         const body = document.body;
         const topbarBrand = document.getElementById('topbarBrand');
 
-        const popularServicesGrid = document.getElementById('popularServicesGrid');
-        const serviceItems = popularServicesGrid.querySelectorAll('.vp-service-item');
-        const itemsToShowInitially = 8; 
-        const serviceToggleAction = document.getElementById('serviceToggleAction'); 
-        const serviceToggleIcon = document.getElementById('serviceToggleIcon');
-        const serviceToggleText = document.getElementById('serviceToggleText');
-        let showingAllServices = false;
-
         const notificationToggle = document.getElementById('notificationToggle');
         const notificationDropdown = document.getElementById('notificationDropdown');
         const notificationIcon = document.getElementById('notificationIcon');
         const notificationBadge = document.getElementById('notificationBadge');
         const notificationList = document.getElementById('notificationList');
         let notificationsData = [];
-
-        function updateServiceDisplay() {
-            serviceItems.forEach((item, index) => {
-                if (showingAllServices) {
-                    item.classList.remove('hidden');
-                } else {
-                    if (index < itemsToShowInitially) {
-                        item.classList.remove('hidden');
-                    } else {
-                        item.classList.add('hidden');
-                    }
-                }
-            });
-
-            if (showingAllServices) {
-                serviceToggleIcon.className = 'bi bi-grid-fill';
-                serviceToggleText.textContent = 'Sembunyikan';
-                serviceToggleAction.setAttribute('aria-label', 'Hide categories');
-            } else {
-                serviceToggleIcon.className = 'bi bi-grid-fill';
-                serviceToggleText.textContent = 'Lihat Semua';
-                serviceToggleAction.setAttribute('aria-label', 'Show all categories');
-            }
-        }
-
-        serviceToggleAction.addEventListener('click', () => {
-            showingAllServices = !showingAllServices;
-            updateServiceDisplay();
-        });
-
-        updateServiceDisplay();
 
         const savedTheme = localStorage.getItem('vp-theme') || 'light';
         body.setAttribute('data-theme', savedTheme);
@@ -2690,26 +2841,29 @@
             }
         }
 
-        function toggleSidebar() {
-            vpSidebar.classList.toggle('active');
-            const isActive = vpSidebar.classList.contains('active');
+        function setSidebarState(isActive) {
+            vpSidebar.classList.toggle('active', isActive);
             updateTopbarBrandVisibility(isActive);
-            
+            vpSidebarToggler.setAttribute('aria-expanded', String(isActive));
+            vpSidebarToggler.setAttribute('aria-label', isActive ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+            vpSidebarToggler.innerHTML = isActive
+                ? '<i class="bi bi-x-lg"></i>'
+                : '<i class="bi bi-list"></i>';
+
             if (window.innerWidth < 992) {
                 sidebarOverlay.style.display = isActive ? 'block' : 'none';
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     sidebarOverlay.style.opacity = isActive ? '1' : '0';
-                }, 10);
+                });
             }
         }
-        
+
+        function toggleSidebar() {
+            setSidebarState(!vpSidebar.classList.contains('active'));
+        }
+
         function closeSidebar() {
-            vpSidebar.classList.remove('active');
-            updateTopbarBrandVisibility(false);
-            sidebarOverlay.style.opacity = '0';
-            setTimeout(() => {
-                sidebarOverlay.style.display = 'none';
-            }, 300);
+            setSidebarState(false);
         }
 
         vpSidebarToggler.addEventListener('click', toggleSidebar);
@@ -2955,31 +3109,32 @@
             orderTbody.innerHTML = '';
 
             if (latestDeposits.length === 0) {
-                depositTbody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada data deposit.</td></tr>';
+                depositTbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada data deposit.</td></tr>';
             } else {
                 latestDeposits.forEach(deposit => {
                     const row = document.createElement('tr');
-                    
-                    let statusBadge = '';
+                    const normalizedStatus = String(deposit.status || 'unknown').toLowerCase();
                     let statusClass = '';
-                    if (deposit.status === 'pending') {
+                    if (normalizedStatus === 'pending') {
                         statusClass = 'status-pending';
-                    } else if (deposit.status === 'success') {
+                    } else if (normalizedStatus === 'success') {
                         statusClass = 'status-success';
-                    } else if (['failed', 'expired', 'cancel'].includes(deposit.status)) {
+                    } else if (['cancel', 'cancelled', 'canceled'].includes(normalizedStatus)) {
+                        statusClass = 'status-cancel';
+                    } else if (['failed', 'expired', 'failed_refunded'].includes(normalizedStatus)) {
                         statusClass = 'status-failed';
                     }
-                    statusBadge = `<span class="status-badge ${statusClass}">${deposit.status}</span>`;
+                    const statusBadge = `<span class="status-badge ${statusClass}">${deposit.status || 'Unknown'}</span>`;
+                    const cancelButton = normalizedStatus === 'pending'
+                        ? `<button class="btn btn-outline-secondary btn-sm history-cancel-btn" type="button" onclick="cancelDeposit('${deposit.id}')"><i class="bi bi-x-circle me-1"></i>Batal</button>`
+                        : '';
 
                     row.innerHTML = `
                         <td data-label="ID Transaksi">${deposit.id || '-'}</td>
-                        <td data-label="Nominal">Rp ${deposit.get_balance.toLocaleString('id-ID')}</td>
+                        <td data-label="Nominal">Rp ${Number(deposit.get_balance || 0).toLocaleString('id-ID')}</td>
                         <td data-label="Metode">${deposit.metode || '-'}</td>
-                        <td data-label="Status">${statusBadge}</td>
-                        <td data-label="Pembatalan">
-                            <div class="action-buttons">
-                                ${deposit.status === 'pending' ? `<button class="btn btn-outline-secondary btn-sm" onclick="cancelDeposit('${deposit.id}')">Batal</button>` : '<span class="text-muted">—</span>'}
-                            </div>
+                        <td data-label="Status">
+                            <div class="history-status-group">${statusBadge}${cancelButton}</div>
                         </td>
                     `;
                     depositTbody.appendChild(row);
@@ -2992,16 +3147,18 @@
                 latestOrders.forEach(order => {
                     const row = document.createElement('tr');
                     
-                    let statusBadge = '';
+                    const normalizedStatus = String(order.status || 'unknown').toLowerCase();
                     let statusClass = '';
-                    if (order.status === 'pending') {
+                    if (normalizedStatus === 'pending') {
                         statusClass = 'status-pending';
-                    } else if (order.status === 'success') {
+                    } else if (normalizedStatus === 'success') {
                         statusClass = 'status-success';
-                    } else if (['failed', 'cancel', 'failed_refunded'].includes(order.status)) {
+                    } else if (['cancel', 'cancelled', 'canceled'].includes(normalizedStatus)) {
+                        statusClass = 'status-cancel';
+                    } else if (['failed', 'expired', 'failed_refunded'].includes(normalizedStatus)) {
                         statusClass = 'status-failed';
                     }
-                    statusBadge = `<span class="status-badge ${statusClass}">${order.status}</span>`;
+                    const statusBadge = `<span class="status-badge ${statusClass}">${order.status || 'Unknown'}</span>`;
 
                     row.innerHTML = `
                         <td data-label="ID Transaksi">${order.id || '-'}</td>
