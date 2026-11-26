@@ -156,6 +156,50 @@ function calcDepositAdminAndBalance({ nominal, kodeUnik = 0, apiData = {}, role 
 }
 
 
+const axios = require("axios");
+
+// ================= HELPER PERHITUNGAN ADMIN DEPOSIT =================
+function getRoleFeePercent(role = "user") {
+  const normalizedRole = String(role || "user").toLowerCase();
+  if (normalizedRole === "user") return 1.5;
+  if (normalizedRole === "reseller") return 0.7;
+  return 0;
+}
+
+function calcDepositAdminAndBalance({ nominal = 0, kodeUnik = 0, apiData = {}, role = "user" }) {
+  const cleanNominal = Math.max(parseInt(nominal, 10) || 0, 0);
+  const cleanKodeUnik = Math.max(parseInt(kodeUnik, 10) || 0, 0);
+
+  const feePersen = getRoleFeePercent(role);
+  const feeApp = Math.round((cleanNominal * feePersen) / 100);
+  const feeProvider = Math.max(parseInt(apiData?.fee ?? 0, 10) || 0, 0);
+
+  // Total biaya admin yang tampil ke user
+  const totalFee = feeApp + feeProvider;
+
+  // Saldo diterima tetap sebesar nominal deposit murni
+  const getBalance = cleanNominal;
+
+  // Total bayar di UI: nominal + biaya admin (totalFee)
+  // Sementara total_bayar_provider menyimpan nominal + kodeUnik (atau total_bayar dari API)
+  const totalBayarProvider =
+    parseInt(apiData?.total_bayar, 10) || cleanNominal + cleanKodeUnik;
+  const totalAmount = cleanNominal + totalFee;
+
+  return {
+    nominal: cleanNominal,
+    tambahan: cleanKodeUnik,
+    kode_unik: cleanKodeUnik,
+    fee_persen: feePersen,
+    fee_app: feeApp,
+    fee_provider: feeProvider,
+    fee: totalFee,
+    get_balance: getBalance,
+    total_bayar: totalBayarProvider,
+    total_amount: totalAmount
+  };
+}
+
 // ================= LIST METODE DEPOSIT (DITZNESIA) =================
 router.post("/deposit/metode", requireLogin, async (req, res) => {
   try {
@@ -168,9 +212,7 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
     }
 
     const role = req.session.role || "user";
-    let tambahanPersen = 0;
-    if (role === "user") tambahanPersen = 1.5;
-    if (role === "reseller") tambahanPersen = 0.7;
+    const tambahanPersen = getRoleFeePercent(role);
 
     // Default metode QRIS Ditznesia (tetap kompatibel dengan format frontend sebelumnya)
     let rawMethods = [
@@ -178,7 +220,7 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
         metode: "QRISFAST",
         type: "ewallet",
         name: "QRIS Otomatis (All Payment)",
-        min: 500,
+        min: 1000,
         max: 5000000,
         fee: 0,
         fee_persen: 0,
@@ -603,6 +645,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       role: user.role || req.session.role || "user"
     });
 
+    const fee = txInDb.fee ?? calc.fee;
+    const totalAmount = txInDb.total_amount ?? (calc.nominal + fee);
     const creditAmount = parseInt(txInDb.get_balance, 10) || calc.get_balance;
 
     if (normalizedStatus === "success" && dbStatusNormalized !== "success") {
@@ -632,12 +676,12 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         nominal: calc.nominal,
         tambahan: calc.tambahan,
         kode_unik: calc.kode_unik,
-        fee: txInDb.fee ?? calc.fee,
+        fee,
         fee_provider: txInDb.fee_provider ?? calc.fee_provider,
         fee_app: txInDb.fee_app ?? calc.fee_app,
         get_balance: creditAmount,
         total_bayar: calc.total_bayar,
-        total_amount: calc.total_amount,
+        total_amount: totalAmount,
         metode: txInDb.metode || depositDetails.metode || "QRISFAST",
         qr_image: txInDb.qr_image || depositDetails.qr_link || depositDetails.qr_image || null,
         qris_string: txInDb.qris_string || depositDetails.qr_string || "",
