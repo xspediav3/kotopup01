@@ -533,6 +533,185 @@ footer a { overflow-wrap: anywhere; }
     .vp-price-list-table .product-image { width: 28px; height: 28px; }
 }
 
+
+
+
+/* Compact search/filter controls — text stays inside the field on narrow screens */
+.filter-controls,
+.filter-controls > [class*="col"] { min-width: 0; }
+.filter-controls .form-label,
+label[for="searchDeposit"],
+label[for="searchOrder"],
+label[for="searchProduct"],
+label[for="searchOrderProducts"] {
+    margin-bottom: .32rem;
+    font-size: .73rem;
+    line-height: 1.3;
+    font-weight: 700;
+}
+#searchDeposit, #searchOrder, #searchProduct, #searchOrderProducts {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px !important;
+    padding: .38rem .72rem;
+    border: 1px solid var(--vp-border-color);
+    border-radius: 10px;
+    font-size: .77rem;
+    line-height: 1.25;
+    letter-spacing: .005em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 rgba(22, 101, 52, .045);
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+#searchDeposit::placeholder, #searchOrder::placeholder,
+#searchProduct::placeholder, #searchOrderProducts::placeholder {
+    font-size: .74rem;
+    color: var(--vp-text-muted);
+    opacity: .82;
+}
+#searchDeposit:focus, #searchOrder:focus,
+#searchProduct:focus, #searchOrderProducts:focus {
+    border-color: var(--vp-primary);
+    box-shadow: 0 0 0 3px rgba(var(--vp-primary-rgb), .10), 2px 2px 0 rgba(22, 101, 52, .05);
+    outline: none;
+}
+@media (max-width: 575.98px) {
+    .filter-controls { --bs-gutter-y: .55rem; }
+    .filter-controls .form-label { font-size: .7rem; }
+    #searchDeposit, #searchOrder, #searchProduct, #searchOrderProducts {
+        height: 35px;
+        min-height: 35px !important;
+        font-size: .75rem;
+    }
+}
+
+
+
+
+/* Price list: clean table, compact mobile rows and controlled text wrapping */
+.vp-main-content > .vp-section:first-child { padding: .9rem !important; border-radius: 15px; }
+.vp-price-list-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--vp-border-color);
+    border-radius: 12px;
+}
+.vp-price-list-table th {
+    padding: .62rem .55rem;
+    background: var(--vp-primary-light);
+    color: var(--vp-dark);
+    font-size: .72rem;
+    font-weight: 800;
+    border-bottom: 1px solid var(--vp-border-color);
+}
+.vp-price-list-table td {
+    min-width: 0;
+    padding: .52rem .55rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--vp-border-color);
+    color: var(--vp-dark);
+    font-size: .76rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.vp-price-list-table th:nth-child(1) { width: 29%; }
+.vp-price-list-table th:nth-child(2) { width: 14%; }
+.vp-price-list-table th:nth-child(3) { width: 16%; }
+.vp-price-list-table th:nth-child(4) { width: 14%; }
+.vp-price-list-table th:nth-child(5) { width: 15%; }
+.vp-price-list-table th:nth-child(6) { width: 12%; }
+.vp-price-list-table tbody tr:last-child td { border-bottom: 0; }
+.vp-price-list-table tbody tr:hover { background: rgba(var(--vp-primary-rgb), .045); }
+.vp-price-list-table td[data-label="Harga"] {
+    color: var(--vp-primary-dark);
+    font-weight: 900;
+    white-space: nowrap;
+}
+[data-theme="dark"] .vp-price-list-table td[data-label="Harga"] { color: var(--vp-primary); }
+.vp-price-list-table td[data-label="Produk"] { font-weight: 700; }
+.vp-price-list-table .product-image {
+    width: 27px;
+    height: 27px;
+    max-width: 27px;
+    object-fit: contain;
+    margin-right: .4rem;
+    vertical-align: middle;
+}
+.vp-price-list-table .status-badge { display: inline-block; max-width: 100%; padding: .2rem .42rem; border-radius: 7px; font-size: .64rem; overflow-wrap: anywhere; }
+.table-responsive { border-radius: 12px; }
+@media (max-width: 767.98px) {
+    .vp-price-list-table { display: block; width: 100%; border: 0; overflow: visible; }
+    .vp-price-list-table thead { display: none; }
+    .vp-price-list-table tbody { display: grid; gap: .45rem; width: 100%; }
+    .vp-price-list-table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: .2rem .7rem;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: .58rem .65rem;
+        border: 1px solid var(--vp-border-color);
+        border-bottom: 2px solid rgba(34, 197, 94, .16);
+        border-radius: 11px;
+        background: var(--vp-card-bg);
+        box-shadow: 2px 2px 0 rgba(21, 128, 61, .035);
+    }
+    .vp-price-list-table td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: .38rem;
+        min-width: 0;
+        padding: .12rem 0;
+        border: 0;
+        text-align: right !important;
+        font-size: .72rem;
+    }
+    .vp-price-list-table td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        margin: 0;
+        color: var(--vp-text-muted);
+        text-align: left;
+        font-size: .64rem;
+        font-weight: 700;
+    }
+    .vp-price-list-table td[data-label="Produk"] {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding-bottom: .32rem;
+        margin-bottom: .1rem;
+        border-bottom: 1px dashed var(--vp-border-color);
+        text-align: left !important;
+        font-size: .82rem;
+        overflow-wrap: anywhere;
+    }
+    .vp-price-list-table td[data-label="Produk"]::before { display: none; }
+    .vp-price-list-table td[data-label="Harga"] { color: var(--vp-primary); font-size: .75rem; font-weight: 900; }
+    .vp-price-list-table td[data-label="Kode"] { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .vp-price-list-table .product-image { width: 25px; height: 25px; flex: 0 0 25px; margin-right: .42rem; }
+    .vp-price-list-table td[colspan] { grid-column: 1 / -1; display: block; text-align: center !important; }
+    .vp-price-list-table td[colspan]::before { display: none; }
+}
+@media (max-width: 360px) {
+    .vp-price-list-table tbody tr { padding: .52rem; gap: .18rem .45rem; }
+    .vp-price-list-table td { font-size: .68rem; }
+    .vp-price-list-table td::before { font-size: .6rem; }
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -609,7 +788,7 @@ footer a { overflow-wrap: anywhere; }
                             </div>
                             <div class="col-md-4">
                                 <label for="searchProduct" class="form-label">Cari Produk</label>
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama atau kode produk...">
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Cari nama / kode produk...">
                             </div>
                         </div>
 
@@ -641,55 +820,63 @@ footer a { overflow-wrap: anywhere; }
                 </main>
             </div>
             
-             <footer>
-                <div class="footer-left">
-                    <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="XS-Pedia Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">XS-Pedia</span>
-                    </a>
-                    <div class="footer-description">
-                        <i class="bi bi-info-circle-fill"></i>
-                        XS-Pedia adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+             <footer class="dashboard-footer">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-brand-top">
+                            <span class="footer-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <div class="footer-brand-copy">
+                                <a href="/dashboard" class="footer-logo-name">
+                                    <span class="footer-logo-name-text">XS-Pedia</span>
+                                </a>
+                                <span class="footer-brand-kicker">PLATFORM LAYANAN DIGITAL</span>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            XS-Pedia adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        </p>
                     </div>
                     <div class="footer-copyright">
                         XS-Pedia © <span id="currentYear"></span>. All Rights Reserved.
                     </div>
                 </div>
-                
+
                 <div class="footer-links-section">
-                    <div>
-                        <span class="footer-section-title">Navigasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-compass-fill"></i> Navigasi</span>
                         <ul>
-                            <li><a href="/dashboard">Beranda</a></li>
-                            <li><a href="/deposit">Deposit</a></li>
-                            <li><a href="/order">Pesanan</a></li>
-                            <li><a href="/price-list">Daftar Harga</a></li>
+                            <li><i class="bi bi-house-door-fill"></i><a href="/dashboard">Beranda</a></li>
+                            <li><i class="bi bi-wallet2"></i><a href="/deposit">Deposit</a></li>
+                            <li><i class="bi bi-cart-check-fill"></i><a href="/order">Pesanan</a></li>
+                            <li><i class="bi bi-tags-fill"></i><a href="/price-list">Daftar Harga</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Informasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-grid-1x2-fill"></i> Informasi</span>
                         <ul>
-                            <li><a href="/profile">Profil Pengguna</a></li>
-                            <li><a href="/api-key-page">API Key</a></li>
-                            <li><a href="/docs">Dokumentasi API</a></li>
-                            <li><a href="#">Syarat & Ketentuan</a></li>
-                            <li><a href="#">Kebijakan Privasi</a></li>
+                            <li><i class="bi bi-person-fill"></i><a href="/profile">Profil Pengguna</a></li>
+                            <li><i class="bi bi-key-fill"></i><a href="/api-key-page">API Key</a></li>
+                            <li><i class="bi bi-code-slash"></i><a href="/docs">Dokumentasi API</a></li>
+                            <li><i class="bi bi-file-earmark-text"></i><a href="#">Syarat &amp; Ketentuan</a></li>
+                            <li><i class="bi bi-shield-check"></i><a href="#">Kebijakan Privasi</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Kontak Kami</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="astrapterodactyl@gmail.com">Email Support</a></li>
-                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                            <li><i class="bi bi-whatsapp"></i><a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i><a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
+                            <li><i class="bi bi-telegram"></i><a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
                 </div>
-                
-                <div class="footer-right">
+
+                <div class="footer-community">
+                    <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
                         <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:astrapterodactyl@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </footer>

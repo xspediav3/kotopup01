@@ -440,6 +440,136 @@ footer a { overflow-wrap: anywhere; }
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
+
+
+
+/* Compact search/filter controls — text stays inside the field on narrow screens */
+.filter-controls,
+.filter-controls > [class*="col"] { min-width: 0; }
+.filter-controls .form-label,
+label[for="searchDeposit"],
+label[for="searchOrder"],
+label[for="searchProduct"],
+label[for="searchOrderProducts"] {
+    margin-bottom: .32rem;
+    font-size: .73rem;
+    line-height: 1.3;
+    font-weight: 700;
+}
+#searchDeposit, #searchOrder, #searchProduct, #searchOrderProducts {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px !important;
+    padding: .38rem .72rem;
+    border: 1px solid var(--vp-border-color);
+    border-radius: 10px;
+    font-size: .77rem;
+    line-height: 1.25;
+    letter-spacing: .005em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 rgba(22, 101, 52, .045);
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+#searchDeposit::placeholder, #searchOrder::placeholder,
+#searchProduct::placeholder, #searchOrderProducts::placeholder {
+    font-size: .74rem;
+    color: var(--vp-text-muted);
+    opacity: .82;
+}
+#searchDeposit:focus, #searchOrder:focus,
+#searchProduct:focus, #searchOrderProducts:focus {
+    border-color: var(--vp-primary);
+    box-shadow: 0 0 0 3px rgba(var(--vp-primary-rgb), .10), 2px 2px 0 rgba(22, 101, 52, .05);
+    outline: none;
+}
+@media (max-width: 575.98px) {
+    .filter-controls { --bs-gutter-y: .55rem; }
+    .filter-controls .form-label { font-size: .7rem; }
+    #searchDeposit, #searchOrder, #searchProduct, #searchOrderProducts {
+        height: 35px;
+        min-height: 35px !important;
+        font-size: .75rem;
+    }
+}
+
+
+
+
+/* IP whitelist: compact chips and a clean, responsive add form */
+#ipWhitelistContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: .5rem;
+    min-width: 0;
+    margin-bottom: .85rem !important;
+}
+#ipWhitelistContainer .ip-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .65rem;
+    min-width: 0;
+    min-height: 46px;
+    margin: 0;
+    padding: .42rem .55rem .42rem .7rem;
+    border: 1px solid var(--vp-border-color);
+    border-radius: 11px;
+    background: var(--vp-card-bg);
+    box-shadow: 2px 2px 0 rgba(21, 128, 61, .045);
+}
+#ipWhitelistContainer .ip-item > span {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    padding: .25rem .5rem;
+    border: 1px solid rgba(34, 197, 94, .13);
+    border-radius: 8px;
+    background: var(--vp-primary-light);
+    color: var(--vp-dark);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .77rem;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+#ipWhitelistContainer .remove-ip-btn {
+    display: inline-flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 9px;
+}
+#addIpForm { display: flex; flex-wrap: wrap; align-items: stretch !important; gap: .5rem; margin: 0; }
+#addIpForm > .col { flex: 1 1 230px; min-width: 0; width: auto; padding: 0; }
+#addIpForm > .col-auto { flex: 0 0 auto; min-width: 0; padding: 0; }
+#newIpAddress {
+    width: 100%;
+    min-width: 0;
+    height: 39px;
+    min-height: 39px !important;
+    padding: .42rem .72rem;
+    font-size: .79rem;
+    border-radius: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#addIpForm .btn { min-height: 39px; padding: .4rem .8rem; border-radius: 10px; font-size: .78rem; white-space: nowrap; }
+@media (max-width: 575.98px) {
+    #ipWhitelistContainer { grid-template-columns: minmax(0, 1fr); }
+    #addIpForm > .col, #addIpForm > .col-auto { flex: 1 1 100%; width: 100%; }
+    #addIpForm .btn { width: 100%; }
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -530,7 +660,7 @@ footer a { overflow-wrap: anywhere; }
                             <form id="addIpForm" class="row g-2 align-items-end">
                                 <div class="col">
                                     <label for="newIpAddress" class="form-label visually-hidden">Alamat IP Baru</label>
-                                    <input type="text" class="form-control" id="newIpAddress" placeholder="Masukkan alamat IP baru">
+                                    <input type="text" class="form-control" id="newIpAddress" placeholder="Contoh: 192.0.2.10 atau IPv6" autocomplete="off" autocapitalize="off" spellcheck="false">
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-vp-primary">
@@ -544,55 +674,63 @@ footer a { overflow-wrap: anywhere; }
                 </main>
             </div>
             
-            <footer>
-                <div class="footer-left">
-                    <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="XS-Pedia Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">XS-Pedia</span>
-                    </a>
-                    <div class="footer-description">
-                        <i class="bi bi-info-circle-fill"></i>
-                        XS-Pedia adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+            <footer class="dashboard-footer">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-brand-top">
+                            <span class="footer-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <div class="footer-brand-copy">
+                                <a href="/dashboard" class="footer-logo-name">
+                                    <span class="footer-logo-name-text">XS-Pedia</span>
+                                </a>
+                                <span class="footer-brand-kicker">PLATFORM LAYANAN DIGITAL</span>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            XS-Pedia adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        </p>
                     </div>
                     <div class="footer-copyright">
                         XS-Pedia © <span id="currentYear"></span>. All Rights Reserved.
                     </div>
                 </div>
-                
+
                 <div class="footer-links-section">
-                    <div>
-                        <span class="footer-section-title">Navigasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-compass-fill"></i> Navigasi</span>
                         <ul>
-                            <li><a href="/dashboard">Beranda</a></li>
-                            <li><a href="/deposit">Deposit</a></li>
-                            <li><a href="/order">Pesanan</a></li>
-                            <li><a href="/price-list">Daftar Harga</a></li>
+                            <li><i class="bi bi-house-door-fill"></i><a href="/dashboard">Beranda</a></li>
+                            <li><i class="bi bi-wallet2"></i><a href="/deposit">Deposit</a></li>
+                            <li><i class="bi bi-cart-check-fill"></i><a href="/order">Pesanan</a></li>
+                            <li><i class="bi bi-tags-fill"></i><a href="/price-list">Daftar Harga</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Informasi</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-grid-1x2-fill"></i> Informasi</span>
                         <ul>
-                            <li><a href="/profile">Profil Pengguna</a></li>
-                            <li><a href="/api-key-page">API Key</a></li>
-                            <li><a href="/docs">Dokumentasi API</a></li>
-                            <li><a href="#">Syarat & Ketentuan</a></li>
-                            <li><a href="#">Kebijakan Privasi</a></li>
+                            <li><i class="bi bi-person-fill"></i><a href="/profile">Profil Pengguna</a></li>
+                            <li><i class="bi bi-key-fill"></i><a href="/api-key-page">API Key</a></li>
+                            <li><i class="bi bi-code-slash"></i><a href="/docs">Dokumentasi API</a></li>
+                            <li><i class="bi bi-file-earmark-text"></i><a href="#">Syarat &amp; Ketentuan</a></li>
+                            <li><i class="bi bi-shield-check"></i><a href="#">Kebijakan Privasi</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <span class="footer-section-title">Kontak Kami</span>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <li><i class="bi bi-envelope-fill"></i> <a href="astrapterodactyl@gmail.com">Email Support</a></li>
-                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                            <li><i class="bi bi-whatsapp"></i><a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i><a href="mailto:astrapterodactyl@gmail.com">Email Support</a></li>
+                            <li><i class="bi bi-telegram"></i><a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
                     </div>
                 </div>
-                
-                <div class="footer-right">
+
+                <div class="footer-community">
+                    <span class="footer-community-label">Terhubung dengan tim kami</span>
                     <div class="footer-social-links">
                         <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:astrapterodactyl@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
                     </div>
                 </div>
             </footer>
@@ -646,12 +784,15 @@ footer a { overflow-wrap: anywhere; }
 
         function renderWhitelistIps() {
             ipWhitelistContainer.innerHTML = '';
+
             if (currentWhitelistIps.length === 0 || (currentWhitelistIps.length === 1 && currentWhitelistIps[0] === '0.0.0.0')) {
-                 const itemDiv = document.createElement('div');
+                const itemDiv = document.createElement('div');
+                const ipText = document.createElement('span');
                 itemDiv.className = 'ip-item';
-                itemDiv.innerHTML = `<span>Semua IP diizinkan (0.0.0.0)</span>`;
+                ipText.textContent = 'Semua IP diizinkan (0.0.0.0)';
+                itemDiv.appendChild(ipText);
                 ipWhitelistContainer.appendChild(itemDiv);
-                 if (currentWhitelistIps.length === 0) currentWhitelistIps = ['0.0.0.0'];
+                if (currentWhitelistIps.length === 0) currentWhitelistIps = ['0.0.0.0'];
                 return;
             }
 
@@ -659,20 +800,20 @@ footer a { overflow-wrap: anywhere; }
                 if (ip === '0.0.0.0' && currentWhitelistIps.length > 1) return;
 
                 const itemDiv = document.createElement('div');
+                const ipText = document.createElement('span');
+                const removeButton = document.createElement('button');
                 itemDiv.className = 'ip-item';
-                itemDiv.innerHTML = `
-                    <span>${ip}</span>
-                    <button class="btn btn-sm btn-outline-vp-danger remove-ip-btn" data-ip="${ip}" title="Hapus IP">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                `;
+                ipText.textContent = String(ip);
+                ipText.className = 'ip-address-value';
+                removeButton.type = 'button';
+                removeButton.className = 'btn btn-sm btn-outline-vp-danger remove-ip-btn';
+                removeButton.dataset.ip = String(ip);
+                removeButton.title = 'Hapus IP';
+                removeButton.setAttribute('aria-label', `Hapus IP ${ip}`);
+                removeButton.innerHTML = '<i class="bi bi-trash-fill" aria-hidden="true"></i>';
+                removeButton.addEventListener('click', () => removeIpAddress(String(ip)));
+                itemDiv.append(ipText, removeButton);
                 ipWhitelistContainer.appendChild(itemDiv);
-            });
-
-            document.querySelectorAll('.remove-ip-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    removeIpAddress(this.dataset.ip);
-                });
             });
         }
         
