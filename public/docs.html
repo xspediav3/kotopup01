@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riky Shop API Documentation</title>
+    <meta name="theme-color" content="#16A34A">
+    <title>XS-Pedia API Documentation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         * {
@@ -763,7 +764,94 @@
         .fas, .fab {
             vertical-align: middle; /* Better alignment with text */
         }
-    </style>
+    
+
+
+/* XS-Pedia documentation theme */
+:root {
+    --primary-hue: 145;
+    --primary-color: #22c55e;
+    --primary-dark: #15803d;
+    --secondary-color: #16a34a;
+    --accent-color: #86efac;
+    --success-color: #16a34a;
+    --text-primary: #1f2937;
+    --text-secondary: #5f6f63;
+    --text-muted: #839187;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f2fbf4;
+    --bg-tertiary: #ecfdf3;
+    --border-color: #dcefe1;
+    --shadow-sm: 0 2px 5px rgba(22,101,52,.05);
+    --shadow-md: 0 5px 14px rgba(22,101,52,.08);
+    --shadow-lg: 0 10px 25px rgba(22,101,52,.10);
+    --shadow-xl: 0 18px 36px rgba(22,101,52,.12);
+}
+[data-theme="dark"] {
+    --primary-color: #4ade80;
+    --primary-dark: #22c55e;
+    --secondary-color: #16a34a;
+    --accent-color: #86efac;
+    --text-primary: #eaf5ec;
+    --text-secondary: #b3c5b7;
+    --text-muted: #8fa795;
+    --bg-primary: #101b14;
+    --bg-secondary: #17251b;
+    --bg-tertiary: #203629;
+    --border-color: #2b4432;
+    --shadow-sm: 0 2px 5px rgba(0,0,0,.22);
+    --shadow-md: 0 5px 14px rgba(0,0,0,.28);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.34);
+    --shadow-xl: 0 18px 36px rgba(0,0,0,.40);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: radial-gradient(rgba(34,197,94,.07) .7px, transparent .7px);
+    background-size: 17px 17px;
+}
+.header {
+    background: linear-gradient(135deg, #15803d 0%, #22c55e 65%, #4ade80 100%);
+    padding: clamp(52px, 8vw, 76px) 0;
+}
+.header h1 { background: linear-gradient(45deg, #ffffff, #dcfce7); }
+.nav-section { padding: clamp(18px, 3vw, 28px); margin-bottom: 32px; }
+.nav-grid { gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.nav-card { padding: 18px; border-radius: 13px; box-shadow: 2px 2px 0 rgba(21,128,61,.05); }
+.nav-card:hover { transform: translateY(-2px); }
+.endpoint-card {
+    padding: clamp(16px, 3vw, 25px);
+    margin-bottom: 22px;
+    border-radius: 14px;
+    border-left: 3px solid var(--primary-color);
+    box-shadow: 2px 3px 0 rgba(21,128,61,.06);
+}
+.endpoint-url { min-width: min(100%, 250px); overflow-wrap: anywhere; }
+.section-title { font-size: clamp(1.65rem, 4vw, 2.35rem); }
+.section-description { margin-bottom: 26px; }
+.params-table th, .params-table td { padding: 12px; }
+.theme-toggle { top: 14px; right: 14px; border-radius: 12px; }
+.footer { padding: 30px 0; }
+.footer .footer-content { max-width: 760px; margin: 0 auto; padding: 0 18px; }
+.footer-contact { margin-top: 14px; font-weight: 700; }
+.footer-contact a { color: var(--primary-color); text-decoration: none; }
+button, a { transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease; }
+button:focus-visible, a:focus-visible { outline: 3px solid rgba(34,197,94,.28); outline-offset: 2px; }
+@media (max-width: 640px) {
+    .container { padding-left: 16px; padding-right: 16px; }
+    .header h1 { font-size: clamp(1.8rem, 8vw, 2.5rem); flex-wrap: wrap; }
+    .header p { font-size: 1rem; }
+    .main-content { padding: 36px 0; }
+    .endpoint-header { gap: 10px; }
+    .endpoint-url { min-width: 0; width: 100%; font-size: .8rem; }
+    .params-table th, .params-table td { padding: 9px; font-size: .82rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+</style>
 </head>
 <body class="scroll-smooth">
     <button class="theme-toggle" onclick="toggleTheme()">
@@ -774,8 +862,8 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <h1><i class="fas fa-book-open"></i>Riky Shop API</h1>
-                <p>Dokumentasi lengkap untuk API topup dan layanan digital Riky Shop. Bangun aplikasi hebat dengan endpoint kami yang kuat dan aman.</p>
+                <h1><i class="fas fa-book-open"></i>XS-Pedia API</h1>
+                <p>Panduan integrasi API XS-Pedia untuk layanan digital, transaksi, deposit, dan pengelolaan pesanan.</p>
             </div>
         </div>
     </header>
@@ -878,7 +966,7 @@
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/profile</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/profile</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-user"></i>Dapatkan Profil Pengguna</h3>
@@ -898,7 +986,7 @@
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('profile-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="profile-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/profile" \
+                            <div class="code-content" id="profile-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/profile" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -907,7 +995,7 @@
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('profile-js-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="profile-js-code">const response = await fetch('https://topup.alwaysrikyshop.my.id/h2h/profile', {
+                            <div class="code-content" id="profile-js-code">const response = await fetch('https://xs-pedia.my.id/h2h/profile', {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -926,7 +1014,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="profile-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/profile"
+url = "https://xs-pedia.my.id/h2h/profile"
 headers = {
     "X-APIKEY": "your_api_key_here",
     "Content-Type": "application/json"
@@ -955,10 +1043,10 @@ print(data)</div>
                             <div class="code-content">{
   "success": true,
   "user": {
-    "fullname": "Alwaysrikyshop",
-    "username": "Riky Shop",
-    "nomor": "0813808475w1",
-    "email": "Rikyshop@example.com",
+    "fullname": "XS-Pedia",
+    "username": "XS-Pedia",
+    "nomor": "6282310906429",
+    "email": "user@example.com",
     "profileUrl": "https://example.com/avatar.jpg",
     "saldo": 15000,
     "coin": 50,
@@ -996,7 +1084,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/mutasi</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/mutasi</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-list-alt"></i>Dapatkan Riwayat Transaksi</h3>
@@ -1016,7 +1104,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('mutasi-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="mutasi-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/mutasi" \
+                            <div class="code-content" id="mutasi-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/mutasi" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1025,7 +1113,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('mutasi-js-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="mutasi-js-code">const response = await fetch('https://topup.alwaysrikyshop.my.id/h2h/mutasi', {
+                            <div class="code-content" id="mutasi-js-code">const response = await fetch('https://xs-pedia.my.id/h2h/mutasi', {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1044,7 +1132,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="mutasi-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/mutasi"
+url = "https://xs-pedia.my.id/h2h/mutasi"
 headers = {
     "X-APIKEY": "your_api_key_here",
     "Content-Type": "application/json"
@@ -1085,7 +1173,7 @@ print(data)</div>
       "tujuan": null,
       "atas_nama": null,
       "status": "success",
-      "qr_image": "https://topup.alwaysrikyshop.my.id/qr/ABC123DEF456",
+      "qr_image": "https://xs-pedia.my.id/qr/ABC123DEF456",
       "created_at": "2024-12-26T10:30:00.000Z"
     }
   ],
@@ -1130,7 +1218,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/deposit/metode</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/deposit/metode</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-list-ul"></i>Dapatkan Metode Deposit</h3>
@@ -1150,7 +1238,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('metode-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="metode-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/deposit/metode" \
+                            <div class="code-content" id="metode-curl-code">curl -X GET "https://xs-pedia.my.id/deposit/metode" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1159,7 +1247,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('metode-js-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="metode-js-code">const response = await fetch('https://topup.alwaysrikyshop.my.id/deposit/metode', {
+                            <div class="code-content" id="metode-js-code">const response = await fetch('https://xs-pedia.my.id/deposit/metode', {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1178,7 +1266,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="metode-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/deposit/metode"
+url = "https://xs-pedia.my.id/deposit/metode"
 headers = {
     "X-APIKEY": "your_api_key_here",
     "Content-Type": "application/json"
@@ -1201,7 +1289,7 @@ print(data)</div>
                             </div>
                             <div class="code-content">{
   "success": true,
-  "message": "Daftar metode deposit Riky Shop",
+  "message": "Daftar metode deposit XS-Pedia",
   "metode": [
     {
       "metode": "BCA",
@@ -1212,7 +1300,7 @@ print(data)</div>
       "fee": "0",
       "fee_persen": "0.10",
       "status": "aktif",
-      "img_url": "https://topup.alwaysrikyshop.my.id/media/metode/bca.png"
+      "img_url": "https://xs-pedia.my.id/media/metode/bca.png"
     },
     {
       "metode": "QRISFAST",
@@ -1223,7 +1311,7 @@ print(data)</div>
       "fee": "0",
       "fee_persen": "0.15",
       "status": "aktif",
-      "img_url": "https://topup.alwaysrikyshop.my.id/media/metode/qrisfast.png"
+      "img_url": "https://xs-pedia.my.id/media/metode/qrisfast.png"
     }
   ]
 }</div>
@@ -1234,7 +1322,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/deposit/create</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/deposit/create</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-plus-circle"></i>Buat Deposit</h3>
@@ -1282,7 +1370,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('create-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="create-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/deposit/create?nominal=25000&metode=QRISFAST" \
+                            <div class="code-content" id="create-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/deposit/create?nominal=25000&metode=QRISFAST" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1296,7 +1384,7 @@ print(data)</div>
   metode: 'QRISFAST'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/deposit/create?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/deposit/create?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1315,7 +1403,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="create-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/deposit/create"
+url = "https://xs-pedia.my.id/h2h/deposit/create"
 params = {
     "nominal": "25000",
     "metode": "QRISFAST"
@@ -1356,7 +1444,7 @@ print(data)</div>
     "fee": 500,
     "get_balance": 24500,
     "qr_string": "00020101021226610016ID.CO.SHOPEE.WWW01189360091800209988050208209988050303UME51440014ID.CO.QRIS.WWW0215ID20232405136140303UME52044814530336054072000.005802ID5905MITRA6012KOTA BANDUNG61054061462220518pay_H3chOqLuGy00336304E606",
-    "qr_image": "https://topup.alwaysrikyshop.my.id/qr/ABC123DEF456GHI",
+    "qr_image": "https://xs-pedia.my.id/qr/ABC123DEF456GHI",
     "status": "pending",
     "created_at": "2024-12-26 15:30:00",
     "expired_at": "2024-12-26 16:30:00"
@@ -1382,7 +1470,7 @@ print(data)</div>
     "get_balance": 50900,
     "bank": "BCA",
     "tujuan": "1234567890",
-    "atas_nama": "Toko Riky Shop",
+    "atas_nama": "XS-Pedia",
     "status": "pending",
     "created_at": "2024-12-26 15:30:00",
     "expired_at": "2024-12-26 23:59:59"
@@ -1408,7 +1496,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/deposit/status</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/deposit/status</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-tasks"></i>Cek Status Deposit</h3>
@@ -1450,7 +1538,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('status-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="status-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/deposit/status?id=ABC123DEF456GHI" \
+                            <div class="code-content" id="status-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/deposit/status?id=ABC123DEF456GHI" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1463,7 +1551,7 @@ print(data)</div>
   id: 'ABC123DEF456GHI'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/deposit/status?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/deposit/status?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1482,7 +1570,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="status-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/deposit/status"
+url = "https://xs-pedia.my.id/h2h/deposit/status"
 params = {
     "id": "ABC123DEF456GHI"
 }
@@ -1527,7 +1615,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/deposit/cancel</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/deposit/cancel</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-ban"></i>Batalkan Deposit</h3>
@@ -1569,7 +1657,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('cancel-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="cancel-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/deposit/cancel?id=ABC123DEF456GHI" \
+                            <div class="code-content" id="cancel-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/deposit/cancel?id=ABC123DEF456GHI" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1582,7 +1670,7 @@ print(data)</div>
   id: 'ABC123DEF456GHI'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/deposit/cancel?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/deposit/cancel?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1601,7 +1689,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="cancel-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/deposit/cancel"
+url = "https://xs-pedia.my.id/h2h/deposit/cancel"
 params = {
     "id": "ABC123DEF456GHI"
 }
@@ -1647,7 +1735,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/layanan/price-list</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/layanan/price-list</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-dollar-sign"></i>Dapatkan Daftar Harga Layanan</h3>
@@ -1689,7 +1777,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('pricelist-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="pricelist-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/layanan/price-list" \
+                            <div class="code-content" id="pricelist-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/layanan/price-list" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1698,7 +1786,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('pricelist-js-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="pricelist-js-code">const response = await fetch('https://topup.alwaysrikyshop.my.id/h2h/layanan/price-list', {
+                            <div class="code-content" id="pricelist-js-code">const response = await fetch('https://xs-pedia.my.id/h2h/layanan/price-list', {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1717,7 +1805,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="pricelist-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/layanan/price-list"
+url = "https://xs-pedia.my.id/h2h/layanan/price-list"
 headers = {
     "X-APIKEY": "your_api_key_here",
     "Content-Type": "application/json"
@@ -1750,7 +1838,7 @@ print(data)</div>
       "price": "45000",
       "note": "Telkomsel Data 5GB berlaku 30 hari",
       "status": "available",
-      "img_url": "https://topup.alwaysrikyshop.my.id/images/telkomsel.png"
+      "img_url": "https://xs-pedia.my.id/images/telkomsel.png"
     },
     {
       "code": "XL10K",
@@ -1761,7 +1849,7 @@ print(data)</div>
       "price": "10500",
       "note": "XL Pulsa 10.000",
       "status": "available",
-      "img_url": "https://topup.alwaysrikyshop.my.id/images/xl.png"
+      "img_url": "https://xs-pedia.my.id/images/xl.png"
     }
   ]
 }</div>
@@ -1772,7 +1860,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/order/create</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/order/create</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-cart-plus"></i>Buat Pesanan Layanan</h3>
@@ -1820,7 +1908,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('order-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="order-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/order/create?code=TSEL5GB&tujuan=081234567890" \
+                            <div class="code-content" id="order-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/order/create?code=TSEL5GB&tujuan=081234567890" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1834,7 +1922,7 @@ print(data)</div>
   tujuan: '081234567890'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/order/create?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/order/create?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1853,7 +1941,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="order-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/order/create"
+url = "https://xs-pedia.my.id/h2h/order/create"
 params = {
     "code": "TSEL5GB",
     "tujuan": "081234567890"
@@ -1899,7 +1987,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/order/check</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/order/check</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-search"></i>Cek Status Pesanan</h3>
@@ -1941,7 +2029,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('check-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="check-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/order/check?id=ORDER123ABC456" \
+                            <div class="code-content" id="check-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/order/check?id=ORDER123ABC456" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -1954,7 +2042,7 @@ print(data)</div>
   id: 'ORDER123ABC456'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/order/check?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/order/check?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -1973,7 +2061,7 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="check-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/order/check"
+url = "https://xs-pedia.my.id/h2h/order/check"
 params = {
     "id": "ORDER123ABC456"
 }
@@ -2026,7 +2114,7 @@ print(data)</div>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge method-get"><i class="fas fa-download"></i>GET</span>
-                        <code class="endpoint-url">https://topup.alwaysrikyshop.my.id/h2h/order-panel</code>
+                        <code class="endpoint-url">https://xs-pedia.my.id/h2h/order-panel</code>
                     </div>
                     
                     <h3 class="endpoint-title"><i class="fas fa-server"></i>Buat Layanan Panel</h3>
@@ -2116,7 +2204,7 @@ print(data)</div>
                                 <span>Contoh Permintaan</span>
                                 <button class="copy-button" onclick="copyCode('panel-curl-code')"><i class="fas fa-copy"></i>Salin</button>
                             </div>
-                            <div class="code-content" id="panel-curl-code">curl -X GET "https://topup.alwaysrikyshop.my.id/h2h/order-panel?username=johndoe&paket=2gb" \
+                            <div class="code-content" id="panel-curl-code">curl -X GET "https://xs-pedia.my.id/h2h/order-panel?username=johndoe&paket=2gb" \
   -H "X-APIKEY: your_api_key_here"</div>
                         </div>
 
@@ -2130,7 +2218,7 @@ print(data)</div>
   paket: '2gb'
 });
 
-const response = await fetch(`https://topup.alwaysrikyshop.my.id/h2h/order-panel?${params}`, {
+const response = await fetch(`https://xs-pedia.my.id/h2h/order-panel?${params}`, {
   method: 'GET',
   headers: {
     'X-APIKEY': 'your_api_key_here',
@@ -2149,9 +2237,9 @@ console.log(data);</div>
                             </div>
                             <div class="code-content" id="panel-python-code">import requests
 
-url = "https://topup.alwaysrikyshop.my.id/h2h/order-panel"
+url = "https://xs-pedia.my.id/h2h/order-panel"
 params = {
-    "username": "Riky Shop",
+    "username": "XS-Pedia",
     "paket": "2gb"
 }
 headers = {
@@ -2187,19 +2275,19 @@ print(data)</div>
     "reff_id": "TRX-PANEL123",
     "layanan": "Panel 2gb",
     "code": "2GB",
-    "target": "RikyShop",
+    "target": "XS-Pedia",
     "price": "2100",
     "status": "Sukses",
     "created_at": "2024-12-26T16:30:00.000Z",
     "user": {
       "id": 42,
-      "username": "RikyShop",
-      "email": "Rikyshop@gmail.com",
-      "password": "RikySho123"
+      "username": "XS-Pedia",
+      "email": "user@example.com",
+      "password": "examplePassword123"
     },
     "server": {
       "id": 58,
-      "name": "RikyShop",
+      "name": "XS-Pedia",
       "memory": 2048,
       "disk": 2048,
       "cpu": 100
@@ -2253,8 +2341,9 @@ print(data)</div>
             <div class="footer-content">
                 <h3><i class="fas fa-rocket"></i>Siap Memulai?</h3>
                 <p>
-                    Mulai berintegrasi dengan API Riky Shop hari ini. Dokumentasi dan contoh kami yang komprehensif akan membantu Anda membangun aplikasi yang hebat dengan cepat dan efisien.
+                    Mulai integrasikan layanan XS-Pedia. Gunakan endpoint dan contoh kode di bawah sebagai panduan pengembangan.
                 </p>
+                <p class="footer-contact"><a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp XS-Pedia: 6282310906429</a></p>
             </div>
         </div>
     </footer>

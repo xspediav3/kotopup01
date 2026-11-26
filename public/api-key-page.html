@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Eiky Shop API Key - Kelola API Key dan IP Whitelist Anda.">
+    <meta name="description" content="XS-Pedia API Key - Kelola API Key dan alamat IP yang diizinkan untuk integrasi.">
     <meta name="keywords" content="api key, ip whitelist, integrasi api, developer">
-    <meta name="author" content="Rikyshop">
+    <meta name="author" content="XS-Pedia">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#EC4899">
-    <title>API Key - Riky Shop | Platform Topup Terpercaya</title>
+    <meta name="theme-color" content="#16A34A">
+    <title>API Key - XS-Pedia | Platform Topup Terpercaya</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -332,14 +332,122 @@
         [data-theme="dark"] .btn-outline-vp-danger { color: #f85149; border-color: #f85149;}
         [data-theme="dark"] .btn-outline-vp-danger:hover { background-color: #f85149; color: white; }
 
-    </style>
+    
+
+
+/* XS-Pedia visual system: clean green + subtle comic accents */
+:root {
+    --primary-hue: 145;
+    --vp-primary: #22c55e;
+    --vp-primary-rgb: 34, 197, 94;
+    --vp-primary-light: #ecfdf3;
+    --vp-primary-dark: #15803d;
+    --vp-body-bg: #f2fbf4;
+    --vp-card-bg: #ffffff;
+    --vp-text-muted: #66776b;
+    --vp-border-color: #dcefe1;
+    --vp-shadow-sm: 0 2px 5px rgba(22, 101, 52, .05);
+    --vp-shadow-md: 0 6px 16px rgba(22, 101, 52, .08);
+    --vp-shadow-lg: 0 12px 28px rgba(22, 101, 52, .11);
+    --vp-header-bg-light-transparent: rgba(255,255,255,.88);
+}
+[data-theme="dark"] {
+    --vp-primary: #4ade80;
+    --vp-primary-rgb: 74, 222, 128;
+    --vp-primary-light: rgba(74, 222, 128, .14);
+    --vp-primary-dark: #22c55e;
+    --vp-body-bg: #101b14;
+    --vp-card-bg: #17251b;
+    --vp-text-muted: #a4b8a8;
+    --vp-border-color: #2b4432;
+    --vp-dark: #eaf5ec;
+    --vp-light: #213328;
+    --vp-shadow-sm: 0 2px 6px rgba(0,0,0,.22);
+    --vp-shadow-md: 0 6px 16px rgba(0,0,0,.28);
+    --vp-shadow-lg: 0 12px 28px rgba(0,0,0,.34);
+    --vp-header-bg-dark-transparent: rgba(23,37,27,.92);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: radial-gradient(rgba(34,197,94,.075) .7px, transparent .7px);
+    background-size: 17px 17px;
+}
+.vp-wrapper { min-height: 100vh; }
+.vp-main-container, .vp-content-wrapper, .vp-main-content { min-width: 0; }
+.vp-content-wrapper { align-items: stretch; }
+.vp-topbar {
+    border-radius: 13px;
+    box-shadow: 3px 3px 0 rgba(21,128,61,.07), var(--vp-shadow-sm);
+}
+[data-theme="dark"] .vp-topbar { box-shadow: 3px 3px 0 rgba(74,222,128,.06), var(--vp-shadow-sm); }
+.vp-sidebar { overscroll-behavior: contain; }
+.vp-sidebar-menu { scrollbar-width: thin; }
+.vp-sidebar-menu .nav-link { border-radius: 10px; }
+.vp-section, .vp-order-details-section, .modal-content, .dropdown-menu {
+    border-color: var(--vp-border-color);
+}
+.vp-section > h3, .vp-section > h4 {
+    letter-spacing: -.025em;
+    line-height: 1.25;
+}
+.vp-section > h3::after {
+    content: "";
+    display: block;
+    width: 44px;
+    height: 3px;
+    margin-top: 9px;
+    border-radius: 99px;
+    background: var(--vp-primary);
+    box-shadow: 2px 2px 0 rgba(20,83,45,.12);
+}
+.btn, .form-control, .form-select, .nav-link, .dropdown-item, .vp-product-item-card {
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid rgba(34,197,94,.28);
+    outline-offset: 2px;
+}
+.form-control, .form-select { min-height: 42px; border-color: var(--vp-border-color); }
+.form-control:focus, .form-select:focus {
+    border-color: var(--vp-primary);
+    box-shadow: 0 0 0 .2rem rgba(var(--vp-primary-rgb), .13);
+}
+.table-responsive { max-width: 100%; -webkit-overflow-scrolling: touch; }
+footer {
+    gap: 1.25rem;
+    box-shadow: 2px 2px 0 rgba(20,83,45,.05);
+}
+footer a { overflow-wrap: anywhere; }
+.footer-left { min-width: min(280px, 100%); }
+.footer-links-section { min-width: 0; }
+.footer-logo-name-text { color: var(--vp-primary); }
+.footer-social-links a { transition: transform .18s ease, color .18s ease; }
+.footer-social-links a:hover { transform: translateY(-2px); }
+@media (max-width: 991.98px) {
+    .vp-main-container { width: 100%; }
+    .vp-content-wrapper { width: 100%; }
+    footer { width: calc(100% - 12px); margin: 6px; }
+}
+@media (max-width: 575.98px) {
+    html { font-size: 14px; }
+    .vp-topbar { top: 5px; margin: 6px; width: calc(100% - 12px); }
+    .vp-content-wrapper { padding: .65rem; }
+    footer { padding: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+</style>
 </head>
 <body data-theme="light">
     <div class="vp-wrapper">
         <nav class="vp-sidebar" id="vpSidebar">
             <div class="vp-sidebar-header">
-                <img src="/media/logo.png" alt="RikyShop Logo" class="vp-sidebar-header-logo">
-                <a class="vp-sidebar-brand-text" href="/dashboard">Riky Shop</a>
+                <img src="/media/logo.png" alt="XS-Pedia Logo" class="vp-sidebar-header-logo">
+                <a class="vp-sidebar-brand-text" href="/dashboard">XS-Pedia</a>
             </div>
             <div class="vp-sidebar-menu">
                 <ul class="nav flex-column">
@@ -366,8 +474,8 @@
                 <div class="vp-topbar-brand-toggler">
                     <button class="vp-sidebar-toggler" id="vpSidebarToggler" type="button" aria-label="Toggle sidebar"><i class="bi bi-list"></i></button>
                     <a href="/dashboard" class="vp-topbar-brand-link" id="topbarBrand">
-                        <img src="/media/logo.png" alt="Riky Shop Logo" class="vp-topbar-logo">
-                        <span class="vp-topbar-brand-text">Riky Shop</span>
+                        <img src="/media/logo.png" alt="XS-Pedia Logo" class="vp-topbar-logo">
+                        <span class="vp-topbar-brand-text">XS-Pedia</span>
                     </a>
                 </div>
                 <div class="vp-topbar-actions">
@@ -439,15 +547,15 @@
             <footer>
                 <div class="footer-left">
                     <a href="/dashboard" class="footer-logo-name">
-                        <img src="/media/logo.png" alt="Riky shop Logo" class="footer-logo-name-img">
-                        <span class="footer-logo-name-text">Riky Shop</span>
+                        <img src="/media/logo.png" alt="XS-Pedia Logo" class="footer-logo-name-img">
+                        <span class="footer-logo-name-text">XS-Pedia</span>
                     </a>
                     <div class="footer-description">
                         <i class="bi bi-info-circle-fill"></i>
-                        Riky Shop TopUp adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
+                        XS-Pedia adalah salah satu website topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya. Terbaru di Indonesia.
                     </div>
                     <div class="footer-copyright">
-                        Riky Shop TopUp © <span id="currentYear"></span>. All Rights Reserved.
+                        XS-Pedia © <span id="currentYear"></span>. All Rights Reserved.
                     </div>
                 </div>
                 
@@ -474,7 +582,7 @@
                     <div>
                         <span class="footer-section-title">Kontak Kami</span>
                         <ul>
-                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6281380847521" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
                             <li><i class="bi bi-envelope-fill"></i> <a href="astrapterodactyl@gmail.com">Email Support</a></li>
                             <li><i class="bi bi-telegram"></i> <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer">Telegram</a></li>
                         </ul>
@@ -483,9 +591,8 @@
                 
                 <div class="footer-right">
                     <div class="footer-social-links">
-                        <a href="#" aria-label="Saluran"><i class="bi bi-whatsapp"></i></a>
-                        <a href="#" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-                        <a href="#" aria-label="Group"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://t.me/UCOK109" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
                     </div>
                 </div>
             </footer>
