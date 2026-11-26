@@ -121,14 +121,6 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
       });
     }
 
-    const role = user.role || req.session.role || "user";
-    const feePersen = parseFloat(
-      role === "reseller"
-        ? (process.env.FEE_PERCENT_RESELLER || "0.7")
-        : (process.env.FEE_PERCENT_USER || "1.5")
-    ) || 0;
-    const feeAdmin = Math.round((parsedNominal * feePersen) / 100);
-
     // Kode unik: 100-400 untuk 1k, kelipatan per 10k (10k = 1x, 20k = 2x, dst.)
     const baseUnik = Math.floor(Math.random() * (400 - 100 + 1)) + 100;
     const kelipatan10k = parsedNominal >= 10000 ? Math.max(1, Math.floor(parsedNominal / 10000)) : 1;
@@ -186,14 +178,16 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
     const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
     const providerPaymentId = String(paymentData.id || paymentData.invoice_id || paymentData.trx_id);
-    const localTrxId = providerPaymentId;
-    const reffId = String(paymentData.trx_id || paymentData.reff_id || localTrxId);
+    // Gunakan trx_id dari API Ditznesia sebagai ID yang ditampilkan
+    const displayTrxId = String(paymentData.trx_id || paymentData.reff_id || providerPaymentId);
 
     const apiTotalBayar = parseInt(paymentData.total_bayar || paymentData.amount, 10) || totalBayarRequest;
-    const selisihProvider = Math.max(0, apiTotalBayar - totalBayarRequest);
-    const feeProvider = Math.max(Number(paymentData.fee) || 0, selisihProvider);
-    const totalFee = feeAdmin + feeProvider;
-    const totalAmount = Math.max(apiTotalBayar, parsedNominal + kodeUnik) + feeAdmin;
+    const selisihDitz = Math.max(0, apiTotalBayar - totalBayarRequest);
+    const feeDitznesia = Math.max(Number(paymentData.fee) || 0, selisihDitz);
+
+    // Satukan kode unik + admin Ditznesia ke dalam biaya admin (fee)
+    const totalAdminGabungan = kodeUnik + feeDitznesia;
+    const totalAmount = parsedNominal + totalAdminGabungan;
 
     const rawCreatedAt = paymentData.created_at;
     const providerCreatedAt = rawCreatedAt
@@ -217,21 +211,19 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const initialStatus = ["berhasil", "paid", "success", "sukses"].includes(rawStatus) ? "success" : rawStatus;
 
     const historyDataForDb = {
-      id: localTrxId,
-      reff_id: reffId,
+      id: displayTrxId,
+      reff_id: displayTrxId,
       nominal: parsedNominal,
       tambahan: kodeUnik,
       kode_unik: kodeUnik,
-      fee: totalFee,
-      fee_admin: feeAdmin,
-      fee_persen: feePersen,
-      fee_provider: feeProvider,
+      fee: totalAdminGabungan,
+      fee_ditznesia: feeDitznesia,
       total_amount: totalAmount,
       get_balance: saldoDiterima,
       provider_amount: apiTotalBayar,
       provider: "ditznesia",
       provider_id: providerPaymentId,
-      provider_reference_id: reffId,
+      provider_reference_id: displayTrxId,
       provider_created_at: providerCreatedAt,
       provider_expires_at: providerExpiresAt,
       expires_in_ms: 15 * 60 * 1000,
@@ -250,17 +242,15 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        id: localTrxId,
-        trx_id: localTrxId,
-        reff_id: reffId,
+        id: displayTrxId,
+        trx_id: displayTrxId,
+        reff_id: displayTrxId,
         metode: "QRIS",
         nominal: parsedNominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
-        fee: totalFee,
-        fee_admin: feeAdmin,
-        fee_persen: feePersen,
-        fee_provider: feeProvider,
+        fee: totalAdminGabungan,
+        fee_ditznesia: feeDitznesia,
         total_amount: totalAmount,
         get_balance: saldoDiterima,
         qr_image: rawQrImage || null,
@@ -276,7 +266,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const intervalId = setInterval(async () => {
       try {
         const latestHistory = await User.findOne(
-          { _id: user._id, "historyDeposit.id": localTrxId },
+          { _id: user._id, "historyDeposit.id": displayTrxId },
           { "historyDeposit.$": 1 }
         );
 
@@ -288,7 +278,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           return;
         }
 
-        const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(localTrxId)}`;
+        const lookupId = latestDeposit.provider_id || displayTrxId;
+        const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(lookupId)}`;
         const checkRes = await fetch(detailUrl, {
           method: "GET",
           headers: {
@@ -317,7 +308,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
               _id: user._id,
               historyDeposit: {
                 $elemMatch: {
-                  id: localTrxId,
+                  id: displayTrxId,
                   status: { $in: ["pending", "processing"] }
                 }
               }
@@ -325,8 +316,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
             {
               $set: {
                 "historyDeposit.$.status": "success",
-                "historyDeposit.$.provider_id": String(providerTrx.id || localTrxId),
-                "historyDeposit.$.provider_reference_id": String(providerTrx.trx_id || providerTrx.reff_id || localTrxId),
+                "historyDeposit.$.provider_id": String(providerTrx.id || lookupId),
+                "historyDeposit.$.provider_reference_id": String(providerTrx.trx_id || displayTrxId),
                 "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
                 "historyDeposit.$.provider_status": rawProviderStatus || "success",
                 "historyDeposit.$.provider_time": pTime
@@ -338,7 +329,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           );
 
           if (updateResult.modifiedCount > 0) {
-            console.log(`Deposit SUCCESS ${localTrxId}`);
+            console.log(`Deposit SUCCESS ${displayTrxId}`);
           }
           clearInterval(intervalId);
           return;
@@ -351,7 +342,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
               _id: user._id,
               historyDeposit: {
                 $elemMatch: {
-                  id: localTrxId,
+                  id: displayTrxId,
                   status: { $in: ["pending", "processing"] }
                 }
               }
@@ -418,26 +409,26 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
+    const displayId = String(localData.id || id);
 
     // ================= STATUS TERMINAL =================
     if (!["pending", "processing"].includes(localStatus)) {
       const nominal = Number(localData.nominal) || 0;
       const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
       const feeTotal = Number(localData.fee) || 0;
-      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
+      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeTotal;
 
       return res.status(200).json({
         success: true,
         data: {
-          id,
-          trx_id: id,
-          reff_id: localData.reff_id || localData.provider_reference_id || "-",
+          id: displayId,
+          trx_id: displayId,
+          reff_id: localData.reff_id || localData.provider_reference_id || displayId,
           nominal,
           kode_unik: kodeUnik,
           tambahan: kodeUnik,
           fee: feeTotal,
-          fee_admin: Number(localData.fee_admin) || 0,
-          fee_provider: Number(localData.fee_provider) || 0,
+          fee_ditznesia: Number(localData.fee_ditznesia) || 0,
           total_amount: totalAmount,
           get_balance: Number(localData.get_balance) || nominal,
           status: localStatus,
@@ -481,7 +472,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     };
 
     let providerTrx = null;
-    const targetPaymentId = localData.provider_id || id;
+    const targetPaymentId = localData.provider_id || displayId;
 
     if (targetPaymentId) {
       const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
@@ -510,7 +501,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         : rawProviderStatus;
 
       const pId = String(providerTrx.id || providerTrx.invoice_id || targetPaymentId);
-      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || pId);
+      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || displayId);
 
       let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
       if (typeof pPaidAt === "number") {
@@ -528,7 +519,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
             _id: user._id,
             historyDeposit: {
               $elemMatch: {
-                id,
+                id: displayId,
                 status: { $in: ["pending", "processing"] }
               }
             }
@@ -559,7 +550,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
             _id: user._id,
             historyDeposit: {
               $elemMatch: {
-                id,
+                id: displayId,
                 status: { $in: ["pending", "processing"] }
               }
             }
@@ -584,7 +575,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     const refreshedUser = await User.findOne(
-      { _id: user._id, "historyDeposit.id": id },
+      { _id: user._id, "historyDeposit.id": displayId },
       { "historyDeposit.$": 1 }
     );
 
@@ -594,20 +585,19 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     const nominal = Number(localData.nominal) || 0;
     const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
     const feeTotal = Number(localData.fee) || 0;
-    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
+    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeTotal;
 
     return res.status(200).json({
       success: true,
       data: {
-        id,
-        trx_id: id,
-        reff_id: localData.reff_id || localData.provider_reference_id || "-",
+        id: displayId,
+        trx_id: displayId,
+        reff_id: localData.reff_id || localData.provider_reference_id || displayId,
         nominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
         fee: feeTotal,
-        fee_admin: Number(localData.fee_admin) || 0,
-        fee_provider: Number(localData.fee_provider) || 0,
+        fee_ditznesia: Number(localData.fee_ditznesia) || 0,
         total_amount: totalAmount,
         get_balance: Number(localData.get_balance) || nominal,
         status: localStatus,
@@ -658,6 +648,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
+    const displayId = String(currentData.id || id);
 
     if (currentData.status !== "pending") {
       return res.status(400).json({
@@ -676,7 +667,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const targetPaymentId = currentData.provider_id || id;
+    const targetPaymentId = currentData.provider_id || displayId;
     const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
 
     let response;
@@ -709,14 +700,14 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    await editHistoryDeposit(user._id, id, "cancelled");
+    await editHistoryDeposit(user._id, displayId, "cancelled");
 
     return res.status(200).json({
       success: true,
       message: result?.message || "Deposit berhasil dibatalkan.",
       data: {
-        id: id,
-        trx_id: id,
+        id: displayId,
+        trx_id: displayId,
         status: "cancelled"
       }
     });
