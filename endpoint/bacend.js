@@ -128,12 +128,16 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         : (process.env.FEE_PERCENT_USER || "1.5")
     ) || 0;
     const feeAdmin = Math.round((parsedNominal * feePersen) / 100);
-    const kodeUnik = Math.floor(Math.random() * 250) + 1;
-    const totalBayarProvider = parsedNominal + kodeUnik;
-    const totalAmount = parsedNominal + feeAdmin;
+
+    // Kode unik: 100-400 untuk 1k, kelipatan per 10k (10k = 1x, 20k = 2x, dst.)
+    const baseUnik = Math.floor(Math.random() * (400 - 100 + 1)) + 100;
+    const kelipatan10k = parsedNominal >= 10000 ? Math.max(1, Math.floor(parsedNominal / 10000)) : 1;
+    const kodeUnik = parsedNominal >= 10000 ? baseUnik * kelipatan10k : baseUnik;
+
+    const totalBayarRequest = parsedNominal + kodeUnik;
     const saldoDiterima = parsedNominal;
 
-    const createUrl = `${DITZ_BASE}/deposit/create?apikey=${encodeURIComponent(DITZ_API_KEY)}&nominal=${totalBayarProvider}`;
+    const createUrl = `${DITZ_BASE}/deposit/create?apikey=${encodeURIComponent(DITZ_API_KEY)}&nominal=${totalBayarRequest}`;
 
     let response;
     try {
@@ -185,17 +189,23 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     const localTrxId = providerPaymentId;
     const reffId = String(paymentData.trx_id || paymentData.reff_id || localTrxId);
 
+    const apiTotalBayar = parseInt(paymentData.total_bayar || paymentData.amount, 10) || totalBayarRequest;
+    const selisihProvider = Math.max(0, apiTotalBayar - totalBayarRequest);
+    const feeProvider = Math.max(Number(paymentData.fee) || 0, selisihProvider);
+    const totalFee = feeAdmin + feeProvider;
+    const totalAmount = Math.max(apiTotalBayar, parsedNominal + kodeUnik) + feeAdmin;
+
     const rawCreatedAt = paymentData.created_at;
     const providerCreatedAt = rawCreatedAt
       ? new Date(typeof rawCreatedAt === "number" ? rawCreatedAt : rawCreatedAt).toISOString()
       : new Date().toISOString();
 
-    const rawExpiresAt = paymentData.expired_at || paymentData.expires_at;
+    const rawExpiresAt = paymentData.expired_at || paymentData.expires_at || paymentData.expires_at_ms;
     const providerExpiresAt = rawExpiresAt
       ? new Date(typeof rawExpiresAt === "number" ? rawExpiresAt : rawExpiresAt).toISOString()
       : null;
 
-    if (!rawQrImage && !qrisString || !providerPaymentId) {
+    if ((!rawQrImage && !qrisString) || !providerPaymentId) {
       return res.status(502).json({
         success: false,
         message: "Ditznesia tidak mengembalikan QRIS / ID lengkap."
@@ -203,6 +213,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     }
 
     const customBgUrl = "https://files.catbox.moe/mbhgwo.png";
+    const rawStatus = String(paymentData.status || "pending").toLowerCase();
+    const initialStatus = ["berhasil", "paid", "success", "sukses"].includes(rawStatus) ? "success" : rawStatus;
 
     const historyDataForDb = {
       id: localTrxId,
@@ -210,12 +222,13 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
       nominal: parsedNominal,
       tambahan: kodeUnik,
       kode_unik: kodeUnik,
-      fee: feeAdmin,
+      fee: totalFee,
+      fee_admin: feeAdmin,
       fee_persen: feePersen,
-      fee_provider: Number(paymentData.fee) || 0,
+      fee_provider: feeProvider,
       total_amount: totalAmount,
       get_balance: saldoDiterima,
-      provider_amount: Number(paymentData.total_bayar || paymentData.amount) || totalBayarProvider,
+      provider_amount: apiTotalBayar,
       provider: "ditznesia",
       provider_id: providerPaymentId,
       provider_reference_id: reffId,
@@ -226,7 +239,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
       provider_time: null,
       qris_string: qrisString,
       metode: "QRIS",
-      status: "pending",
+      status: initialStatus,
       qr_image: rawQrImage || null,
       bg_image: customBgUrl,
       created_at: new Date()
@@ -244,15 +257,16 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         nominal: parsedNominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
-        fee: feeAdmin,
+        fee: totalFee,
+        fee_admin: feeAdmin,
         fee_persen: feePersen,
-        fee_provider: Number(paymentData.fee) || 0,
+        fee_provider: feeProvider,
         total_amount: totalAmount,
         get_balance: saldoDiterima,
         qr_image: rawQrImage || null,
         qris_string: qrisString,
         bg_image: customBgUrl,
-        status: paymentData.status || "pending",
+        status: initialStatus,
         expires_at: providerExpiresAt,
         expires_in_ms: 15 * 60 * 1000
       }
@@ -288,7 +302,9 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         const checkData = await checkRes.json();
         const providerTrx = checkData?.data || checkData?.deposit || checkData;
         const rawProviderStatus = String(providerTrx?.status || "").toLowerCase();
-        const providerStatus = rawProviderStatus === "paid" || rawProviderStatus === "success" ? "success" : rawProviderStatus;
+        const providerStatus = ["berhasil", "paid", "success", "sukses"].includes(rawProviderStatus)
+          ? "success"
+          : rawProviderStatus;
 
         if (providerStatus === "success") {
           let pTime = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
@@ -312,7 +328,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
                 "historyDeposit.$.provider_id": String(providerTrx.id || localTrxId),
                 "historyDeposit.$.provider_reference_id": String(providerTrx.trx_id || providerTrx.reff_id || localTrxId),
                 "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
-                "historyDeposit.$.provider_status": providerStatus,
+                "historyDeposit.$.provider_status": rawProviderStatus || "success",
                 "historyDeposit.$.provider_time": pTime
               },
               $inc: {
@@ -328,7 +344,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           return;
         }
 
-        if (["failed", "expired", "cancel", "cancelled"].includes(providerStatus)) {
+        if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
+          const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
           await User.updateOne(
             {
               _id: user._id,
@@ -341,8 +358,8 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
             },
             {
               $set: {
-                "historyDeposit.$.status": providerStatus,
-                "historyDeposit.$.provider_status": providerStatus
+                "historyDeposit.$.status": mappedStatus,
+                "historyDeposit.$.provider_status": rawProviderStatus
               }
             }
           );
@@ -406,8 +423,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     if (!["pending", "processing"].includes(localStatus)) {
       const nominal = Number(localData.nominal) || 0;
       const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
-      const feeAdmin = Number(localData.fee) || 0;
-      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeAdmin;
+      const feeTotal = Number(localData.fee) || 0;
+      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
 
       return res.status(200).json({
         success: true,
@@ -418,7 +435,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           nominal,
           kode_unik: kodeUnik,
           tambahan: kodeUnik,
-          fee: feeAdmin,
+          fee: feeTotal,
+          fee_admin: Number(localData.fee_admin) || 0,
           fee_provider: Number(localData.fee_provider) || 0,
           total_amount: totalAmount,
           get_balance: Number(localData.get_balance) || nominal,
@@ -486,8 +504,10 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     if (providerTrx) {
-      let rawProviderStatus = String(providerTrx.status || localStatus).toLowerCase();
-      let providerStatus = (rawProviderStatus === "paid" || rawProviderStatus === "success") ? "success" : rawProviderStatus;
+      const rawProviderStatus = String(providerTrx.status || localStatus).toLowerCase();
+      const providerStatus = ["berhasil", "paid", "success", "sukses"].includes(rawProviderStatus)
+        ? "success"
+        : rawProviderStatus;
 
       const pId = String(providerTrx.id || providerTrx.invoice_id || targetPaymentId);
       const pRef = String(providerTrx.trx_id || providerTrx.reff_id || pId);
@@ -497,7 +517,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         pPaidAt = new Date(pPaidAt).toISOString();
       }
 
-      let pExpiresAt = providerTrx.expired_at || providerTrx.expires_at || null;
+      let pExpiresAt = providerTrx.expired_at || providerTrx.expires_at || providerTrx.expires_at_ms || null;
       if (typeof pExpiresAt === "number") {
         pExpiresAt = new Date(pExpiresAt).toISOString();
       }
@@ -519,7 +539,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
-              "historyDeposit.$.provider_status": providerStatus,
+              "historyDeposit.$.provider_status": rawProviderStatus || "success",
               "historyDeposit.$.provider_time": pPaidAt,
               "historyDeposit.$.provider_expires_at": pExpiresAt
             },
@@ -532,7 +552,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         if (updateResult.modifiedCount > 0) {
           localStatus = "success";
         }
-      } else if (["failed", "expired", "cancel", "cancelled"].includes(providerStatus)) {
+      } else if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
+        const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
         const updateResult = await User.updateOne(
           {
             _id: user._id,
@@ -545,11 +566,11 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           },
           {
             $set: {
-              "historyDeposit.$.status": providerStatus,
+              "historyDeposit.$.status": mappedStatus,
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
-              "historyDeposit.$.provider_status": providerStatus,
+              "historyDeposit.$.provider_status": rawProviderStatus,
               "historyDeposit.$.provider_time": pPaidAt,
               "historyDeposit.$.provider_expires_at": pExpiresAt
             }
@@ -557,7 +578,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         );
 
         if (updateResult.modifiedCount > 0) {
-          localStatus = providerStatus;
+          localStatus = mappedStatus;
         }
       }
     }
@@ -572,8 +593,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
     const nominal = Number(localData.nominal) || 0;
     const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
-    const feeAdmin = Number(localData.fee) || 0;
-    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeAdmin;
+    const feeTotal = Number(localData.fee) || 0;
+    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
 
     return res.status(200).json({
       success: true,
@@ -584,7 +605,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         nominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
-        fee: feeAdmin,
+        fee: feeTotal,
+        fee_admin: Number(localData.fee_admin) || 0,
         fee_provider: Number(localData.fee_provider) || 0,
         total_amount: totalAmount,
         get_balance: Number(localData.get_balance) || nominal,
@@ -704,6 +726,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
+
 
 
 // 1. Daftar game (pengganti /produk yang mengambil daftar provider)
