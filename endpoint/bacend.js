@@ -477,45 +477,64 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
 
-    // ditzId asli dari Ditznesia untuk query API; ditzTrxId untuk tampilan
-    const ditzId = String(localData.provider_id || localData.ditz_id || id);
+    const ditzId = String(localData.provider_id || localData.ditz_id || localData.id || id);
     const ditzTrxId = String(localData.trx_id || localData.id || ditzId);
+
+    const matchFilter = {
+      _id: user._id,
+      "historyDeposit": {
+        $elemMatch: {
+          $or: [
+            ...(localData.id ? [{ id: localData.id }] : []),
+            ...(localData.trx_id ? [{ trx_id: localData.trx_id }] : []),
+            ...(localData.provider_id ? [{ provider_id: localData.provider_id }] : []),
+            ...(localData.ditz_id ? [{ ditz_id: localData.ditz_id }] : [])
+          ]
+        }
+      }
+    };
+
+    const buildResponseData = (item, statusVal) => {
+      const finalDitzId = String(item.provider_id || item.ditz_id || ditzId);
+      const finalTrxId = String(item.trx_id || item.id || ditzTrxId);
+      const nominal = Number(item.nominal) || 0;
+      const kodeUnik = Number(item.kode_unik || item.tambahan) || 0;
+      const feeTotal = Number(item.fee) || 0;
+      const totalAmount = Number(item.total_amount) > 0 ? Number(item.total_amount) : nominal + feeTotal;
+
+      return {
+        id: finalTrxId,
+        trx_id: finalTrxId,
+        reff_id: finalTrxId,
+        ditz_id: finalDitzId,
+        provider_id: finalDitzId,
+        nominal,
+        kode_unik: kodeUnik,
+        tambahan: kodeUnik,
+        fee: feeTotal,
+        fee_ditznesia: Number(item.fee_ditznesia) || 0,
+        total_amount: totalAmount,
+        get_balance: Number(item.get_balance) || nominal,
+        status: statusVal,
+        metode: item.metode || "QRIS",
+        qr_image: item.qr_image || null,
+        bg_image: item.bg_image || "https://files.catbox.moe/mbhgwo.png",
+        qris_string: item.qris_string || "",
+        created_at: item.created_at || null,
+        expires_at: item.provider_expires_at || null,
+        paid_at: item.provider_time || null,
+        provider_reference_id: finalTrxId,
+        provider_amount: Number(item.provider_amount) || totalAmount,
+        provider_status: item.provider_status || null,
+        provider_time: item.provider_time || null
+      };
+    };
 
     // ================= STATUS TERMINAL =================
     if (!["pending", "processing"].includes(localStatus)) {
-      const nominal = Number(localData.nominal) || 0;
-      const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
-      const feeTotal = Number(localData.fee) || 0;
-      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeTotal;
-
       return res.status(200).json({
         success: true,
-        data: {
-          id: ditzTrxId,
-          trx_id: ditzTrxId,
-          reff_id: ditzTrxId,
-          ditz_id: ditzId,
-          provider_id: ditzId,
-          nominal,
-          kode_unik: kodeUnik,
-          tambahan: kodeUnik,
-          fee: feeTotal,
-          fee_ditznesia: Number(localData.fee_ditznesia) || 0,
-          total_amount: totalAmount,
-          get_balance: Number(localData.get_balance) || nominal,
-          status: localStatus,
-          metode: localData.metode || "QRIS",
-          qr_image: localData.qr_image || null,
-          bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
-          qris_string: localData.qris_string || "",
-          created_at: localData.created_at || null,
-          expires_at: localData.provider_expires_at || null,
-          paid_at: localData.provider_time || null,
-          provider_reference_id: ditzTrxId,
-          provider_amount: Number(localData.provider_amount) || totalAmount,
-          provider_status: localData.provider_status || null,
-          provider_time: localData.provider_time || null
-        }
+        data: buildResponseData(localData, localStatus)
       });
     }
 
@@ -570,6 +589,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         : rawProviderStatus;
 
       const pId = String(providerTrx.id || providerTrx.invoice_id || ditzId);
+      const pTrxId = String(providerTrx.trx_id || ditzTrxId);
 
       let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
       if (typeof pPaidAt === "number") {
@@ -584,17 +604,14 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       if (providerStatus === "success") {
         const updateResult = await User.updateOne(
           {
-            _id: user._id,
-            historyDeposit: {
-              $elemMatch: {
-                id: localData.id,
-                status: { $in: ["pending", "processing"] }
-              }
-            }
+            ...matchFilter,
+            "historyDeposit.status": { $in: ["pending", "processing"] }
           },
           {
             $set: {
               "historyDeposit.$.status": "success",
+              "historyDeposit.$.trx_id": pTrxId,
+              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.ditz_id": pId,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
@@ -621,17 +638,14 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
         const updateResult = await User.updateOne(
           {
-            _id: user._id,
-            historyDeposit: {
-              $elemMatch: {
-                id: localData.id,
-                status: { $in: ["pending", "processing"] }
-              }
-            }
+            ...matchFilter,
+            "historyDeposit.status": { $in: ["pending", "processing"] }
           },
           {
             $set: {
               "historyDeposit.$.status": mappedStatus,
+              "historyDeposit.$.trx_id": pTrxId,
+              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.ditz_id": pId,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
@@ -649,49 +663,24 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     const refreshedUser = await User.findOne(
-      { _id: user._id, "historyDeposit.id": localData.id },
+      {
+        _id: user._id,
+        $or: [
+          { "historyDeposit.id": id },
+          { "historyDeposit.trx_id": id },
+          { "historyDeposit.provider_id": id },
+          { "historyDeposit.ditz_id": id }
+        ]
+      },
       { "historyDeposit.$": 1 }
     );
 
     localData = refreshedUser?.historyDeposit?.[0] || localData;
     localStatus = String(localData.status || localStatus || "pending").toLowerCase();
 
-    const finalDitzId = String(localData.provider_id || localData.ditz_id || ditzId);
-    const finalTrxId = String(localData.trx_id || localData.id || ditzTrxId);
-
-    const nominal = Number(localData.nominal) || 0;
-    const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
-    const feeTotal = Number(localData.fee) || 0;
-    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeTotal;
-
     return res.status(200).json({
       success: true,
-      data: {
-        id: finalTrxId,
-        trx_id: finalTrxId,
-        reff_id: finalTrxId,
-        ditz_id: finalDitzId,
-        provider_id: finalDitzId,
-        nominal,
-        kode_unik: kodeUnik,
-        tambahan: kodeUnik,
-        fee: feeTotal,
-        fee_ditznesia: Number(localData.fee_ditznesia) || 0,
-        total_amount: totalAmount,
-        get_balance: Number(localData.get_balance) || nominal,
-        status: localStatus,
-        metode: localData.metode || "QRIS",
-        qr_image: localData.qr_image || null,
-        bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
-        qris_string: localData.qris_string || "",
-        created_at: localData.created_at || null,
-        expires_at: localData.provider_expires_at || null,
-        paid_at: localData.provider_time || null,
-        provider_reference_id: finalTrxId,
-        provider_amount: Number(localData.provider_amount) || totalAmount,
-        provider_status: localData.provider_status || null,
-        provider_time: localData.provider_time || null
-      }
+      data: buildResponseData(localData, localStatus)
     });
 
   } catch (error) {
@@ -734,7 +723,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
-    const ditzId = String(currentData.provider_id || currentData.ditz_id || id);
+    const ditzId = String(currentData.provider_id || currentData.ditz_id || currentData.id || id);
     const ditzTrxId = String(currentData.trx_id || currentData.id || ditzId);
     const currentStatus = String(currentData.status || "pending").toLowerCase();
 
@@ -780,13 +769,23 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       clearTimeout(timeoutId);
     }
 
+    const elemConditions = [
+      ...(currentData.id ? [{ "elem.id": currentData.id }] : []),
+      ...(currentData.trx_id ? [{ "elem.trx_id": currentData.trx_id }] : []),
+      ...(currentData.provider_id ? [{ "elem.provider_id": currentData.provider_id }] : []),
+      ...(currentData.ditz_id ? [{ "elem.ditz_id": currentData.ditz_id }] : [])
+    ];
+
     await User.updateOne(
-      { _id: user._id, "historyDeposit.id": currentData.id },
+      { _id: user._id },
       {
         $set: {
-          "historyDeposit.$.status": "cancelled",
-          "historyDeposit.$.provider_status": "batal"
+          "historyDeposit.$[elem].status": "cancelled",
+          "historyDeposit.$[elem].provider_status": "batal"
         }
+      },
+      {
+        arrayFilters: [{ $or: elemConditions }]
       }
     );
 
@@ -807,7 +806,6 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
-
 
 
 
