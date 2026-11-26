@@ -455,15 +455,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     let userWithHistory = await User.findOne(
-      {
-        _id: user._id,
-        $or: [
-          { "historyDeposit.id": id },
-          { "historyDeposit.trx_id": id },
-          { "historyDeposit.provider_id": id },
-          { "historyDeposit.ditz_id": id }
-        ]
-      },
+      { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
 
@@ -477,64 +469,41 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
 
-    const ditzId = String(localData.provider_id || localData.ditz_id || localData.id || id);
-    const ditzTrxId = String(localData.trx_id || localData.id || ditzId);
-
-    const matchFilter = {
-      _id: user._id,
-      "historyDeposit": {
-        $elemMatch: {
-          $or: [
-            ...(localData.id ? [{ id: localData.id }] : []),
-            ...(localData.trx_id ? [{ trx_id: localData.trx_id }] : []),
-            ...(localData.provider_id ? [{ provider_id: localData.provider_id }] : []),
-            ...(localData.ditz_id ? [{ ditz_id: localData.ditz_id }] : [])
-          ]
-        }
-      }
-    };
-
-    const buildResponseData = (item, statusVal) => {
-      const finalDitzId = String(item.provider_id || item.ditz_id || ditzId);
-      const finalTrxId = String(item.trx_id || item.id || ditzTrxId);
-      const nominal = Number(item.nominal) || 0;
-      const kodeUnik = Number(item.kode_unik || item.tambahan) || 0;
-      const feeTotal = Number(item.fee) || 0;
-      const totalAmount = Number(item.total_amount) > 0 ? Number(item.total_amount) : nominal + feeTotal;
-
-      return {
-        id: finalTrxId,
-        trx_id: finalTrxId,
-        reff_id: finalTrxId,
-        ditz_id: finalDitzId,
-        provider_id: finalDitzId,
-        nominal,
-        kode_unik: kodeUnik,
-        tambahan: kodeUnik,
-        fee: feeTotal,
-        fee_ditznesia: Number(item.fee_ditznesia) || 0,
-        total_amount: totalAmount,
-        get_balance: Number(item.get_balance) || nominal,
-        status: statusVal,
-        metode: item.metode || "QRIS",
-        qr_image: item.qr_image || null,
-        bg_image: item.bg_image || "https://files.catbox.moe/mbhgwo.png",
-        qris_string: item.qris_string || "",
-        created_at: item.created_at || null,
-        expires_at: item.provider_expires_at || null,
-        paid_at: item.provider_time || null,
-        provider_reference_id: finalTrxId,
-        provider_amount: Number(item.provider_amount) || totalAmount,
-        provider_status: item.provider_status || null,
-        provider_time: item.provider_time || null
-      };
-    };
-
     // ================= STATUS TERMINAL =================
     if (!["pending", "processing"].includes(localStatus)) {
+      const nominal = Number(localData.nominal) || 0;
+      const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
+      const feeTotal = Number(localData.fee) || 0;
+      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
+
       return res.status(200).json({
         success: true,
-        data: buildResponseData(localData, localStatus)
+        data: {
+          id,
+          trx_id: id,
+          reff_id: localData.reff_id || localData.provider_reference_id || "-",
+          nominal,
+          kode_unik: kodeUnik,
+          tambahan: kodeUnik,
+          fee: feeTotal,
+          fee_admin: Number(localData.fee_admin) || 0,
+          fee_provider: Number(localData.fee_provider) || 0,
+          total_amount: totalAmount,
+          get_balance: Number(localData.get_balance) || nominal,
+          status: localStatus,
+          metode: localData.metode || "QRIS",
+          qr_image: localData.qr_image || null,
+          bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
+          qris_string: localData.qris_string || "",
+          created_at: localData.created_at || null,
+          expires_at: localData.provider_expires_at || null,
+          paid_at: localData.provider_time || null,
+          provider_id: localData.provider_id || null,
+          provider_reference_id: localData.provider_reference_id || null,
+          provider_amount: Number(localData.provider_amount) || totalAmount,
+          provider_status: localData.provider_status || null,
+          provider_time: localData.provider_time || null
+        }
       });
     }
 
@@ -548,38 +517,40 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       });
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
+      const controller = new AbortController();
+      const idTimeout = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(idTimeout);
+        return response;
+      } catch (err) {
+        clearTimeout(idTimeout);
+        return null;
+      }
+    };
 
     let providerTrx = null;
-    try {
-      const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
-      const detailRes = await fetch(detailUrl, {
+    const targetPaymentId = localData.provider_id || id;
+
+    if (targetPaymentId) {
+      const detailUrl = `${DITZ_BASE}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
+      const detailRes = await fetchWithTimeout(detailUrl, {
         method: "GET",
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        },
-        signal: controller.signal
+        }
       });
 
-      if (detailRes.ok) {
-        const rawText = await detailRes.text();
-        const detailData = JSON.parse(rawText);
-        const payload = detailData?.data || detailData?.deposit || detailData;
-        if (
-          detailData?.success !== false &&
-          detailData?.status !== false &&
-          payload &&
-          (payload.status || payload.id || payload.trx_id)
-        ) {
-          providerTrx = payload;
-        }
+      if (detailRes && detailRes.ok) {
+        try {
+          const detailData = await detailRes.json();
+          if (detailData) {
+            providerTrx = detailData.data || detailData.deposit || detailData;
+          }
+        } catch (e) {}
       }
-    } catch (err) {
-      console.error("Gagal cek status Ditznesia:", err?.message || err);
-    } finally {
-      clearTimeout(timeoutId);
     }
 
     if (providerTrx) {
@@ -588,8 +559,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         ? "success"
         : rawProviderStatus;
 
-      const pId = String(providerTrx.id || providerTrx.invoice_id || ditzId);
-      const pTrxId = String(providerTrx.trx_id || ditzTrxId);
+      const pId = String(providerTrx.id || providerTrx.invoice_id || targetPaymentId);
+      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || pId);
 
       let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
       if (typeof pPaidAt === "number") {
@@ -604,16 +575,19 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       if (providerStatus === "success") {
         const updateResult = await User.updateOne(
           {
-            ...matchFilter,
-            "historyDeposit.status": { $in: ["pending", "processing"] }
+            _id: user._id,
+            historyDeposit: {
+              $elemMatch: {
+                id,
+                status: { $in: ["pending", "processing"] }
+              }
+            }
           },
           {
             $set: {
               "historyDeposit.$.status": "success",
-              "historyDeposit.$.trx_id": pTrxId,
-              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
-              "historyDeposit.$.ditz_id": pId,
+              "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
               "historyDeposit.$.provider_status": rawProviderStatus || "success",
               "historyDeposit.$.provider_time": pPaidAt,
@@ -628,26 +602,23 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         if (updateResult.modifiedCount > 0) {
           localStatus = "success";
         }
-      } else if (["failed", "expired", "cancel", "cancelled", "batal", "gagal"].includes(providerStatus)) {
-        const mappedStatus =
-          providerStatus === "batal" || providerStatus === "cancelled"
-            ? "cancel"
-            : providerStatus === "gagal"
-            ? "failed"
-            : providerStatus;
-
+      } else if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
+        const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
         const updateResult = await User.updateOne(
           {
-            ...matchFilter,
-            "historyDeposit.status": { $in: ["pending", "processing"] }
+            _id: user._id,
+            historyDeposit: {
+              $elemMatch: {
+                id,
+                status: { $in: ["pending", "processing"] }
+              }
+            }
           },
           {
             $set: {
               "historyDeposit.$.status": mappedStatus,
-              "historyDeposit.$.trx_id": pTrxId,
-              "historyDeposit.$.reff_id": pTrxId,
               "historyDeposit.$.provider_id": pId,
-              "historyDeposit.$.ditz_id": pId,
+              "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
               "historyDeposit.$.provider_status": rawProviderStatus,
               "historyDeposit.$.provider_time": pPaidAt,
@@ -663,24 +634,46 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     const refreshedUser = await User.findOne(
-      {
-        _id: user._id,
-        $or: [
-          { "historyDeposit.id": id },
-          { "historyDeposit.trx_id": id },
-          { "historyDeposit.provider_id": id },
-          { "historyDeposit.ditz_id": id }
-        ]
-      },
+      { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
 
     localData = refreshedUser?.historyDeposit?.[0] || localData;
     localStatus = String(localData.status || localStatus || "pending").toLowerCase();
 
+    const nominal = Number(localData.nominal) || 0;
+    const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
+    const feeTotal = Number(localData.fee) || 0;
+    const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
+
     return res.status(200).json({
       success: true,
-      data: buildResponseData(localData, localStatus)
+      data: {
+        id,
+        trx_id: id,
+        reff_id: localData.reff_id || localData.provider_reference_id || "-",
+        nominal,
+        kode_unik: kodeUnik,
+        tambahan: kodeUnik,
+        fee: feeTotal,
+        fee_admin: Number(localData.fee_admin) || 0,
+        fee_provider: Number(localData.fee_provider) || 0,
+        total_amount: totalAmount,
+        get_balance: Number(localData.get_balance) || nominal,
+        status: localStatus,
+        metode: localData.metode || "QRIS",
+        qr_image: localData.qr_image || null,
+        bg_image: localData.bg_image || "https://files.catbox.moe/mbhgwo.png",
+        qris_string: localData.qris_string || "",
+        created_at: localData.created_at || null,
+        expires_at: localData.provider_expires_at || null,
+        paid_at: localData.provider_time || null,
+        provider_id: localData.provider_id || null,
+        provider_reference_id: localData.provider_reference_id || null,
+        provider_amount: Number(localData.provider_amount) || totalAmount,
+        provider_status: localData.provider_status || null,
+        provider_time: localData.provider_time || null
+      }
     });
 
   } catch (error) {
@@ -706,15 +699,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const userHistory = await User.findOne(
-      {
-        _id: user._id,
-        $or: [
-          { "historyDeposit.id": id },
-          { "historyDeposit.trx_id": id },
-          { "historyDeposit.provider_id": id },
-          { "historyDeposit.ditz_id": id }
-        ]
-      },
+      { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
 
@@ -723,11 +708,8 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
-    const ditzId = String(currentData.provider_id || currentData.ditz_id || currentData.id || id);
-    const ditzTrxId = String(currentData.trx_id || currentData.id || ditzId);
-    const currentStatus = String(currentData.status || "pending").toLowerCase();
 
-    if (!["pending", "processing"].includes(currentStatus)) {
+    if (currentData.status !== "pending") {
       return res.status(400).json({
         success: false,
         message: `Transaksi tidak bisa dibatalkan karena status sudah ${currentData.status}.`
@@ -744,63 +726,51 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       });
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const targetPaymentId = currentData.provider_id || id;
+    const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(targetPaymentId)}`;
 
-    let cancelMessage = "Deposit berhasil dibatalkan.";
+    let response;
     try {
-      const cancelUrl = `${DITZ_BASE}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
-      const cancelRes = await fetch(cancelUrl, {
+      response = await fetch(cancelUrl, {
         method: "GET",
         headers: {
           "Accept": "application/json",
           "User-Agent": "Mozilla/5.0"
-        },
-        signal: controller.signal
+        }
       });
-      if (cancelRes.ok) {
-        const cancelText = await cancelRes.text();
-        const cancelJson = JSON.parse(cancelText);
-        cancelMessage = cancelJson?.message || cancelMessage;
-      }
-    } catch (cancelErr) {
-      console.error("Ditznesia Cancel Warning:", cancelErr?.message || cancelErr);
-    } finally {
-      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      console.error("Ditznesia Cancel Fetch Error:", fetchError);
+      return res.status(502).json({
+        success: false,
+        message: "Koneksi server ke Ditznesia gagal."
+      });
     }
 
-    const elemConditions = [
-      ...(currentData.id ? [{ "elem.id": currentData.id }] : []),
-      ...(currentData.trx_id ? [{ "elem.trx_id": currentData.trx_id }] : []),
-      ...(currentData.provider_id ? [{ "elem.provider_id": currentData.provider_id }] : []),
-      ...(currentData.ditz_id ? [{ "elem.ditz_id": currentData.ditz_id }] : [])
-    ];
+    const responseText = await response.text();
+    let result;
 
-    await User.updateOne(
-      { _id: user._id },
-      {
-        $set: {
-          "historyDeposit.$[elem].status": "cancelled",
-          "historyDeposit.$[elem].provider_status": "batal"
-        }
-      },
-      {
-        arrayFilters: [{ $or: elemConditions }]
-      }
-    );
+    try {
+      result = JSON.parse(responseText);
+    } catch (jsonError) {
+      console.error("Ditznesia Cancel Invalid Response:", responseText.slice(0, 500));
+      return res.status(502).json({
+        success: false,
+        message: "Ditznesia mengembalikan respons yang bukan JSON."
+      });
+    }
+
+    await editHistoryDeposit(user._id, id, "cancelled");
 
     return res.status(200).json({
       success: true,
-      message: cancelMessage,
+      message: result?.message || "Deposit berhasil dibatalkan.",
       data: {
-        id: ditzTrxId,
-        trx_id: ditzTrxId,
-        reff_id: ditzTrxId,
-        ditz_id: ditzId,
-        provider_id: ditzId,
+        id: id,
+        trx_id: id,
         status: "cancelled"
       }
     });
+
   } catch (error) {
     console.error("Cancel Deposit Error:", error);
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
