@@ -3,1086 +3,3640 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Xs-Pedia Comic Admin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Dashboard - Platform topup, aplikasi premium, dan integrasi H2H yang cepat, mudah digunakan, aman, dan terpercaya di Indonesia">
+    <meta name="keywords" content="topup, pulsa, data internet, voucher game, e-money, PLN, aplikasi premium, H2H">
+    <meta name="author" content="Dashboard">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#16A34A">
+    <meta property="og:title" content="Dashboard">
+    <meta property="og:description" content="Platform topup terpercaya dengan berbagai layanan digital">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://xspedia.my.id/">
+    <meta property="og:image" content="/media/logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dashboard">
+    <meta name="twitter:description" content="Platform topup terpercaya dengan berbagai layanan digital">
+    <meta name="twitter:image" content="/media/logo.png">
+    <link rel="canonical" href="https://xspedia.my.id/">
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/banner.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/media/banner.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/banner.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>Dashboard - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-:root {
-    --sidebar-width: 268px;
-    --topbar-height: 74px;
-    --comic-border: 3.5px solid #111319;
-    --comic-shadow: 5px 5px 0px #111319;
-    --comic-shadow-sm: 3px 3px 0px #111319;
-    --comic-shadow-lg: 8px 8px 0px #111319;
-
-    --bg-cream: #FFFDF5;
-    --bg-panel: #FFFFFF;
-    --ink-black: #111319;
-    --ink-muted: #4A5568;
-
-    --c-blue: #3B82F6;
-    --c-blue-soft: #DBEAFE;
-    --c-green: #10B981;
-    --c-green-soft: #D1FAE5;
-    --c-yellow: #FBBF24;
-    --c-yellow-soft: #FEF3C7;
-    --c-cyan: #06B6D4;
-    --c-cyan-soft: #CFFAFE;
-    --c-red: #EF4444;
-    --c-red-soft: #FEE2E2;
-    --c-purple: #8B5CF6;
-    --c-purple-soft: #EDE9FE;
-    --c-orange: #F97316;
-    --c-orange-soft: #FFEDD5;
-    --c-slate: #64748B;
-    --c-slate-soft: #F1F5F9;
-
-    --font-display: 'Bangers', cursive, sans-serif;
-    --font-comic: 'Comic Neue', 'Plus Jakarta Sans', sans-serif;
-    --font-ui: 'Plus Jakarta Sans', sans-serif;
-}
-
-*, *::before, *::after {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: var(--font-ui);
-    background-color: var(--bg-cream);
-    background-image: radial-gradient(#111319 1.1px, transparent 1.1px);
-    background-size: 18px 18px;
-    color: var(--ink-black);
-    font-size: 0.94rem;
-    line-height: 1.4;
-    overflow-x: hidden;
-}
-
-.comic-title {
-    font-family: var(--font-display);
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-.page-wrapper {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: var(--sidebar-width);
-    min-width: var(--sidebar-width);
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: var(--c-yellow);
-    border-right: var(--comic-border);
-    z-index: 1030;
-    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 4px 0px 0px rgba(17, 19, 25, 0.12);
-}
-
-.sidebar-brand {
-    padding: 1.15rem 1.2rem;
-    background: var(--c-blue);
-    color: #FFFFFF;
-    border-bottom: var(--comic-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.brand-lockup {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
-
-.brand-badge {
-    width: 40px;
-    height: 40px;
-    background: var(--c-yellow);
-    color: var(--ink-black);
-    border: 3px solid var(--ink-black);
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-size: 1.3rem;
-    box-shadow: 2px 2px 0px var(--ink-black);
-    transform: rotate(-4deg);
-}
-
-.brand-text {
-    font-family: var(--font-display);
-    font-size: 1.75rem;
-    letter-spacing: 1.5px;
-    text-shadow: 2px 2px 0px var(--ink-black);
-    line-height: 1;
-}
-
-.brand-sub {
-    display: block;
-    font-family: var(--font-ui);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    background: var(--ink-black);
-    color: var(--c-yellow);
-    padding: 2px 7px;
-    border-radius: 5px;
-    margin-top: 4px;
-    width: fit-content;
-}
-
-.sidebar-nav {
-    list-style: none;
-    padding: 0.85rem 0.8rem;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.48rem;
-    flex: 1;
-    overflow-y: auto;
-}
-
-.nav-item .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.68rem;
-    padding: 0.66rem 0.88rem;
-    background: var(--bg-panel);
-    color: var(--ink-black);
-    font-weight: 800;
-    font-size: 0.88rem;
-    border: 3px solid var(--ink-black);
-    border-radius: 11px;
-    box-shadow: var(--comic-shadow-sm);
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-}
-
-.nav-item .nav-link:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px var(--ink-black);
-    background: var(--c-cyan-soft);
-}
-
-.nav-item .nav-link.active {
-    background: var(--c-orange);
-    color: #FFFFFF;
-}
-
-.nav-item.logout {
-    margin-top: auto;
-    padding-top: 0.65rem;
-    border-top: 3px dashed var(--ink-black);
-}
-
-.nav-item.logout .nav-link {
-    background: var(--c-red-soft);
-    color: #991B1B;
-}
-
-.nav-item.logout .nav-link:hover {
-    background: var(--c-red);
-    color: #FFFFFF;
-}
-
-.content-wrapper {
-    width: calc(100% - var(--sidebar-width));
-    margin-left: var(--sidebar-width);
-    transition: margin-left 0.24s ease, width 0.24s ease;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.topbar {
-    height: var(--topbar-height);
-    background-color: var(--bg-panel);
-    border-bottom: var(--comic-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.85rem;
-    padding: 0 1.5rem;
-    position: sticky;
-    top: 0;
-    z-index: 1010;
-}
-
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.sidebar-toggle-btn {
-    background: var(--c-yellow);
-    border: 3px solid var(--ink-black);
-    border-radius: 10px;
-    width: 40px;
-    height: 40px;
-    font-size: 1.3rem;
-    cursor: pointer;
-    color: var(--ink-black);
-    display: none;
-    place-items: center;
-    box-shadow: 3px 3px 0px var(--ink-black);
-}
-
-.sidebar-toggle-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px var(--ink-black);
-}
-
-.main-content {
-    padding: 1.5rem;
-    max-width: 1440px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-.page-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.85rem;
-    margin-bottom: 1.2rem;
-}
-
-.page-heading {
-    margin: 0;
-    font-size: 2.2rem;
-    line-height: 1.05;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.caption-tag {
-    background: var(--c-yellow);
-    border: 2.5px solid var(--ink-black);
-    box-shadow: 2.5px 2.5px 0px var(--ink-black);
-    padding: 0.2rem 0.65rem;
-    border-radius: 8px;
-    font-family: var(--font-ui);
-    font-size: 0.74rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.comic-panel {
-    background: var(--bg-panel);
-    border: var(--comic-border);
-    border-radius: 15px;
-    box-shadow: var(--comic-shadow);
-    padding: 1.2rem;
-    margin-bottom: 1.4rem;
-}
-
-.dashboard-grid {
-    display: grid;
-    gap: 1.1rem;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    margin-bottom: 1.4rem;
-}
-
-.stat-card {
-    background-color: var(--bg-panel);
-    border: var(--comic-border);
-    border-radius: 14px;
-    box-shadow: var(--comic-shadow);
-    overflow: hidden;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.stat-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0px var(--ink-black);
-}
-
-.card-top-strip {
-    height: 9px;
-    border-bottom: 3px solid var(--ink-black);
-}
-
-.stat-card .card-body {
-    padding: 1rem 1.15rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-}
-
-.stat-card .card-title {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 0.35rem 0;
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    border: 2px solid var(--ink-black);
-}
-
-.stat-card .card-value {
-    font-size: 1.55rem;
-    font-weight: 800;
-    color: var(--ink-black);
-    line-height: 1.15;
-}
-
-.card-icon-box {
-    width: 46px;
-    height: 46px;
-    border-radius: 11px;
-    border: 3px solid var(--ink-black);
-    box-shadow: 2.5px 2.5px 0px var(--ink-black);
-    display: grid;
-    place-items: center;
-    font-size: 1.35rem;
-    flex-shrink: 0;
-}
-
-.theme-success .card-top-strip, .theme-success .card-icon-box { background: var(--c-green); color: #fff; }
-.theme-success .card-title { background: var(--c-green-soft); color: #065F46; }
-
-.theme-secondary .card-top-strip, .theme-secondary .card-icon-box { background: var(--c-slate); color: #fff; }
-.theme-secondary .card-title { background: var(--c-slate-soft); color: #1E293B; }
-
-.theme-primary .card-top-strip, .theme-primary .card-icon-box { background: var(--c-blue); color: #fff; }
-.theme-primary .card-title { background: var(--c-blue-soft); color: #1E3A8A; }
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.85rem;
-    padding-bottom: 0.9rem;
-    margin-bottom: 1rem;
-    border-bottom: 3px dashed var(--ink-black);
-}
-
-.card-header h3 {
-    margin: 0;
-    font-size: 1.4rem;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    flex-wrap: wrap;
-}
-
-.form-inline-group {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-}
-
-.comic-input, .search-input, .action-input, .action-select, .comic-textarea {
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    padding: 0.45rem 0.7rem;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: 0.86rem;
-    background: var(--bg-panel);
-    color: var(--ink-black);
-    box-shadow: 2px 2px 0px var(--ink-black);
-    outline: none;
-}
-
-.comic-input:focus, .search-input:focus, .action-input:focus, .action-select:focus, .comic-textarea:focus {
-    background: #FEFCE8;
-}
-
-.search-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    padding: 0.4rem 0.7rem;
-    background: var(--bg-panel);
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
-.search-bar input {
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: 0.86rem;
-    color: var(--ink-black);
-    min-width: 190px;
-}
-
-.action-btn, .save-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    background-color: var(--c-blue);
-    color: #FFFFFF;
-    border: 2.5px solid var(--ink-black);
-    padding: 0.42rem 0.72rem;
-    border-radius: 9px;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    font-weight: 800;
-    font-size: 0.8rem;
-    box-shadow: 2px 2px 0px var(--ink-black);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    white-space: nowrap;
-}
-
-.action-btn:hover, .save-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3.5px 3.5px 0px var(--ink-black);
-}
-
-.action-btn:active, .save-btn:active {
-    transform: translate(1.5px, 1.5px);
-    box-shadow: 1px 1px 0px var(--ink-black);
-}
-
-.action-btn.delete-btn { background-color: var(--c-red); color: #fff; }
-.action-btn.verify-btn { background-color: var(--c-cyan); color: var(--ink-black); }
-.action-btn.unverify-btn { background-color: var(--c-yellow); color: var(--ink-black); }
-.action-btn.edit-btn { background-color: var(--c-green); color: #fff; }
-.save-btn { background-color: var(--c-green); color: #fff; padding: 0.62rem 1.2rem; font-size: 0.9rem; }
-
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    border: 3px solid var(--ink-black);
-    border-radius: 12px;
-    background: var(--bg-panel);
-    box-shadow: var(--comic-shadow-sm);
-}
-
-.data-table, .users-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.86rem;
-}
-
-.data-table th, .data-table td,
-.users-table th, .users-table td {
-    padding: 0.52rem 0.68rem;
-    border-bottom: 1.5px solid #E2E8F0;
-    vertical-align: middle;
-}
-
-.data-table th, .users-table th {
-    background: var(--ink-black);
-    color: #FFFFFF;
-    font-weight: 800;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-
-.data-table tbody tr:nth-child(even),
-.users-table tbody tr:nth-child(even) {
-    background: #FFFDF7;
-}
-
-.data-table tbody tr:hover,
-.users-table tbody tr:hover {
-    background: var(--c-yellow-soft);
-}
-
-.data-table tbody tr:last-child td,
-.users-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.user-cell-main {
-    font-weight: 800;
-    color: var(--ink-black);
-    line-height: 1.15;
-}
-
-.user-cell-sub {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--ink-muted);
-}
-
-.otp-compact-inline {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.28rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-.otp-mini-code {
-    font-family: monospace;
-    font-weight: 800;
-    background: var(--c-green-soft);
-    color: #065F46;
-    border: 1.5px solid var(--ink-black);
-    padding: 1px 5px;
-    border-radius: 5px;
-}
-
-.otp-mini-del {
-    background: var(--c-red-soft);
-    color: #991B1B;
-    border: 1.5px solid var(--ink-black);
-    border-radius: 5px;
-    padding: 1px 5px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.otp-mini-del:hover {
-    background: var(--c-red);
-    color: #fff;
-}
-
-.row-actions-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.28rem;
-    white-space: nowrap;
-}
-
-.row-actions-compact .action-btn {
-    padding: 0.26rem 0.48rem;
-    font-size: 0.74rem;
-    margin-right: 0;
-}
-
-.action-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    flex-wrap: nowrap;
-}
-
-.action-select {
-    padding: 0.28rem 0.42rem;
-    font-size: 0.78rem;
-}
-
-.action-input {
-    max-width: 120px;
-    padding: 0.28rem 0.48rem;
-    font-size: 0.78rem;
-}
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.16rem 0.48rem;
-    font-size: 0.7rem;
-    font-weight: 800;
-    border-radius: 999px;
-    border: 2px solid var(--ink-black);
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.status-success { background-color: var(--c-green-soft); color: #065F46; }
-.status-pending { background-color: var(--c-yellow-soft); color: #78350F; }
-.status-failed, .status-cancel, .status-expired { background-color: var(--c-red-soft); color: #991B1B; }
-
-/* Notification Composer Grid */
-.notif-grid {
-    display: grid;
-    grid-template-columns: 1.05fr 1.15fr;
-    gap: 1.25rem;
-    align-items: start;
-}
-
-.form-group {
-    margin-bottom: 0.85rem;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 800;
-    font-size: 0.8rem;
-    margin-bottom: 0.35rem;
-    text-transform: uppercase;
-}
-
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.9rem;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    background: var(--bg-panel);
-    color: var(--ink-black);
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
-.form-group textarea {
-    min-height: 135px;
-    resize: vertical;
-}
-
-.mode-pills {
-    display: flex;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-}
-
-.mode-pill-btn {
-    flex: 1;
-    min-width: 140px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.55rem 0.8rem;
-    border-radius: 10px;
-    border: 2.5px solid var(--ink-black);
-    background: var(--bg-cream);
-    color: var(--ink-black);
-    font-family: var(--font-ui);
-    font-weight: 800;
-    font-size: 0.82rem;
-    cursor: pointer;
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
-.mode-pill-btn.active {
-    background: var(--c-yellow);
-}
-
-.recipient-box {
-    border: 3px solid var(--ink-black);
-    border-radius: 12px;
-    background: var(--bg-cream);
-    padding: 0.8rem;
-    max-height: 290px;
-    overflow-y: auto;
-    box-shadow: var(--comic-shadow-sm);
-}
-
-.recipient-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.45rem 0.6rem;
-    border-radius: 8px;
-    background: var(--bg-panel);
-    border: 2px solid var(--ink-black);
-    margin-bottom: 0.45rem;
-    cursor: pointer;
-}
-
-.recipient-item:last-child {
-    margin-bottom: 0;
-}
-
-.recipient-item input[type="checkbox"] {
-    width: 17px;
-    height: 17px;
-    accent-color: var(--ink-black);
-    cursor: pointer;
-}
-
-.rekap-box {
-    background-color: var(--bg-cream);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    margin-top: 1rem;
-    border: 3px solid var(--ink-black);
-    box-shadow: 3px 3px 0px var(--ink-black);
-}
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(17, 19, 25, 0.65);
-    backdrop-filter: blur(2px);
-    z-index: 1029;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.95);
-    z-index: 1050;
-    background: var(--bg-panel);
-    border: 4px solid var(--ink-black);
-    border-radius: 16px;
-    width: 94%;
-    max-width: 880px;
-    box-shadow: var(--comic-shadow-lg);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.modal.active, .modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal.active {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.9rem 1.25rem;
-    background: var(--c-yellow);
-    border-bottom: 3.5px solid var(--ink-black);
-}
-
-.modal-title {
-    margin: 0;
-    font-size: 1.4rem;
-}
-
-.modal-close-btn {
-    background: var(--c-red);
-    color: #FFFFFF;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 8px;
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 2px 2px 0px var(--ink-black);
-    display: grid;
-    place-items: center;
-}
-
-.modal-body {
-    padding: 1.25rem;
-    overflow-y: auto;
-    flex-grow: 1;
-    max-height: 78vh;
-}
-
-.modal-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-bottom: 1.15rem;
-    padding-bottom: 0.65rem;
-    border-bottom: 3px dashed var(--ink-black);
-}
-
-.tab-btn {
-    background: var(--bg-cream);
-    border: 2.5px solid var(--ink-black);
-    border-radius: 9px;
-    padding: 0.45rem 0.85rem;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    font-size: 0.84rem;
-    font-weight: 800;
-    color: var(--ink-black);
-    box-shadow: 2px 2px 0px var(--ink-black);
-}
-
-.tab-btn.active {
-    background: var(--ink-black);
-    color: var(--c-yellow);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: 165px 1fr;
-    gap: 0.55rem 1.1rem;
-    align-items: start;
-}
-
-.detail-grid dt {
-    font-weight: 800;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-}
-
-.detail-grid dd {
-    margin: 0;
-    font-weight: 700;
-    word-break: break-word;
-}
-
-.otp-code {
-    font-family: monospace;
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    background: var(--bg-panel);
-    padding: 0.5rem;
-    border-radius: 8px;
-    border: 2.5px dashed var(--ink-black);
-}
-
-.otp-history-item {
-    padding: 0.85rem 1rem;
-    border: 2.5px solid var(--ink-black);
-    border-radius: 11px;
-    margin-bottom: 0.75rem;
-    background: var(--bg-cream);
-    box-shadow: 3px 3px 0px var(--ink-black);
-}
-
-.otp-history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.4rem;
-}
-
-.otp-code-display {
-    font-family: monospace;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--ink-black);
-}
-
-#toast-container {
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.toast-message {
-    background-color: var(--ink-black);
-    color: #FFFFFF;
-    padding: 0.75rem 1.15rem;
-    border: 3px solid var(--ink-black);
-    border-radius: 11px;
-    box-shadow: var(--comic-shadow-sm);
-    font-weight: 800;
-    font-size: 0.86rem;
-    opacity: 0;
-    transform: translateY(-14px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.toast-message.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.spinner {
-    width: 1.35rem;
-    height: 1.35rem;
-    border: 3px solid #E2E8F0;
-    border-top-color: var(--ink-black);
-    border-radius: 50%;
-    display: inline-block;
-    animation: spinner-border 0.75s linear infinite;
-    vertical-align: middle;
-}
-
-@keyframes spinner-border {
-    to { transform: rotate(360deg); }
-}
-
-@media (max-width: 992px) {
-    .sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); }
-    .sidebar.active { transform: translateX(0); }
-    .content-wrapper { width: 100%; margin-left: 0; }
-    .sidebar-toggle-btn { display: grid; }
-    .notif-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 640px) {
-    .main-content, .topbar { padding: 0.9rem; }
-    .page-heading { font-size: 1.8rem; }
-    .detail-grid { grid-template-columns: 1fr; gap: 0.35rem; }
-    .card-header { flex-direction: column; align-items: stretch; }
-    .search-bar input { min-width: 0; width: 100%; }
-}
-</style>
+        :root {
+            --primary-hue: 145;
+            --vp-primary: #22c55e;
+            --vp-primary-rgb: 34, 197, 94;
+            --vp-primary-light: #ecfdf3;
+            --vp-primary-dark: #15803d;
+            --vp-secondary: #6c757d;
+            --vp-secondary-rgb: 108, 117, 125;
+            --vp-success: #198754;
+            --vp-success-rgb: 25, 135, 84;
+            --vp-info: #0dcaf0;
+            --vp-warning: #ffc107;
+            --vp-warning-rgb: 255, 193, 7;
+            --vp-danger: #dc3545;
+            --vp-danger-rgb: 220, 53, 69;
+            --vp-light: #f8f9fa;
+            --vp-dark: #212529;
+            --vp-body-bg: #f2fbf4;
+            --vp-card-bg: #ffffff;
+            --vp-text-muted: #66776b;
+            --vp-border-color: #dcefe1;
+            --vp-font-main: 'Manrope', sans-serif;
+            --vp-font-heading: 'Poppins', sans-serif;
+            --vp-transition: 0.2s ease-in-out;
+            --vp-radius-sm: 0.375rem;
+            --vp-radius-md: 0.5rem;
+            --vp-radius-lg: 0.75rem;
+            --vp-radius-xl: 1rem;
+            --vp-shadow-sm: 0 .125rem .25rem hsla(var(--primary-hue), 50%, 50%, .075);
+            --vp-shadow-md: 0 .5rem 1rem hsla(var(--primary-hue), 50%, 50%, .1);
+            --vp-shadow-lg: 0 1rem 3rem hsla(var(--primary-hue), 50%, 50%, .125);
+            --vp-shadow-xl: 0 1.5rem 4rem hsla(var(--primary-hue), 50%, 50%, .15);
+            --vp-header-bg-light-transparent: hsla(0, 0%, 100%, 0.5);
+            --vp-header-bg-dark-transparent: rgba(33, 37, 41, 0.5);
+        }
+
+        [data-theme="dark"] {
+            --vp-primary: #4ade80;
+            --vp-primary-rgb: 74, 222, 128;
+            --vp-primary-light: rgba(74, 222, 128, 0.15);
+            --vp-primary-dark: #22c55e;
+            --vp-body-bg: #101b14;
+            --vp-card-bg: #17251b;
+            --vp-text-muted: #a4b8a8;
+            --vp-border-color: #2b4432;
+            --vp-dark: #eaf5ec;
+            --vp-light: #213328;
+            --vp-shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --vp-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --vp-shadow-lg: 0 8px 25px rgba(0,0,0,0.5);
+            --vp-header-bg-dark-transparent: rgba(23, 37, 27, 0.78);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 15px;
+        }
+
+        body {
+            font-family: var(--vp-font-main);
+            background-color: var(--vp-body-bg);
+            color: var(--vp-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color var(--vp-transition), color var(--vp-transition);
+        }
+
+        .vp-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .vp-sidebar {
+            width: 260px;
+            background-color: var(--vp-card-bg);
+            box-shadow: var(--vp-shadow-md);
+            padding: 1.5rem 0;
+            position: fixed;
+            top: 0;
+            left: -260px;
+            bottom: 0;
+            z-index: 1030;
+            transition: transform var(--vp-transition), background-color var(--vp-transition);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--vp-border-color);
+        }
+
+        .vp-sidebar.active {
+            transform: translateX(260px);
+        }
+
+        .vp-sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--vp-border-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .vp-sidebar-header-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        .vp-sidebar-brand-text {
+            font-family: var(--vp-font-heading);
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--vp-primary);
+            text-decoration: none;
+            transition: color var(--vp-transition);
+        }
+        .vp-sidebar-brand-text:hover {
+             color: var(--vp-primary-dark);
+        }
+
+        .vp-sidebar-menu {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 0 1rem;
+        }
+
+        .vp-sidebar-menu .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.80rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: var(--vp-radius-md);
+            color: var(--vp-text-muted);
+            font-weight: 500;
+            font-family: var(--vp-font-heading);
+            transition: all var(--vp-transition);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+        
+        .vp-sidebar-menu .nav-link .bi {
+            margin-right: 0.80rem;
+            font-size: 1.05rem;
+            min-width: 18px;
+            opacity: 0.7;
+            transition: opacity var(--vp-transition);
+        }
+
+        .vp-sidebar-menu .nav-link.active,
+        .vp-sidebar-menu .nav-link:hover {
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary);
+        }
+        
+        .vp-sidebar-menu .nav-link.active .bi,
+        .vp-sidebar-menu .nav-link:hover .bi {
+            opacity: 1;
+        }
+        
+        [data-theme="light"] .vp-sidebar-menu .nav-link.active,
+        [data-theme="light"] .vp-sidebar-menu .nav-link:hover {
+            color: var(--vp-primary);
+            background-color: var(--vp-primary-light);
+        }
+
+        [data-theme="dark"] .vp-sidebar-menu .nav-link.active,
+        [data-theme="dark"] .vp-sidebar-menu .nav-link:hover {
+            color: var(--vp-primary);
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-sidebar-heading {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--vp-text-muted);
+            padding: 1.1rem 1rem 0.5rem;
+            letter-spacing: 0.5px;
+            font-family: var(--vp-font-heading);
+        }
+        .vp-sidebar-menu hr {
+            border-top: 1px solid var(--vp-border-color);
+            margin: 0.75rem 0.5rem;
+        }
+
+        .vp-main-container {
+            flex-grow: 1;
+            padding-left: 0;
+            transition: padding-left var(--vp-transition), width var(--vp-transition);
+            background-color: var(--vp-body-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .vp-topbar {
+            background-color: var(--vp-header-bg-light-transparent);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: var(--vp-shadow-sm);
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 8px;
+            z-index: 1020;
+            border: 1px solid var(--vp-border-color);
+            transition: background-color var(--vp-transition), width var(--vp-transition), margin-left var(--vp-transition);
+            border-radius: 8px;
+            margin: 8px; 
+            width: calc(100% - 16px);
+        }
+        [data-theme="dark"] .vp-topbar {
+            background-color: var(--vp-header-bg-dark-transparent);
+        }
+
+        .vp-sidebar-toggler {
+            font-size: 1.4rem;
+            color: var(--vp-dark);
+            background: none;
+            border: none;
+            padding: 0.4rem;
+            border-radius: var(--vp-radius-md);
+            transition: all var(--vp-transition);
+            order: 1; 
+        }
+
+        .vp-sidebar-toggler:hover {
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary);
+        }
+
+        .vp-topbar-brand-toggler {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .vp-topbar-brand-link { 
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            order: 2; 
+            margin-right: auto; 
+        }
+
+        .vp-topbar-logo {
+            height: 28px;
+            width: auto;
+        }
+        .vp-topbar-brand-text {
+            font-family: var(--vp-font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--vp-dark);
+            text-decoration: none;
+            margin-left: 0.5rem;
+        }
+        [data-theme="dark"] .vp-topbar-brand-text {
+            color: var(--vp-light);
+        }
+
+        .vp-topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            order: 3; 
+        }
+
+        .vp-topbar-actions .nav-link {
+            color: var(--vp-text-muted);
+            padding: 0.65rem;
+            border-radius: var(--vp-radius-md);
+            transition: all var(--vp-transition);
+            text-decoration: none;
+        }
+
+        .vp-topbar-actions .nav-link:hover {
+            color: var(--vp-primary);
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-theme-toggle {
+            background: none;
+            border: none;
+            color: var(--vp-text-muted);
+            padding: 0.65rem;
+            border-radius: var(--vp-radius-md);
+            transition: all var(--vp-transition);
+            cursor: pointer;
+        }
+
+        .vp-theme-toggle:hover {
+            color: var(--vp-primary);
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-notification-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .vp-notification-toggle {
+            background: none;
+            border: none;
+            color: var(--vp-text-muted);
+            padding: 0.65rem;
+            border-radius: var(--vp-radius-md);
+            transition: all var(--vp-transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .vp-notification-toggle:hover {
+            color: var(--vp-primary);
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-notification-badge {
+            position: absolute;
+            top: 0.3rem;
+            right: 0.3rem;
+            width: 8px;
+            height: 8px;
+            background-color: var(--vp-danger);
+            border-radius: 50%;
+            border: 2px solid var(--vp-card-bg);
+            animation: pulse 2s infinite;
+        }
+
+        .vp-notification-shake {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .vp-notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background-color: var(--vp-card-bg);
+            border: 1px solid var(--vp-border-color);
+            border-radius: var(--vp-radius-lg);
+            box-shadow: var(--vp-shadow-lg);
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all var(--vp-transition);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .vp-notification-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .vp-notification-header {
+            padding: 1rem 1.25rem 0.75rem;
+            border-bottom: 1px solid var(--vp-border-color);
+            font-family: var(--vp-font-heading);
+            font-weight: 600;
+            color: var(--vp-dark);
+            font-size: 1rem;
+        }
+
+        .vp-notification-list {
+            padding: 0.5rem 0;
+        }
+
+        .vp-notification-item {
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--vp-border-color);
+            cursor: pointer;
+            transition: background-color var(--vp-transition);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .vp-notification-item:hover {
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .vp-notification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        .vp-notification-icon.info {
+            background-color: rgba(13, 202, 240, 0.15);
+            color: var(--vp-info);
+        }
+
+        .vp-notification-icon.promo {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: var(--vp-warning);
+        }
+
+        .vp-notification-icon.maintenance {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: var(--vp-danger);
+        }
+
+        .vp-notification-icon.success {
+            background-color: rgba(25, 135, 84, 0.15);
+            color: var(--vp-success);
+        }
+
+        .vp-notification-content {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .vp-notification-title {
+            font-weight: 600;
+            color: var(--vp-dark);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+        }
+
+        .vp-notification-message {
+            color: var(--vp-text-muted);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-bottom: 0.25rem;
+        }
+
+        .vp-notification-time {
+            color: var(--vp-text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .vp-notification-empty {
+            padding: 2rem 1.25rem;
+            text-align: center;
+            color: var(--vp-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .vp-notification-modal .modal-content {
+            border-radius: var(--vp-radius-lg);
+            border: 1px solid var(--vp-border-color);
+            background-color: var(--vp-card-bg);
+        }
+
+        .vp-notification-modal .modal-header {
+            border-bottom: 1px solid var(--vp-border-color);
+            padding: 1.25rem;
+        }
+
+        .vp-notification-modal .modal-title {
+            font-family: var(--vp-font-heading);
+            font-weight: 600;
+            color: var(--vp-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .vp-notification-modal .modal-body {
+            padding: 1.25rem;
+        }
+
+        .vp-notification-modal .notification-detail-message {
+            color: var(--vp-dark);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .vp-notification-modal .notification-detail-time {
+            color: var(--vp-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .vp-notification-modal .modal-footer {
+            border-top: 1px solid var(--vp-border-color);
+            padding: 1rem 1.25rem;
+        }
+
+        .vp-profile-dropdown img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--vp-primary-light);
+            transition: border-color var(--vp-transition);
+        }
+
+        .vp-profile-dropdown img:hover {
+            border-color: var(--vp-primary);
+        }
+
+        .vp-content-wrapper {
+            padding-left: 8px; 
+            padding-right: 8px;
+            padding-bottom: 8px; 
+            display: flex;
+            gap: 1rem;
+            flex-grow: 1;
+        }
+
+        .vp-main-content {
+            flex-grow: 1;
+            max-width: 100%;
+        }
+        
+        .vp-section {
+            background-color: var(--vp-card-bg);
+            padding: 1.25rem;
+            border-radius: var(--vp-radius-lg);
+            box-shadow: var(--vp-shadow-sm);
+            margin-bottom: 1rem;
+            border: 1px solid var(--vp-border-color);
+        }
+
+        .vp-user-summary-card {
+            padding: 0.75rem;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .vp-user-summary-item {
+            padding: 0.5rem 0.6rem;
+            position: relative;
+            z-index: 1;
+            flex-basis: 0; 
+            flex-grow: 1;   
+            max-width: 50%; 
+            min-width: 120px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .vp-user-summary-item::before { 
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'bootstrap-icons';
+            font-size: 3rem; 
+            opacity: 0.05; 
+            color: var(--vp-primary);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .vp-user-summary-item.saldo-item::before {
+            content: '\F678'; 
+        }
+        .vp-user-summary-item.level-item::before {
+            content: '\F15D'; 
+        }
+
+        .vp-user-summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--vp-shadow-md);
+        }
+
+        .vp-user-summary-item .label {
+            font-size: 0.75rem;
+            color: var(--vp-text-muted);
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+        .vp-user-summary-item .label .bi {
+            font-size: 0.85rem;
+        }
+
+        .vp-user-summary-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--vp-dark);
+            font-family: var(--vp-font-heading);
+            transition: color var(--vp-transition);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vp-user-summary-item .value.text-primary {
+            color: var(--vp-primary) !important;
+        }
+         .vp-user-summary-divider {
+            width: 1px;
+            background-color: var(--vp-border-color);
+            align-self: stretch;
+            margin: 0.25rem 0;
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .vp-service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .vp-service-item.hidden {
+            display: none;
+        }
+
+        .vp-service-item {
+            background-color: transparent; 
+            border-radius: var(--vp-radius-md); 
+            padding: 0.85rem; 
+            text-align: center;
+            box-shadow: none; 
+            transition: all var(--vp-transition);
+            text-decoration: none;
+            color: var(--vp-dark);
+            border: 1px solid transparent; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vp-service-item:hover {
+            transform: translateY(-3px);
+            background-color: var(--vp-primary-light); 
+            border-color: var(--vp-primary-light); 
+            box-shadow: var(--vp-shadow-sm); 
+            color: var(--vp-primary);
+        }
+
+        .vp-service-item .icon-wrapper {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--vp-primary-light), rgba(var(--vp-primary-rgb), 0.1));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.6rem;
+            transition: all var(--vp-transition);
+            position: relative;
+            z-index: 1;
+        }
+        
+        [data-theme="light"] .vp-service-item:hover .icon-wrapper {
+            background: linear-gradient(135deg, var(--vp-primary), var(--vp-primary-dark));
+        }
+        [data-theme="dark"] .vp-service-item:hover .icon-wrapper {
+            background: linear-gradient(135deg, var(--vp-primary), var(--vp-primary-dark));
+        }
+
+        .vp-service-item .icon-wrapper .bi {
+            font-size: 1.5rem;
+            color: var(--vp-primary);
+            transition: color var(--vp-transition);
+        }
+
+        .vp-service-item:hover .icon-wrapper .bi {
+            color: green;
+        }
+
+        .vp-service-item .service-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.25;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vp-loading-shimmer {
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(90deg, var(--vp-border-color) 25%, rgba(255,255,255,0.5) 50%, var(--vp-border-color) 75%);
+            background-size: 200% 100%;
+            border-radius: var(--vp-radius-sm);
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            border-radius: var(--vp-radius-md);
+            box-shadow: var(--vp-shadow-lg);
+            border: 1px solid var(--vp-border-color);
+            margin-top: 0.4rem !important;
+            background-color: var(--vp-card-bg);
+            padding: 0.4rem;
+        }
+
+        .dropdown-item {
+            padding: 0.65rem 0.9rem;
+            font-weight: 500;
+            font-family: var(--vp-font-heading);
+            border-radius: var(--vp-radius-sm);
+            margin-bottom: 0.2rem;
+            transition: all var(--vp-transition);
+            color: var(--vp-dark);
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item .bi {
+            margin-right: 0.6rem;
+            color: var(--vp-text-muted);
+            transition: color var(--vp-transition);
+            font-size: 1rem;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary) !important;
+        }
+
+        .dropdown-item:hover .bi,
+        .dropdown-item:focus .bi {
+            color: var(--vp-primary) !important;
+        }
+
+        .dropdown-header {
+            color: var(--vp-dark) !important;
+            font-weight: 600;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-divider {
+            border-color: var(--vp-border-color);
+            margin: 0.4rem 0;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 1.5rem;
+            border-top: 1px solid var(--vp-border-color);
+            color: var(--vp-text-muted);
+            font-size: 0.85rem;
+            background-color: var(--vp-card-bg);
+            transition: all var(--vp-transition);
+            margin-left: 8px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            width: calc(100% - 16px);
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-wrap: wrap; 
+        }
+
+        .footer-logo-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; 
+            text-decoration: none;
+            color: var(--vp-dark);
+            transition: color var(--vp-transition);
+        }
+        
+        .footer-logo-name:hover {
+            color: var(--vp-primary);
+        }
+
+        .footer-logo-name-img {
+            height: 36px; 
+            width: auto;
+            border-radius: var(--vp-radius-md); 
+        }
+
+        .footer-logo-name-text {
+            font-family: var(--vp-font-heading);
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+        }
+        
+        [data-theme="dark"] .footer-logo-name-text {
+            color: var(--vp-light);
+        }
+        
+        .footer-description {
+            max-width: 300px; 
+            margin-top: 0.75rem; 
+            margin-bottom: 1rem; 
+            font-size: 0.8rem;
+            color: var(--vp-text-muted);
+            line-height: 1.5;
+            text-align: left; 
+        }
+        .footer-description .bi {
+            margin-right: 0.5rem;
+            color: var(--vp-primary); 
+            font-size: 1rem;
+        }
+
+        .footer-links-section {
+            display: flex;
+            gap: 2rem; 
+            flex-wrap: wrap; 
+        }
+
+        .footer-section-title {
+            font-family: var(--vp-font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--vp-dark);
+            margin-bottom: 0.75rem;
+            display: block; 
+        }
+        [data-theme="dark"] .footer-section-title {
+            color: var(--vp-light);
+        }
+
+        .footer-links-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links-section a {
+            color: var(--vp-text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color var(--vp-transition), transform 0.2s ease;
+            display: inline-block; 
+        }
+
+        .footer-links-section a:hover {
+            color: var(--vp-primary);
+            transform: translateX(3px); 
+        }
+        
+        .footer-social-links a {
+            font-size: 1.3rem; 
+            margin: 0 0.4rem;
+            color: var(--vp-text-muted);
+            transition: color var(--vp-transition);
+        }
+
+        .footer-social-links a:hover {
+            color: var(--vp-primary);
+        }
+        
+        .footer-copyright {
+            width: 100%; 
+            text-align: left; 
+            margin-top: 1rem; 
+            font-size: 0.75rem; 
+            color: var(--vp-text-muted);
+        }
+
+        .vp-history-section {
+            background-color: var(--vp-card-bg);
+            padding: 1.25rem;
+            border-radius: var(--vp-radius-lg);
+            box-shadow: var(--vp-shadow-sm);
+            margin-bottom: 1rem;
+            border: 1px solid var(--vp-border-color);
+        }
+
+        .vp-history-section .section-title {
+            font-family: var(--vp-font-heading);
+            color: var(--vp-dark);
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .vp-history-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .vp-history-table th,
+        .vp-history-table td {
+            padding: 0.875rem 1rem;
+            vertical-align: middle;
+            text-align: left;
+            border: none;
+        }
+
+        .vp-history-table thead {
+            background-color: var(--vp-primary-light);
+        }
+
+        .vp-history-table thead th {
+            font-family: var(--vp-font-heading);
+            font-weight: 600;
+            color: var(--vp-primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 1px solid var(--vp-border-color);
+            border-bottom: 1px solid var(--vp-border-color);
+        }
+
+        .vp-history-table thead th:first-child {
+            border-left: 1px solid var(--vp-border-color);
+            border-top-left-radius: var(--vp-radius-md);
+        }
+
+        .vp-history-table thead th:last-child {
+            border-right: 1px solid var(--vp-border-color);
+            border-top-right-radius: var(--vp-radius-md);
+        }
+
+        .vp-history-table tbody tr {
+            background-color: var(--vp-card-bg);
+            transition: all var(--vp-transition);
+            border-left: 1px solid var(--vp-border-color);
+            border-right: 1px solid var(--vp-border-color);
+            border-bottom: 1px solid var(--vp-border-color);
+        }
+
+        .vp-history-table tbody tr:hover {
+            background-color: var(--vp-primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--vp-shadow-sm);
+        }
+
+        .vp-history-table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: var(--vp-radius-md);
+        }
+
+        .vp-history-table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: var(--vp-radius-md);
+        }
+
+        .vp-history-table td {
+            font-size: 0.875rem;
+            color: var(--vp-dark);
+            font-weight: 500;
+        }
+
+        .vp-history-table .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--vp-radius-sm);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: var(--vp-warning);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        .status-success {
+            background-color: rgba(25, 135, 84, 0.15);
+            color: var(--vp-success);
+            border: 1px solid rgba(25, 135, 84, 0.3);
+        }
+        .status-cancel, .status-failed, .status-expired {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: var(--vp-danger);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        .status-refunded {
+            background-color: rgba(108, 117, 125, 0.15);
+            color: var(--vp-secondary);
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .vp-history-table .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .vp-history-table .action-buttons .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: var(--vp-radius-sm);
+            transition: all var(--vp-transition);
+            white-space: nowrap;
+        }
+
+        .vp-history-table .btn-primary {
+            background-color: var(--vp-primary);
+            border-color: var(--vp-primary);
+            color: green;
+        }
+        .vp-history-table .btn-primary:hover {
+            background-color: var(--vp-primary-dark);
+            border-color: var(--vp-primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .vp-history-table .btn-outline-secondary {
+            color: var(--vp-secondary);
+            border-color: var(--vp-secondary);
+            background-color: transparent;
+        }
+        .vp-history-table .btn-outline-secondary:hover {
+            background-color: var(--vp-secondary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .modal-content {
+            border-radius: var(--vp-radius-lg);
+            border: 1px solid var(--vp-border-color);
+            background-color: var(--vp-card-bg);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--vp-border-color);
+            padding: 1rem 1.25rem;
+        }
+        .modal-title {
+            font-family: var(--vp-font-heading);
+            font-weight: 600;
+            color: var(--vp-dark);
+        }
+        [data-theme="dark"] .modal-title {
+            color: var(--vp-light);
+        }
+        .modal-header .btn-close {
+            background-color: transparent;
+            border: none;
+            font-size: 1.2rem;
+        }
+        .modal-body {
+            padding: 1.25rem;
+        }
+        .modal-body .detail-item {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--vp-text-muted);
+        }
+        .modal-body .detail-item strong {
+            color: var(--vp-dark);
+            display: inline-block;
+            min-width: 120px;
+            font-weight: 500;
+        }
+        [data-theme="dark"] .modal-body .detail-item strong {
+            color: var(--vp-light);
+        }
+        .modal-body .detail-item .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .modal-footer {
+            border-top: 1px solid var(--vp-border-color);
+            padding: 0.75rem 1.25rem;
+            justify-content: flex-end;
+        }
+
+        .history-view-all {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            font-family: var(--vp-font-heading);
+            font-weight: 500;
+            color: var(--vp-primary);
+            text-decoration: none;
+            transition: color var(--vp-transition);
+        }
+        .history-view-all:hover {
+            color: var(--vp-primary-dark);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-loaded {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .vp-service-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--vp-radius-md);
+            transition: all var(--vp-transition);
+        }
+
+        .vp-service-toggle-wrapper:hover {
+            background-color: var(--vp-primary-light);
+            color: var(--vp-primary);
+        }
+        
+        .vp-service-toggle-wrapper:hover .bi {
+            color: var(--vp-primary);
+        }
+
+        .vp-service-toggle-wrapper .bi {
+            font-size: 1.3rem;
+            color: var(--vp-text-muted);
+            transition: color var(--vp-transition);
+        }
+
+        .vp-service-toggle-wrapper .toggle-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: var(--vp-font-heading);
+        }
+
+        .vp-category-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .vp-category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+        .vp-category-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            max-width: 100%;
+            padding: 0.38rem 0.75rem;
+            border: 1px solid rgba(34, 197, 94, 0.38);
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(34,197,94,.14), rgba(16,185,129,.07));
+            color: var(--vp-primary);
+            font-size: .76rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: .02em;
+            white-space: nowrap;
+            box-shadow: 0 3px 12px rgba(34,197,94,.10), inset 0 0 0 1px rgba(255,255,255,.08);
+        }
+        .vp-category-role .bi { font-size: .85rem; }
+        [data-theme="dark"] .vp-category-role {
+            background: linear-gradient(135deg, rgba(34,197,94,.2), rgba(16,185,129,.1));
+            border-color: rgba(74,222,128,.42);
+            color: #86efac;
+        }
+        @media (max-width: 420px) {
+            .vp-category-title { gap: .5rem; flex-wrap: wrap; }
+            .vp-category-role { font-size: .7rem; padding: .34rem .6rem; }
+        }
+
+        .vp-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 1029;
+            display: none;
+            transition: opacity var(--vp-transition);
+        }
+
+        #mainBannerCarousel .carousel-item img {
+            object-fit: cover;
+            max-height: 220px;
+            border-radius: var(--vp-radius-md);
+        }
+
+        #mainBannerCarousel .carousel-inner {
+             border-radius: var(--vp-radius-md);
+             box-shadow: var(--vp-shadow-sm);
+             overflow: hidden; 
+        }
+        #mainBannerCarousel {
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 992px) {
+            .vp-sidebar {
+                transform: translateX(0);
+            }
+            .vp-main-container {
+                padding-left: 260px;
+                width: calc(100% - 260px);
+            }
+            .vp-sidebar-toggler {
+                display: none;
+            }
+            .vp-topbar-brand-link.desktop-hidden {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .vp-content-wrapper {
+                flex-direction: column;
+                padding: 0.75rem;
+            }
+             .vp-main-container {
+                padding-left: 0;
+                width: 100%;
+            }
+            .vp-topbar-brand-link { 
+                display: flex !important;
+            }
+            footer {
+                flex-direction: column; 
+                align-items: flex-start; 
+                text-align: left; 
+            }
+            .footer-logo-name {
+                margin-bottom: 0.75rem; 
+            }
+            .footer-links-section {
+                width: 100%; 
+                justify-content: space-between; 
+            }
+            .vp-notification-dropdown {
+                width: 280px;
+                right: -20px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .vp-user-summary-item .label {
+                 font-size: 0.7rem;
+            }
+             .vp-user-summary-item .value {
+                 font-size: 1.1rem;
+            }
+            .vp-service-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                gap: 0.6rem;
+            }
+            .vp-service-item .icon-wrapper {
+                width: 40px;
+                height: 40px;
+            }
+            .vp-service-item .icon-wrapper .bi {
+                font-size: 1.3rem;
+            }
+            .vp-service-item .service-name {
+                font-size: 0.7rem;
+            }
+            .vp-topbar, footer {
+                margin: 6px;
+                width: calc(100% - 12px);
+                padding: 0.6rem;
+            }
+            .vp-content-wrapper {
+                padding: 0.6rem;
+            }
+            .vp-section {
+                padding: 1rem;
+            }
+            .vp-topbar-brand-text {
+                font-size: 1.1rem;
+            }
+            .vp-topbar-logo {
+                height: 24px;
+            }
+            .footer-logo-name-img {
+                height: 30px;
+            }
+            .footer-logo-name-text {
+                font-size: 1.3rem;
+            }
+            .footer-links-section {
+                flex-direction: column; 
+                gap: 1rem;
+            }
+            .footer-section-title {
+                margin-bottom: 0.5rem;
+            }
+            .footer-description {
+                max-width: 100%; 
+            }
+            #mainBannerCarousel .carousel-item img {
+                max-height: 140px; 
+            }
+            .vp-notification-dropdown {
+                width: 260px;
+                right: -40px;
+            }
+
+            .vp-history-table {
+                border: 1px solid var(--vp-border-color);
+                border-radius: var(--vp-radius-md);
+                overflow: hidden;
+            }
+
+            .vp-history-table thead {
+                display: none;
+            }
+
+            .vp-history-table tbody {
+                display: block;
+            }
+
+            .vp-history-table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid var(--vp-border-color);
+                border-radius: var(--vp-radius-md);
+                padding: 1rem;
+                background-color: var(--vp-card-bg);
+                box-shadow: var(--vp-shadow-sm);
+                position: relative;
+            }
+
+            .vp-history-table tbody tr:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--vp-shadow-md);
+            }
+
+            .vp-history-table tbody tr:last-child {
+                margin-bottom: 0;
+            }
+
+            .vp-history-table tbody td {
+                display: block;
+                text-align: left;
+                padding: 0.5rem 0;
+                border: none;
+                position: relative;
+                padding-left: 0;
+            }
+
+            .vp-history-table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--vp-text-muted);
+                display: block;
+                margin-bottom: 0.25rem;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .vp-history-table tbody td:last-child {
+                padding-top: 1rem;
+                border-top: 1px solid var(--vp-border-color);
+                margin-top: 0.75rem;
+            }
+
+            .vp-history-table tbody td:last-child::before {
+                content: "Aksi";
+            }
+
+            .vp-history-table .action-buttons {
+                justify-content: flex-start;
+                gap: 0.5rem;
+            }
+
+            .vp-history-table .action-buttons .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                min-width: auto;
+            }
+
+            .vp-history-table .status-badge {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+                display: inline-block;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .vp-notification-dropdown {
+                width: 240px;
+                right: -60px;
+            }
+
+            .vp-history-table tbody tr {
+                padding: 0.875rem;
+            }
+
+            .vp-history-table .action-buttons {
+                flex-direction: column;
+                gap: 0.375rem;
+            }
+
+            .vp-history-table .action-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        [data-theme="dark"] .vp-loading-shimmer {
+            background: linear-gradient(90deg, #30363d 25%, rgba(139, 148, 158, 0.3) 50%, #30363d 75%);
+        }
+
+        [data-theme="dark"] .dropdown-item.text-danger {
+            color: #green !important;
+        }
+
+        [data-theme="dark"] .dropdown-item.text-danger:hover {
+            color: #green !important;
+        }
+
+        [data-theme="dark"] .vp-notification-header {
+            color: var(--vp-light);
+        }
+
+        [data-theme="dark"] .vp-notification-title {
+            color: var(--vp-light);
+        }
+    
+
+        /* Fresh green gradient theme and mobile-style bottom navigation */
+        body {
+            background: linear-gradient(180deg, #effcf2 0%, #f8fff9 42%, #ffffff 100%);
+        }
+
+        [data-theme="dark"] body,
+        body[data-theme="dark"] {
+            background: linear-gradient(180deg, #101b14 0%, #14251a 48%, #101b14 100%);
+        }
+
+        .vp-topbar {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: #dcefe1;
+        }
+
+        [data-theme="dark"] .vp-topbar {
+            background: rgba(23, 37, 27, 0.88);
+            border-color: var(--vp-border-color);
+        }
+
+        .vp-balance-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .48rem;
+            padding: .58rem .75rem;
+            border: 1px solid rgba(34, 197, 94, .12);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #e7f8ec 0%, #d5f3df 100%);
+            color: #16803d;
+            font-weight: 800;
+            font-size: .9rem;
+            line-height: 1;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, .08);
+            transition: transform var(--vp-transition), box-shadow var(--vp-transition);
+        }
+
+        .vp-balance-pill:hover {
+            color: #11632f;
+            transform: translateY(-1px);
+            box-shadow: 0 7px 18px rgba(34, 197, 94, .14);
+        }
+
+        .vp-balance-pill > i { font-size: 1rem; }
+        .vp-balance-plus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 23px;
+            height: 23px;
+            margin: -.2rem -.35rem -.2rem .05rem;
+            border-radius: 50%;
+            color: #ffffff;
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+        }
+
+        .vp-theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            color: #248448;
+            border-radius: 50%;
+        }
+
+        .vp-theme-toggle:hover { background: #e7f8ec; color: #166534; }
+
+        .vp-section,
+        .vp-history-section,
+        .vp-user-summary-card {
+            border-color: rgba(34, 197, 94, .12);
+            box-shadow: 0 8px 24px rgba(22, 101, 52, .045);
+        }
+
+        .vp-service-item:hover .icon-wrapper,
+        .vp-service-item .icon-wrapper {
+            background: linear-gradient(135deg, #effcf2 0%, #d8f7e1 100%);
+        }
+
+        .vp-service-item:hover .icon-wrapper .bi { color: #15803d; }
+
+        .btn-primary,
+        .vp-history-table .btn-primary {
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+            border-color: #22c55e;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover,
+        .vp-history-table .btn-primary:hover {
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+            border-color: #15803d;
+            color: #ffffff;
+        }
+
+        .mobile-bottom-nav { display: none; }
+
+        @media (max-width: 991.98px) {
+            .vp-main-container { padding-bottom: calc(108px + env(safe-area-inset-bottom)); }
+            .mobile-bottom-nav {
+                position: fixed; left: 14px; right: 14px;
+                bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 1040;
+                display: flex; align-items: center; justify-content: space-around;
+                min-height: 72px; padding: 8px 7px 7px;
+                border: 1px solid rgba(255,255,255,.75); border-radius: 28px;
+                background: rgba(250, 255, 251, .88);
+                box-shadow: 0 12px 34px rgba(20, 83, 45, .18), 0 2px 8px rgba(20, 83, 45, .08);
+                backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+            }
+            [data-theme="dark"] .mobile-bottom-nav { background: rgba(29, 43, 33, .88); border-color: rgba(255,255,255,.12); box-shadow: 0 12px 34px rgba(0,0,0,.3); }
+            .mobile-bottom-nav__item {
+                position: relative; display: flex; flex: 1 1 20%; min-width: 0; min-height: 53px;
+                flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+                padding: 3px 1px; border-radius: 16px; color: #758277; font-size: .66rem;
+                font-weight: 600; line-height: 1.2; text-decoration: none; transition: color .2s ease, transform .2s ease;
+            }
+            .mobile-bottom-nav__item > i { font-size: 1.35rem; line-height: 1.2; }
+            .mobile-bottom-nav__item.active, .mobile-bottom-nav__item:hover { color: #16803d; }
+            .mobile-bottom-nav__item.active:not(.mobile-bottom-nav__item--primary) { background: rgba(220, 252, 231, .72); }
+            .mobile-bottom-nav__item--primary { overflow: visible; justify-content: center; gap: 0; padding-top: 0; color: #166534; }
+            .mobile-bottom-nav__main-icon {
+                display: flex; align-items: center; justify-content: center; width: 62px; height: 62px;
+                margin-top: -37px; margin-bottom: 2px; border: 5px solid #fafffb; border-radius: 50%;
+                background: linear-gradient(145deg, #86efac 0%, #22c55e 65%, #15803d 100%); color: #fff;
+                box-shadow: 0 7px 20px rgba(22, 163, 74, .32);
+            }
+            .mobile-bottom-nav__main-icon i { font-size: 1.65rem; }
+            .mobile-bottom-nav__main-label { font-size: .65rem; font-weight: 800; white-space: nowrap; }
+            .vp-topbar-actions { gap: .2rem; }
+            .vp-balance-pill { padding: .55rem .65rem; gap: .35rem; }
+            .vp-theme-toggle { width: 38px; height: 38px; padding: .45rem; }
+            .vp-notification-wrapper { display: inline-block; }
+            .vp-content-wrapper { padding-bottom: .8rem; }
+            footer { margin-bottom: 0; }
+        }
+        @media (max-width: 390px) {
+            .vp-topbar { gap: .25rem; } .vp-topbar-brand-toggler { gap: .35rem; }
+            .vp-topbar-brand-text { font-size: 1rem; } .vp-topbar-logo { height: 22px; }
+            .vp-topbar-actions { gap: .05rem; } .vp-balance-pill { padding: .5rem .55rem; font-size: .8rem; }
+            .mobile-bottom-nav { left: 9px; right: 9px; border-radius: 25px; }
+            .mobile-bottom-nav__item { font-size: .62rem; } .mobile-bottom-nav__main-label { font-size: .62rem; }
+        }
+
+        @media (min-width: 992px) {
+            .mobile-bottom-nav { display: none !important; }
+        }
+
+
+        /* ===== Riwayat transaksi: horizontal swipe cards on mobile ===== */
+        @media (max-width: 767.98px) {
+            .vp-history-section {
+                padding: 1.05rem .9rem 1rem;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(34, 197, 94, .16);
+                box-shadow: 0 9px 24px rgba(22, 101, 52, .055);
+            }
+
+            .vp-history-section .section-title {
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+                margin-bottom: .9rem;
+                font-size: 1.04rem;
+                letter-spacing: -.25px;
+            }
+
+            .vp-history-section .section-title::before {
+                content: '';
+                display: block;
+                width: 5px;
+                height: 23px;
+                flex: 0 0 5px;
+                border-radius: 99px;
+                background: linear-gradient(180deg, #4ade80, #15803d);
+            }
+
+            .vp-history-table-container {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: .1rem 0 .35rem;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(34, 197, 94, .45) rgba(34, 197, 94, .08);
+            }
+
+            .vp-history-table-container::-webkit-scrollbar { height: 5px; }
+            .vp-history-table-container::-webkit-scrollbar-track {
+                background: rgba(34, 197, 94, .08);
+                border-radius: 99px;
+            }
+            .vp-history-table-container::-webkit-scrollbar-thumb {
+                background: rgba(34, 197, 94, .42);
+                border-radius: 99px;
+            }
+
+            .vp-history-table {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                overflow: visible;
+                border: 0;
+                border-spacing: 0;
+            }
+
+            .vp-history-table thead { display: none !important; }
+
+            .vp-history-table tbody {
+                display: flex;
+                align-items: stretch;
+                gap: .75rem;
+                width: max-content;
+                min-width: 100%;
+                padding: .1rem .05rem .35rem;
+            }
+
+            .vp-history-table tbody tr {
+                display: flex;
+                flex: 0 0 min(83vw, 320px);
+                flex-direction: column;
+                width: min(83vw, 320px);
+                min-width: 250px;
+                margin: 0;
+                padding: .85rem .95rem .9rem;
+                border: 1px solid var(--vp-border-color);
+                border-left: 3px solid #4ade80;
+                border-radius: 17px;
+                background: linear-gradient(150deg, var(--vp-card-bg) 0%, rgba(236, 253, 243, .55) 100%);
+                box-shadow: 0 5px 16px rgba(22, 101, 52, .07);
+                scroll-snap-align: start;
+            }
+
+            [data-theme="dark"] .vp-history-table tbody tr {
+                background: linear-gradient(150deg, #17251b 0%, #1b3022 100%);
+                border-left-color: #4ade80;
+            }
+
+            .vp-history-table tbody tr:hover {
+                transform: none;
+                box-shadow: 0 7px 18px rgba(22, 101, 52, .1);
+            }
+
+            .vp-history-table tbody td {
+                display: grid;
+                grid-template-columns: 82px minmax(0, 1fr);
+                align-items: center;
+                gap: .55rem;
+                width: 100%;
+                padding: .48rem 0;
+                border: 0;
+                text-align: left;
+                color: var(--vp-dark);
+                font-size: .79rem;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            .vp-history-table tbody td::before {
+                display: block;
+                margin: 0;
+                color: var(--vp-text-muted);
+                font-size: .62rem;
+                font-weight: 800;
+                letter-spacing: .45px;
+                line-height: 1.35;
+            }
+
+            .vp-history-table tbody td:first-child {
+                color: var(--vp-primary-dark);
+                font-weight: 800;
+            }
+
+            .vp-history-table tbody td:last-child {
+                display: block;
+                margin-top: .45rem;
+                padding: .75rem 0 0;
+                border-top: 1px solid var(--vp-border-color);
+            }
+
+            .vp-history-table tbody td:last-child::before {
+                content: 'AKSI';
+                margin-bottom: .5rem;
+            }
+
+            .vp-history-table .action-buttons {
+                display: flex;
+                flex-direction: row;
+                justify-content: stretch;
+                flex-wrap: nowrap;
+                gap: .5rem;
+            }
+
+            .vp-history-table .action-buttons .btn {
+                flex: 1 1 0;
+                width: auto;
+                min-width: 0;
+                padding: .58rem .7rem;
+                border-radius: 10px;
+                font-size: .76rem;
+            }
+
+            .vp-history-table .status-badge {
+                justify-self: start;
+                padding: .32rem .65rem;
+                border-radius: 999px;
+            }
+
+            /* Loading / empty-state row spans the swipe area as one panel. */
+            .vp-history-table tbody tr:has(td[colspan]) {
+                flex-basis: calc(100vw - 3.5rem);
+                width: calc(100vw - 3.5rem);
+                min-width: 0;
+                justify-content: center;
+                border-left-width: 1px;
+                background: var(--vp-card-bg);
+            }
+
+            .vp-history-table tbody tr:has(td[colspan]) td {
+                display: block;
+                text-align: center;
+            }
+
+            .vp-history-table tbody tr:has(td[colspan]) td::before { display: none; }
+
+            .vp-history-table-container::after {
+                content: 'Geser ke samping untuk melihat riwayat lainnya';
+                display: block;
+                padding: .15rem .1rem 0;
+                color: var(--vp-text-muted);
+                text-align: center;
+                font-size: .65rem;
+                font-weight: 600;
+                letter-spacing: .1px;
+            }
+
+            .history-view-all {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: .45rem;
+                margin-top: .7rem;
+                padding: .72rem .9rem;
+                border: 1px solid rgba(34, 197, 94, .22);
+                border-radius: 13px;
+                background: linear-gradient(135deg, #effcf2 0%, #dcfce7 100%);
+                color: #15803d;
+                font-size: .82rem;
+                font-weight: 800;
+                text-decoration: none;
+            }
+
+            .history-view-all::after {
+                content: '\2192';
+                font-size: 1rem;
+                transition: transform .2s ease;
+            }
+
+            .history-view-all:active::after { transform: translateX(3px); }
+        }
+
+        /* ===== Footer: compact, clean green dashboard panel ===== */
+        footer.dashboard-footer {
+            display: grid;
+            grid-template-columns: minmax(220px, .9fr) minmax(0, 1.8fr);
+            align-items: stretch;
+            gap: 1rem;
+            margin: 0 8px 8px;
+            padding: 1rem;
+            width: calc(100% - 16px);
+            border: 1px solid var(--vp-border-color);
+            border-radius: 22px;
+            background: linear-gradient(145deg, #ffffff 0%, #f5fff7 100%);
+            box-shadow: 0 10px 28px rgba(22, 101, 52, .07);
+            color: var(--vp-dark);
+        }
+
+        [data-theme="dark"] footer.dashboard-footer {
+            background: linear-gradient(145deg, #17251b 0%, #1b3022 100%);
+            border-color: var(--vp-border-color);
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            padding: 1rem;
+            border: 1px solid rgba(34, 197, 94, .15);
+            border-radius: 17px;
+            background: linear-gradient(145deg, #edfff2 0%, #f8fff9 100%);
+        }
+
+        [data-theme="dark"] .footer-brand {
+            background: linear-gradient(145deg, #1d3826 0%, #192a20 100%);
+            border-color: var(--vp-border-color);
+        }
+
+        .footer-brand-top {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .footer-brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%);
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 12px rgba(22, 163, 74, .2);
+        }
+
+        .footer-brand-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: .08rem;
+            min-width: 0;
+        }
+
+        .footer-brand-copy .footer-logo-name { margin: 0; }
+        .footer-brand-copy .footer-logo-name-text {
+            color: #166534;
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        [data-theme="dark"] .footer-brand-copy .footer-logo-name-text { color: #86efac; }
+
+        .footer-brand-kicker {
+            color: #3f8a59;
+            font-size: .57rem;
+            font-weight: 800;
+            letter-spacing: 1.05px;
+        }
+
+        .footer-brand .footer-description {
+            max-width: none;
+            margin: 1rem 0;
+            color: var(--vp-text-muted);
+            font-size: .79rem;
+            line-height: 1.7;
+        }
+
+        .footer-brand .footer-copyright {
+            width: 100%;
+            margin: 0;
+            padding-top: .7rem;
+            border-top: 1px solid rgba(34, 197, 94, .16);
+            color: var(--vp-text-muted);
+            font-size: .66rem;
+            line-height: 1.5;
+        }
+
+        .footer-links-section {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-content: stretch;
+            gap: .65rem;
+            min-width: 0;
+        }
+
+        .footer-link-card {
+            min-width: 0;
+            padding: .95rem .8rem;
+            border: 1px solid var(--vp-border-color);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .82);
+        }
+
+        [data-theme="dark"] .footer-link-card { background: rgba(255, 255, 255, .035); }
+
+        .footer-link-card .footer-section-title {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0 0 .7rem;
+            color: #16803d;
+            font-size: .74rem;
+            font-weight: 800;
+        }
+
+        [data-theme="dark"] .footer-link-card .footer-section-title { color: #86efac; }
+        .footer-link-card .footer-section-title i { font-size: .85rem; }
+
+        .footer-link-card ul {
+            display: grid;
+            gap: .48rem;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .footer-link-card li {
+            display: flex;
+            align-items: center;
+            gap: .42rem;
+            margin: 0;
+            color: var(--vp-text-muted);
+            font-size: .75rem;
+            line-height: 1.4;
+        }
+
+        .footer-link-card li > i {
+            flex: 0 0 14px;
+            color: #22a052;
+            font-size: .78rem;
+        }
+
+        .footer-link-card li a {
+            color: var(--vp-text-muted);
+            font-size: .73rem;
+            overflow-wrap: anywhere;
+            text-decoration: none;
+            transition: color .2s ease, transform .2s ease;
+        }
+
+        .footer-link-card li a:hover {
+            color: var(--vp-primary-dark);
+            transform: translateX(2px);
+        }
+
+        .footer-community {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+            padding: .75rem .25rem 0;
+            border-top: 1px solid var(--vp-border-color);
+        }
+
+        .footer-community-label {
+            color: var(--vp-text-muted);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .footer-social-links {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .footer-social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin: 0;
+            border: 1px solid rgba(34, 197, 94, .18);
+            border-radius: 12px;
+            background: var(--vp-card-bg);
+            color: #16803d;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform .2s ease, background .2s ease;
+        }
+
+        .footer-social-links a:hover {
+            transform: translateY(-2px);
+            background: var(--vp-primary-light);
+            color: var(--vp-primary-dark);
+        }
+
+        @media (max-width: 991.98px) {
+            footer.dashboard-footer {
+                grid-template-columns: 1fr;
+                gap: .75rem;
+                margin: 0 6px 8px;
+                padding: .75rem;
+                width: calc(100% - 12px);
+                border-radius: 20px;
+            }
+
+            .footer-links-section {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: .6rem;
+                width: 100%;
+            }
+
+            .footer-link-card { padding: .85rem .75rem; }
+            .footer-link-card:nth-child(3) { grid-column: 1 / -1; }
+            .footer-link-card:nth-child(3) ul {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: .5rem;
+            }
+            .footer-link-card:nth-child(3) li { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 390px) {
+            .footer-link-card { padding: .78rem .62rem; }
+            .footer-link-card .footer-section-title { font-size: .7rem; }
+            .footer-link-card li a { font-size: .68rem; }
+            .footer-community { align-items: flex-start; flex-direction: column; }
+        }
+
+    
+
+        /* ===== Lively game tiles with four-corner strokes ===== */
+        .vp-service-grid {
+            gap: .85rem;
+        }
+
+        .vp-service-item {
+            isolation: isolate;
+            position: relative;
+            min-height: 118px;
+            padding: 1rem .75rem .9rem;
+            border: 1.5px solid rgba(34, 197, 94, .28);
+            border-radius: 19px;
+            background: linear-gradient(150deg, #ffffff 0%, #f3fff6 100%);
+            box-shadow: 0 7px 18px rgba(22, 101, 52, .07), inset 0 1px 0 rgba(255,255,255,.95);
+            overflow: hidden;
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+
+        /* A slim inner outline keeps the card edge visible on bright backgrounds. */
+        .vp-service-item::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            z-index: -1;
+            border: 1px solid rgba(34, 197, 94, .10);
+            border-radius: 14px;
+            pointer-events: none;
+        }
+
+        /* Four short L-shaped corner strokes. */
+        .vp-service-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: .95;
+            background:
+                linear-gradient(#16a34a, #16a34a) left 8px top 8px / 15px 2px no-repeat,
+                linear-gradient(#16a34a, #16a34a) left 8px top 8px / 2px 15px no-repeat,
+                linear-gradient(#22c55e, #22c55e) right 8px top 8px / 15px 2px no-repeat,
+                linear-gradient(#22c55e, #22c55e) right 8px top 8px / 2px 15px no-repeat,
+                linear-gradient(#22c55e, #22c55e) left 8px bottom 8px / 15px 2px no-repeat,
+                linear-gradient(#22c55e, #22c55e) left 8px bottom 8px / 2px 15px no-repeat,
+                linear-gradient(#15803d, #15803d) right 8px bottom 8px / 15px 2px no-repeat,
+                linear-gradient(#15803d, #15803d) right 8px bottom 8px / 2px 15px no-repeat;
+        }
+
+        .vp-service-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(22, 163, 74, .62);
+            background: linear-gradient(150deg, #ffffff 0%, #e7fbea 100%);
+            box-shadow: 0 12px 25px rgba(22, 163, 74, .15), 0 0 0 3px rgba(74, 222, 128, .10);
+            color: #166534;
+        }
+
+        .vp-service-item:active {
+            transform: translateY(-1px) scale(.985);
+        }
+
+        .vp-service-item .icon-wrapper {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto .7rem;
+            border: 2px solid rgba(255,255,255,.95);
+            outline: 1px solid rgba(22, 163, 74, .24);
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(255,255,255,.92) 0 5%, transparent 6%),
+                linear-gradient(145deg, #bbf7d0 0%, #4ade80 48%, #0d9488 100%);
+            box-shadow: 0 7px 16px rgba(16, 185, 129, .22), inset 0 1px 2px rgba(255,255,255,.75);
+            overflow: hidden;
+            position: relative;
+            transition: transform .22s ease, box-shadow .22s ease;
+        }
+
+        .vp-service-item:hover .icon-wrapper {
+            transform: translateY(-2px) rotate(-3deg) scale(1.04);
+            background: linear-gradient(145deg, #86efac 0%, #22c55e 52%, #047857 100%);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, .30);
+        }
+
+        .vp-service-item .icon-wrapper .bi {
+            color: #065f46;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 1px rgba(255,255,255,.45));
+            transition: color .22s ease, transform .22s ease;
+        }
+
+        .vp-service-item:hover .icon-wrapper .bi {
+            color: #ffffff;
+            transform: scale(1.08);
+        }
+
+        .vp-service-item .icon-wrapper img,
+        .vp-service-item img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .vp-service-item .service-name {
+            position: relative;
+            z-index: 3;
+            color: #166534;
+            font-family: var(--vp-font-heading);
+            font-size: .82rem;
+            font-weight: 800;
+            letter-spacing: .1px;
+            line-height: 1.3;
+            text-shadow: 0 1px 0 rgba(255,255,255,.85);
+        }
+
+        [data-theme="dark"] .vp-service-item {
+            background: linear-gradient(150deg, #1d3324 0%, #17271d 100%);
+            border-color: rgba(74, 222, 128, .34);
+            box-shadow: 0 8px 20px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.04);
+        }
+
+        [data-theme="dark"] .vp-service-item::before {
+            border-color: rgba(74, 222, 128, .12);
+        }
+
+        [data-theme="dark"] .vp-service-item .service-name {
+            color: #bbf7d0;
+            text-shadow: none;
+        }
+
+        [data-theme="dark"] .vp-service-item:hover {
+            background: linear-gradient(150deg, #24452f 0%, #1b3324 100%);
+            border-color: rgba(74, 222, 128, .7);
+        }
+
+        @media (max-width: 767.98px) {
+            .vp-service-grid { gap: .65rem; }
+            .vp-service-item {
+                min-height: 108px;
+                padding: .85rem .55rem .8rem;
+                border-radius: 17px;
+            }
+            .vp-service-item .icon-wrapper {
+                width: 52px;
+                height: 52px;
+                border-radius: 16px;
+                margin-bottom: .58rem;
+            }
+            .vp-service-item .service-name { font-size: .74rem; }
+            /* Keep the order status label intact now that its Detail column is gone. */
+            #latestOrderHistoryBody td:last-child {
+                margin-top: 0;
+                padding: .5rem 0;
+                border-top: 0;
+            }
+            #latestOrderHistoryBody td:last-child::before {
+                content: attr(data-label);
+                margin-bottom: .25rem;
+            }
+        }
+
+
+        /* ===== Polishing pass: category, history statuses and navigation ===== */
+        .vp-category-heading {
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            padding: .1rem .15rem .15rem;
+        }
+        .vp-category-heading h4 {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: .65rem;
+            color: var(--vp-dark);
+            font-family: var(--vp-font-heading);
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: -.35px;
+        }
+        .vp-category-heading h4::before {
+            content: "";
+            width: 5px;
+            height: 25px;
+            border-radius: 99px;
+            background: linear-gradient(180deg, #86efac, #16a34a);
+            box-shadow: 0 3px 10px rgba(22, 163, 74, .22);
+        }
+        .vp-category-section {
+            border: 1px solid rgba(34, 197, 94, .18);
+            box-shadow: 0 10px 28px rgba(22, 101, 52, .055);
+        }
+
+        .vp-sidebar-toggler {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(34, 197, 94, .24);
+            border-radius: 15px;
+            color: #16803d;
+            background: linear-gradient(145deg, #ffffff 0%, #e8f9ed 100%);
+            box-shadow: 0 5px 14px rgba(22, 163, 74, .10), inset 0 1px 0 rgba(255,255,255,.95);
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            cursor: pointer;
+        }
+        .vp-sidebar-toggler .bi {
+            font-size: 1.45rem;
+            line-height: 1;
+            transition: transform .2s ease;
+        }
+        .vp-sidebar-toggler:hover {
+            color: #ffffff;
+            background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 19px rgba(22, 163, 74, .24);
+        }
+        .vp-sidebar-toggler:active { transform: scale(.95); }
+        .vp-sidebar-toggler:focus-visible {
+            outline: 3px solid rgba(74, 222, 128, .35);
+            outline-offset: 3px;
+        }
+        [data-theme="dark"] .vp-sidebar-toggler {
+            color: #bbf7d0;
+            background: linear-gradient(145deg, #243b2b 0%, #17291d 100%);
+            border-color: rgba(74, 222, 128, .25);
+        }
+        .vp-sidebar {
+            background: linear-gradient(180deg, #ffffff 0%, #f1fbf4 100%);
+            border-right: 1px solid rgba(34, 197, 94, .18);
+            box-shadow: 12px 0 34px rgba(20, 83, 45, .10);
+        }
+        .vp-sidebar-header {
+            position: relative;
+            margin: 0 1rem 1rem;
+            padding: 1.1rem .8rem 1.25rem;
+            border: 1px solid rgba(34, 197, 94, .18);
+            border-radius: 18px;
+            background: linear-gradient(135deg, #effcf3 0%, #d9f8e2 100%);
+            box-shadow: 0 7px 18px rgba(22, 163, 74, .08);
+        }
+        .vp-sidebar-brand-text {
+            color: #15803d;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -.6px;
+        }
+        .vp-sidebar-menu { padding: 0 1rem 1rem; }
+        .vp-sidebar-menu .nav-link {
+            margin: .25rem 0;
+            padding: .82rem .95rem;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            font-weight: 700;
+            transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .vp-sidebar-menu .nav-link .bi { font-size: 1.1rem; }
+        .vp-sidebar-menu .nav-link:hover {
+            transform: translateX(3px);
+            border-color: rgba(34, 197, 94, .18);
+            box-shadow: 0 5px 14px rgba(22, 163, 74, .07);
+        }
+        .vp-sidebar-menu .nav-link.active {
+            background: linear-gradient(120deg, #e8f9ed 0%, #d7f7e1 100%);
+            color: #15803d;
+            border-color: rgba(34, 197, 94, .22);
+            box-shadow: inset 3px 0 0 #22c55e, 0 5px 14px rgba(22, 163, 74, .07);
+        }
+        [data-theme="dark"] .vp-sidebar {
+            background: linear-gradient(180deg, #17251b 0%, #101b14 100%);
+            border-right-color: rgba(74, 222, 128, .15);
+        }
+        [data-theme="dark"] .vp-sidebar-header {
+            background: linear-gradient(135deg, #213b29 0%, #182b1e 100%);
+            border-color: rgba(74, 222, 128, .18);
+        }
+        [data-theme="dark"] .vp-sidebar-brand-text { color: #86efac; }
+        [data-theme="dark"] .vp-sidebar-menu .nav-link.active {
+            background: linear-gradient(120deg, #24452f 0%, #1b3324 100%);
+            color: #86efac;
+            border-color: rgba(74, 222, 128, .2);
+        }
+        .vp-sidebar-overlay {
+            background: rgba(7, 25, 13, .48);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .history-status-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .45rem;
+        }
+        .history-status-group .status-badge { flex: 0 0 auto; }
+        .history-cancel-btn {
+            padding: .3rem .58rem;
+            border: 1px solid rgba(220, 53, 69, .22);
+            border-radius: 999px;
+            color: #b42332;
+            background: rgba(220, 53, 69, .06);
+            font-size: .7rem;
+            font-weight: 700;
+        }
+        .history-cancel-btn:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        .status-pending {
+            color: #946200;
+            background: rgba(255, 193, 7, .18);
+            border-color: rgba(255, 193, 7, .42);
+        }
+        .status-success {
+            color: #137a43;
+            background: rgba(25, 135, 84, .14);
+            border-color: rgba(25, 135, 84, .36);
+        }
+        .status-cancel,
+        .status-failed,
+        .status-expired {
+            color: #c62838;
+            background: rgba(220, 53, 69, .13);
+            border-color: rgba(220, 53, 69, .36);
+        }
+        [data-theme="dark"] .status-pending { color: #ffd76a; }
+        [data-theme="dark"] .status-success { color: #6ee7a0; }
+        [data-theme="dark"] .status-cancel,
+        [data-theme="dark"] .status-failed,
+        [data-theme="dark"] .status-expired { color: #ff8994; }
+
+        @media (max-width: 767.98px) {
+            .vp-history-table tbody td:last-child {
+                display: grid;
+                grid-template-columns: 82px minmax(0, 1fr);
+                align-items: center;
+                gap: .55rem;
+                margin-top: 0;
+                padding: .48rem 0;
+                border-top: 0;
+            }
+            .vp-history-table tbody td:last-child::before {
+                content: attr(data-label);
+                margin: 0;
+            }
+            .history-status-group { gap: .35rem; }
+            .history-cancel-btn { font-size: .66rem; padding: .28rem .48rem; }
+        }
+        @media (max-width: 390px) {
+            .vp-sidebar-toggler { width: 40px; height: 40px; border-radius: 13px; }
+        }
+
+    </style>
 </head>
-<body>
-<div id="toast-container"></div>
-<div class="modal-overlay" id="modalOverlay"></div>
-<div class="page-wrapper">
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-lockup">
-                <div class="brand-badge"><i class="bi bi-lightning-charge-fill"></i></div>
-                <div>
-                    <div class="brand-text">Xs-Pedia</div>
-                    <span class="brand-sub">Comic Admin HQ</span>
+<body data-theme="light">
+    <div class="vp-wrapper">
+        <nav class="vp-sidebar" id="vpSidebar">
+            <div class="vp-sidebar-header">
+                <a class="vp-sidebar-brand-text" href="/dashboard">Dashboard</a>
+            </div>
+            <div class="vp-sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="bi bi-house-door-fill"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/deposit">
+                            <i class="bi bi-wallet2"></i>
+                            <span>Deposit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/order">
+                            <i class="bi bi-cart-check-fill"></i>
+                            <span>Order</span>
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="/price-list">
+                            <i class="bi bi-tags-fill"></i>
+                            <span>List Harga</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/mutation-deposit">
+                            <i class="bi bi-cash-stack"></i>
+                            <span>Mutasi Deposit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/mutation-order">
+                            <i class="bi bi-receipt-cutoff"></i>
+                            <span>Mutasi Order</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="vp-sidebar-heading">User Settings</div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile">
+                            <i class="bi bi-person-fill"></i>
+                            <span>Profil</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-key-page">
+                            <i class="bi bi-key-fill"></i>
+                            <span>API Key</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">
+                            <i class="bi bi-code-slash"></i>
+                            <span>Dokumentasi API</span>
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/auth/logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="vp-main-container" id="vpMainContainer">
+            <header class="vp-topbar">
+                <div class="vp-topbar-brand-toggler">
+                    <button class="vp-sidebar-toggler" id="vpSidebarToggler" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="vpSidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <a href="#" class="nav-link d-none d-md-inline-block" title="Mode Layar Penuh">
+                        <i class="bi bi-arrows-fullscreen fs-5"></i>
+                    </a>
+                    <a href="/dashboard" class="vp-topbar-brand-link" id="topbarBrand">
+                        <span class="vp-topbar-brand-text">Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="vp-topbar-actions">
+                    <button class="vp-theme-toggle" id="themeToggle" title="Toggle Theme">
+                        <i class="bi bi-moon-fill" id="themeIcon"></i>
+                    </button>
+                    <div class="vp-notification-wrapper">
+                        <button class="vp-notification-toggle" id="notificationToggle" title="Notifikasi">
+                            <i class="bi bi-bell-fill fs-5" id="notificationIcon"></i>
+                            <span class="vp-notification-badge" id="notificationBadge" style="display: none;"></span>
+                        </button>
+                        <div class="vp-notification-dropdown" id="notificationDropdown">
+                            <div class="vp-notification-header">Notifikasi</div>
+                            <div class="vp-notification-list" id="notificationList">
+                                <div class="vp-notification-empty">Memuat notifikasi...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="vp-balance-pill" href="/deposit" aria-label="Saldo dan top up">
+                        <i class="bi bi-wallet2" aria-hidden="true"></i>
+                        <span id="userSaldoTopbar">Rp 0</span>
+                        <span class="vp-balance-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="vp-content-wrapper">
+                <main class="vp-main-content">
+                    <section class="content-loaded" style="animation-delay: 0s;">
+                        <div id="mainBannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                                <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                            </div>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="/media/banner1.png" class="d-block w-100" alt="Banner 1">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/media/banner2.png" class="d-block w-100" alt="Banner 2">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/media/banner3.png" class="d-block w-100" alt="Banner 3">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#mainBannerCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#mainBannerCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </section>
+<section class="vp-section content-loaded vp-category-section" style="animation-delay: 0.2s;">
+                        <div class="vp-category-heading mb-3">
+                            <div class="vp-category-title">
+                                <h4 class="mb-0 fw-bold">Category Produk</h4>
+                                <span class="vp-category-role" id="categoryUserRole" aria-label="Role pengguna">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                    <span>Memuat role...</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="vp-service-grid" id="popularServicesGrid">
+                            <a href="/produk-detail?category=Games" class="vp-service-item">
+                                <div class="icon-wrapper">
+                                    <i class="bi bi-controller"></i>
+                                </div>
+                                <div class="service-name">Games</div>
+                            </a>
+                        </div>
+                    </section>
+
+                    <section class="vp-history-section content-loaded" style="animation-delay: 0.3s;">
+                        <h4 class="section-title">History Deposit Terbaru</h4>
+                        <div class="vp-history-table-container">
+                            <table class="vp-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Transaksi</th>
+                                        <th>Nominal</th>
+                                        <th>Metode</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="latestDepositHistoryBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            <div class="vp-loading-shimmer" style="width: 100%; height: 40px;"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="/mutation-deposit" class="history-view-all">Lihat Semua Deposit</a>
+                    </section>
+
+                    <section class="vp-history-section content-loaded" style="animation-delay: 0.4s;">
+                        <h4 class="section-title">History Order Terbaru</h4>
+                        <div class="vp-history-table-container">
+                            <table class="vp-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Transaksi</th>
+                                        <th>Layanan</th>
+                                        <th>Target</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="latestOrderHistoryBody">
+                                     <tr>
+                                        <td colspan="4" class="text-center">
+                                            <div class="vp-loading-shimmer" style="width: 100%; height: 40px;"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="/mutation-order" class="history-view-all">Lihat Semua Order</a>
+                    </section>
+
+                </main>
+            </div>
+            
+            <footer class="dashboard-footer">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-brand-top">
+                            <span class="footer-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <div class="footer-brand-copy">
+                                <a href="/dashboard" class="footer-logo-name">
+                                    <span class="footer-logo-name-text">Dashboard</span>
+                                </a>
+                                <span class="footer-brand-kicker">PLATFORM LAYANAN DIGITAL</span>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            Satu tempat untuk mengelola saldo, transaksi, dan berbagai kebutuhan digital dengan lebih praktis.
+                        </p>
+                    </div>
+                    <div class="footer-copyright">
+                        © <span id="currentYear"></span> Dashboard. Seluruh hak cipta dilindungi.
+                    </div>
+                </div>
+
+                <div class="footer-links-section">
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-compass-fill"></i> Navigasi</span>
+                        <ul>
+                            <li><a href="/dashboard">Beranda</a></li>
+                            <li><a href="/deposit">Deposit</a></li>
+                            <li><a href="/order">Pesanan</a></li>
+                            <li><a href="/price-list">Daftar Harga</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-grid-1x2-fill"></i> Informasi</span>
+                        <ul>
+                            <li><a href="/profile">Profil Pengguna</a></li>
+                            <li><a href="/api-key-page">API Key</a></li>
+                            <li><a href="/docs">Dokumentasi API</a></li>
+                            <li><a href="#">Syarat & Ketentuan</a></li>
+                            <li><a href="#">Kebijakan Privasi</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-link-card">
+                        <span class="footer-section-title"><i class="bi bi-headset"></i> Kontak Kami</span>
+                        <ul>
+                            <li><i class="bi bi-whatsapp"></i> <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <li><i class="bi bi-envelope-fill"></i> <a href="mailto:xspedia@gmail.com">Ema</a></li>
+                            <li><i class="bi bi-telegram"></i> <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-community">
+                    <span class="footer-community-label">Terhubung dengan tim kami</span>
+                    <div class="footer-social-links">
+                        <a href="https://wa.me/6282310906429" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://t.me/Ryuuuueen" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+                        <a href="mailto:xspedia@gmail.com" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade vp-notification-modal" id="notificationDetailModal" tabindex="-1" aria-labelledby="notificationDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationDetailModalLabel">
+                        <span id="notificationDetailIcon"></span>
+                        <span id="notificationDetailTitle">Detail Notifikasi</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="notification-detail-message" id="notificationDetailMessage"></div>
+                    <div class="notification-detail-time" id="notificationDetailTime"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="#" class="btn btn-primary" id="notificationDetailLink" style="display: none;" target="_blank">Buka Link</a>
                 </div>
             </div>
         </div>
-        <ul class="sidebar-nav">
-            <li class="nav-item"><a class="nav-link active" href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="bi bi-people-fill"></i> Global User</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/deposit"><i class="bi bi-wallet2"></i> Global Deposit</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/order"><i class="bi bi-cart-check-fill"></i> Global Order</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/notif-member"><i class="bi bi-megaphone-fill"></i> Notif Member</a></li>
-            <li class="nav-item logout"><a class="nav-link" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-        </ul>
+    </div>
+
+    <div class="modal fade" id="depositDetailModal" tabindex="-1" aria-labelledby="depositDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="depositDetailModalLabel">Detail Deposit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="depositDetailModalBody">
+                    <div class="vp-loading-shimmer" style="height: 150px;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" id="modalDepositDetailCheckStatusBtn">Cek Status (API)</button>
+                    <button type="button" class="btn btn-outline-secondary" id="modalCancelDepositBtn">Batalkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailModalLabel">Detail Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailModalBody">
+                    <div class="vp-loading-shimmer" style="height: 150px;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" id="modalOrderDetailCheckStatusBtn">Cek Status (API)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vp-sidebar-overlay" id="sidebarOverlay"></div>
+
+    <nav class="mobile-bottom-nav" aria-label="Navigasi utama">
+        <a href="/dashboard" class="mobile-bottom-nav__item" data-bottom-nav="home">
+            <i class="bi bi-house-door" aria-hidden="true"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="/order" class="mobile-bottom-nav__item" data-bottom-nav="history">
+            <i class="bi bi-clock-history" aria-hidden="true"></i>
+            <span>Riwayat</span>
+        </a>
+        <a href="/produk-detail?category=Games" class="mobile-bottom-nav__item mobile-bottom-nav__item--primary" data-bottom-nav="game" aria-label="Beli Game">
+            <span class="mobile-bottom-nav__main-icon"><i class="bi bi-controller" aria-hidden="true"></i></span>
+            <span class="mobile-bottom-nav__main-label">Beli Game</span>
+        </a>
+        <a href="/deposit" class="mobile-bottom-nav__item" data-bottom-nav="topup">
+            <i class="bi bi-wallet2" aria-hidden="true"></i>
+            <span>Top Up</span>
+        </a>
+        <a href="/profile" class="mobile-bottom-nav__item" data-bottom-nav="account">
+            <i class="bi bi-person" aria-hidden="true"></i>
+            <span>Akun</span>
+        </a>
     </nav>
 
-    <div class="content-wrapper">
-        <header class="topbar">
-            <div class="topbar-left">
-                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Menu"><i class="bi bi-list"></i></button>
-                <span class="comic-title" style="font-size: 1.3rem;">Dashboard Xs-Pedia</span>
-            </div>
-            <span class="caption-tag"><i class="bi bi-bell-fill"></i> Xs-Pedia Panel</span>
-        </header>
 
-        <main class="main-content">
-            <div class="page-header">
-    <h1 class="page-heading comic-title">
-        Dashboard Admin
-        <span class="caption-tag"><i class="bi bi-lightning-charge-fill"></i> Xs-Pedia HQ</span>
-    </h1>
-    <a href="/admin/notif-member" class="action-btn" style="background: var(--c-yellow); color: var(--ink-black);">
-        <i class="bi bi-megaphone-fill"></i> Kirim Notif Member
-    </a>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        const vpSidebar = document.getElementById('vpSidebar');
+        const vpSidebarToggler = document.getElementById('vpSidebarToggler');
+        const vpMainContainer = document.getElementById('vpMainContainer');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+        const topbarBrand = document.getElementById('topbarBrand');
 
-<section class="dashboard-grid">
-    <article class="stat-card theme-primary">
-        <div class="card-top-strip"></div>
-        <div class="card-body">
-            <div>
-                <div class="card-title">Total Pengguna</div>
-                <div class="card-value" id="statTotalUsers">0</div>
-            </div>
-            <div class="card-icon-box"><i class="bi bi-people-fill"></i></div>
-        </div>
-    </article>
+        const notificationToggle = document.getElementById('notificationToggle');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationList = document.getElementById('notificationList');
+        let notificationsData = [];
 
-    <article class="stat-card theme-success">
-        <div class="card-top-strip"></div>
-        <div class="card-body">
-            <div>
-                <div class="card-title">Deposit Sukses</div>
-                <div class="card-value" id="statTotalDeposit">Rp 0</div>
-            </div>
-            <div class="card-icon-box"><i class="bi bi-wallet2"></i></div>
-        </div>
-    </article>
+        const savedTheme = localStorage.getItem('vp-theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
 
-    <article class="stat-card theme-secondary">
-        <div class="card-top-strip"></div>
-        <div class="card-body">
-            <div>
-                <div class="card-title">Omset Order Sukses</div>
-                <div class="card-value" id="statTotalOrder">Rp 0</div>
-            </div>
-            <div class="card-icon-box"><i class="bi bi-cart-check-fill"></i></div>
-        </div>
-    </article>
-</section>
-
-<div class="comic-panel">
-    <div class="card-header">
-        <h3 class="comic-title">Akses Cepat Admin</h3>
-        <span class="caption-tag">Siap Digunakan</span>
-    </div>
-    <div style="display:flex; flex-wrap:wrap; gap:0.65rem;">
-        <a href="/admin/users" class="action-btn"><i class="bi bi-people-fill"></i> Kelola Global User</a>
-        <a href="/admin/deposit" class="action-btn" style="background:var(--c-green);"><i class="bi bi-wallet2"></i> Kelola Global Deposit</a>
-        <a href="/admin/order" class="action-btn" style="background:var(--c-purple);"><i class="bi bi-cart-check-fill"></i> Kelola Global Order</a>
-        <a href="/admin/notif-member" class="action-btn" style="background:var(--c-orange);"><i class="bi bi-megaphone-fill"></i> Kirim Notifikasi Member</a>
-    </div>
-</div>
-        </main>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-    const modalOverlay = document.getElementById('modalOverlay');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-    const toggleSidebar = () => {
-        sidebar.classList.toggle('active');
-        modalOverlay.classList.toggle('active');
-    };
-    sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    sidebar.addEventListener('click', (e) => e.stopPropagation());
-    modalOverlay.addEventListener('click', () => {
-        if (sidebar.classList.contains('active')) toggleSidebar();
-    });
-
-    const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n || 0);
-
-    try {
-        const res = await fetch('/admin/data/users');
-        const users = await res.json();
-        if (Array.isArray(users)) {
-            document.getElementById('statTotalUsers').textContent = users.length;
-            let totalDepo = 0;
-            let totalOrder = 0;
-            users.forEach(u => {
-                (u.historyDeposit || []).forEach(d => {
-                    if (d.status === 'success') totalDepo += Number(d.get_balance || d.nominal || 0);
-                });
-                (u.historyOrder || []).forEach(o => {
-                    if (o.status === 'success') totalOrder += Number(o.price || 0);
-                });
-            });
-            document.getElementById('statTotalDeposit').textContent = formatRupiah(totalDepo);
-            document.getElementById('statTotalOrder').textContent = formatRupiah(totalOrder);
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-moon-fill';
+            } else {
+                themeIcon.className = 'bi bi-sun-fill';
+            }
         }
-    } catch (err) {
-        console.error('Gagal memuat statistik dashboard:', err);
-    }
-});
-</script>
+
+        function toggleTheme() {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('vp-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        function updateTopbarBrandVisibility(isSidebarActive) {
+            if (window.innerWidth >= 992) { 
+                if (isSidebarActive) {
+                    topbarBrand.classList.add('desktop-hidden');
+                } else {
+                    topbarBrand.classList.remove('desktop-hidden');
+                }
+            } else { 
+                topbarBrand.classList.remove('desktop-hidden');
+            }
+        }
+
+        function setSidebarState(isActive) {
+            vpSidebar.classList.toggle('active', isActive);
+            updateTopbarBrandVisibility(isActive);
+            vpSidebarToggler.setAttribute('aria-expanded', String(isActive));
+            vpSidebarToggler.setAttribute('aria-label', isActive ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+            vpSidebarToggler.innerHTML = isActive
+                ? '<i class="bi bi-x-lg"></i>'
+                : '<i class="bi bi-list"></i>';
+
+            if (window.innerWidth < 992) {
+                sidebarOverlay.style.display = isActive ? 'block' : 'none';
+                requestAnimationFrame(() => {
+                    sidebarOverlay.style.opacity = isActive ? '1' : '0';
+                });
+            }
+        }
+
+        function toggleSidebar() {
+            setSidebarState(!vpSidebar.classList.contains('active'));
+        }
+
+        function closeSidebar() {
+            setSidebarState(false);
+        }
+
+        vpSidebarToggler.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        function updateLayoutForSidebar() {
+            const isDesktop = window.innerWidth >= 992;
+            if (isDesktop) {
+                vpSidebar.classList.add('active'); 
+                vpMainContainer.style.paddingLeft = '260px';
+                vpMainContainer.style.width = 'calc(100% - 260px)';
+                sidebarOverlay.style.display = 'none';
+            } else {
+                vpSidebar.classList.remove('active'); 
+                vpMainContainer.style.paddingLeft = '0';
+                vpMainContainer.style.width = '100%';
+            }
+            updateTopbarBrandVisibility(vpSidebar.classList.contains('active'));
+        }
+
+        window.addEventListener('resize', updateLayoutForSidebar);
+
+        function setActiveSidebarLink() {
+            const currentPath = window.location.pathname;
+            const currentSearch = window.location.search;
+            const currentFullPath = currentPath + currentSearch;
+
+            document.querySelectorAll('.vp-sidebar-menu .nav-link').forEach(link => {
+                link.classList.remove('active');
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPath || linkHref === currentFullPath || (currentPath === '/' && linkHref === '/dashboard')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        function setActiveBottomNav() {
+            const path = window.location.pathname;
+            const search = window.location.search;
+            const items = document.querySelectorAll('.mobile-bottom-nav__item');
+            items.forEach(item => item.classList.remove('active'));
+
+            let activeKey = 'home';
+            if (path === '/order' || path.startsWith('/mutation-order') || path.startsWith('/mutation-deposit')) {
+                activeKey = 'history';
+            } else if (path === '/deposit') {
+                activeKey = 'topup';
+            } else if (path === '/profile' || path === '/api-key-page') {
+                activeKey = 'account';
+            } else if (path === '/produk-detail' || path === '/produk-harga') {
+                activeKey = 'game';
+            }
+
+            const activeItem = document.querySelector(`[data-bottom-nav="${activeKey}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const notificationDate = new Date(dateString);
+            const diffInSeconds = Math.floor((now - notificationDate) / 1000);
+
+            if (diffInSeconds < 60) {
+                return 'Baru saja';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} menit yang lalu`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} jam yang lalu`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} hari yang lalu`;
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'info':
+                    return '<i class="bi bi-info-circle-fill"></i>';
+                case 'promo':
+                    return '<i class="bi bi-gift-fill"></i>';
+                case 'maintenance':
+                    return '<i class="bi bi-tools"></i>';
+                case 'success':
+                    return '<i class="bi bi-check-circle-fill"></i>';
+                default:
+                    return '<i class="bi bi-bell-fill"></i>';
+            }
+        }
+
+        function fetchNotifications() {
+            fetch('/api/notif')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.success && data.data.data) {
+                        notificationsData = data.data.data;
+                        renderNotifications();
+                        updateNotificationBadge();
+                    } else {
+                        renderEmptyNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                    renderEmptyNotifications();
+                });
+        }
+
+        function renderNotifications() {
+            if (notificationsData.length === 0) {
+                renderEmptyNotifications();
+                return;
+            }
+
+            const notificationItems = notificationsData.map(notification => {
+                const timeAgo = getTimeAgo(notification.created_at);
+                const iconClass = notification.tipe || 'info';
+                
+                return `
+                    <div class="vp-notification-item" onclick="showNotificationDetail(${notification.id})">
+                        <div class="vp-notification-icon ${iconClass}">
+                            ${getNotificationIcon(notification.tipe)}
+                        </div>
+                        <div class="vp-notification-content">
+                            <div class="vp-notification-title">${notification.judul}</div>
+                            <div class="vp-notification-message">${notification.pesan}</div>
+                            <div class="vp-notification-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            notificationList.innerHTML = notificationItems;
+        }
+
+        function renderEmptyNotifications() {
+            notificationList.innerHTML = '<div class="vp-notification-empty">Tidak ada notifikasi</div>';
+        }
+
+        function updateNotificationBadge() {
+            if (notificationsData.length > 0) {
+                notificationBadge.style.display = 'block';
+                notificationIcon.classList.add('vp-notification-shake');
+            } else {
+                notificationBadge.style.display = 'none';
+                notificationIcon.classList.remove('vp-notification-shake');
+            }
+        }
+
+        function showNotificationDetail(notificationId) {
+            const notification = notificationsData.find(n => n.id === notificationId);
+            if (!notification) return;
+
+            const modal = document.getElementById('notificationDetailModal');
+            const modalTitle = document.getElementById('notificationDetailTitle');
+            const modalIcon = document.getElementById('notificationDetailIcon');
+            const modalMessage = document.getElementById('notificationDetailMessage');
+            const modalTime = document.getElementById('notificationDetailTime');
+            const modalLink = document.getElementById('notificationDetailLink');
+
+            modalTitle.textContent = notification.judul;
+            modalIcon.innerHTML = getNotificationIcon(notification.tipe);
+            modalIcon.className = `vp-notification-icon ${notification.tipe}`;
+            modalMessage.textContent = notification.pesan;
+            modalTime.textContent = `Dikirim pada: ${new Date(notification.created_at).toLocaleString('id-ID')}`;
+
+            if (notification.url && notification.url !== '#' && notification.url.trim() !== '') {
+                modalLink.href = notification.url;
+                modalLink.style.display = 'inline-block';
+            } else {
+                modalLink.style.display = 'none';
+            }
+
+            notificationDropdown.classList.remove('show');
+
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+        }
+
+        notificationToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notificationToggle.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        function fetchDashboardData() {
+            fetch('/profile/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.user) {
+                        displayUserData(data.user);
+                        renderHistory(data.user);
+                    } else {
+                        console.error('Failed to fetch user data or user data is invalid:', data);
+                        if (data.message && data.message.toLowerCase().includes("user not found")) {
+                            window.location.href = '/auth/login';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching dashboard data:', error);
+                    if (error.message.includes('HTTP error!')) {
+                        window.location.href = '/auth/login';
+                    }
+                });
+        }
+
+        function displayUserData(user) {
+            const userSaldoEl = document.getElementById('userSaldo');
+            if (userSaldoEl) {
+                userSaldoEl.textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
+            }
+            const roleValue = String(user.role || user.level || user.user_role || 'User').trim();
+            const formattedRole = roleValue ? roleValue.charAt(0).toUpperCase() + roleValue.slice(1) : 'User';
+            const userRoleEl = document.getElementById('userRole');
+            if (userRoleEl) userRoleEl.textContent = formattedRole;
+            const categoryRoleEl = document.getElementById('categoryUserRole');
+            if (categoryRoleEl) {
+                const roleText = categoryRoleEl.querySelector('span');
+                if (roleText) roleText.textContent = formattedRole;
+                categoryRoleEl.title = `Role akun: ${formattedRole}`;
+            }
+            
+            const saldoTopbar = document.getElementById('userSaldoTopbar');
+            if (saldoTopbar) {
+                saldoTopbar.textContent = `Rp ${Number(user.saldo || 0).toLocaleString('id-ID')}`;
+            }
+        }
+
+        function renderHistory(userData) {
+            const latestDeposits = userData.historyDeposit ? userData.historyDeposit.slice(-3).reverse() : [];
+            const latestOrders = userData.historyOrder ? userData.historyOrder.slice(-3).reverse() : [];
+
+            const depositTbody = document.getElementById('latestDepositHistoryBody');
+            const orderTbody = document.getElementById('latestOrderHistoryBody');
+
+            depositTbody.innerHTML = '';
+            orderTbody.innerHTML = '';
+
+            if (latestDeposits.length === 0) {
+                depositTbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada data deposit.</td></tr>';
+            } else {
+                latestDeposits.forEach(deposit => {
+                    const row = document.createElement('tr');
+                    const normalizedStatus = String(deposit.status || 'unknown').toLowerCase();
+                    let statusClass = '';
+                    if (normalizedStatus === 'pending') {
+                        statusClass = 'status-pending';
+                    } else if (normalizedStatus === 'success') {
+                        statusClass = 'status-success';
+                    } else if (['cancel', 'cancelled', 'canceled'].includes(normalizedStatus)) {
+                        statusClass = 'status-cancel';
+                    } else if (['failed', 'expired', 'failed_refunded'].includes(normalizedStatus)) {
+                        statusClass = 'status-failed';
+                    }
+                    const statusBadge = `<span class="status-badge ${statusClass}">${deposit.status || 'Unknown'}</span>`;
+                    const cancelButton = normalizedStatus === 'pending'
+                        ? `<button class="btn btn-outline-secondary btn-sm history-cancel-btn" type="button" onclick="cancelDeposit('${deposit.id}')"><i class="bi bi-x-circle me-1"></i>Batal</button>`
+                        : '';
+
+                    row.innerHTML = `
+                        <td data-label="ID Transaksi">${deposit.id || '-'}</td>
+                        <td data-label="Nominal">Rp ${Number(deposit.get_balance || 0).toLocaleString('id-ID')}</td>
+                        <td data-label="Metode">${deposit.metode || '-'}</td>
+                        <td data-label="Status">
+                            <div class="history-status-group">${statusBadge}${cancelButton}</div>
+                        </td>
+                    `;
+                    depositTbody.appendChild(row);
+                });
+            }
+
+            if (latestOrders.length === 0) {
+                orderTbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada data order.</td></tr>';
+            } else {
+                latestOrders.forEach(order => {
+                    const row = document.createElement('tr');
+                    
+                    const normalizedStatus = String(order.status || 'unknown').toLowerCase();
+                    let statusClass = '';
+                    if (normalizedStatus === 'pending') {
+                        statusClass = 'status-pending';
+                    } else if (normalizedStatus === 'success') {
+                        statusClass = 'status-success';
+                    } else if (['cancel', 'cancelled', 'canceled'].includes(normalizedStatus)) {
+                        statusClass = 'status-cancel';
+                    } else if (['failed', 'expired', 'failed_refunded'].includes(normalizedStatus)) {
+                        statusClass = 'status-failed';
+                    }
+                    const statusBadge = `<span class="status-badge ${statusClass}">${order.status || 'Unknown'}</span>`;
+
+                    row.innerHTML = `
+                        <td data-label="ID Transaksi">${order.id || '-'}</td>
+                        <td data-label="Layanan">${order.layanan || '-'}</td>
+                        <td data-label="Target">${order.target || '-'}</td>
+                        <td data-label="Status">${statusBadge}</td>
+                    `;
+                    orderTbody.appendChild(row);
+                });
+            }
+        }
+
+        function showDepositDetail(id) {
+            const modalBody = document.getElementById('depositDetailModalBody');
+            modalBody.innerHTML = '<div class="vp-loading-shimmer" style="height: 150px;"></div>';
+
+            const modalCheckDepositStatusBtn = document.getElementById('modalDepositDetailCheckStatusBtn');
+            const modalCancelDepositBtn = document.getElementById('modalCancelDepositBtn');
+
+            modalCheckDepositStatusBtn.onclick = null;
+            modalCancelDepositBtn.onclick = null;
+            if (modalCheckDepositStatusBtn) modalCheckDepositStatusBtn.style.display = '';
+            if (modalCancelDepositBtn) modalCancelDepositBtn.style.display = '';
+
+            modalCheckDepositStatusBtn.onclick = () => {
+                modalCheckDepositStatusBtn.disabled = true;
+                modalCheckDepositStatusBtn.innerHTML = 'Checking...';
+                checkDepositStatus(id, true);
+            };
+            modalCancelDepositBtn.onclick = () => cancelDeposit(id);
+
+            fetch(`/profile/users/deposit/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const deposit = data.data;
+                        let depositStatusBadge = '';
+                        let statusClass = '';
+                        if (deposit.status === 'pending') {
+                            statusClass = 'status-pending';
+                        } else if (deposit.status === 'success') {
+                            statusClass = 'status-success';
+                        } else if (['failed', 'expired', 'cancel'].includes(deposit.status)) {
+                            statusClass = 'status-failed';
+                        }
+                        depositStatusBadge = `<span class="status-badge ${statusClass}">${deposit.status}</span>`;
+
+                        let qrCodeHtml = '';
+                        if (deposit.status === 'pending' && deposit.qr_image) {
+                            qrCodeHtml = `<div class="detail-item text-center"><strong>QR Code:</strong> <br><img src="${deposit.qr_image}" alt="QR Code" style="max-width: 150px; height: auto; margin-top: 10px;"></div>`;
+                        }
+
+                        modalBody.innerHTML = `
+                            <div class="detail-item">
+                                <strong>ID Transaksi:</strong> ${deposit.id || '-'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Ref ID:</strong> ${deposit.reff_id || '-'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Nominal:</strong> Rp ${deposit.get_balance.toLocaleString('id-ID')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Fee:</strong> Rp ${deposit.fee.toLocaleString('id-ID')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Diterima:</strong> Rp ${deposit.get_balance.toLocaleString('id-ID')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Metode:</strong> ${deposit.metode || '-'}
+                            </div>
+                            ${deposit.tujuan ? `<div class="detail-item"><strong>Tujuan:</strong> ${deposit.tujuan}</div>` : ''}
+                            ${deposit.atas_nama ? `<div class="detail-item"><strong>Atas Nama:</strong> ${deposit.atas_nama}</div>` : ''}
+                            <div class="detail-item">
+                                <strong>Status:</strong> ${depositStatusBadge}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Tanggal:</strong> ${new Date(deposit.created_at).toLocaleString('id-ID')}
+                            </div>
+                            ${qrCodeHtml}
+                        `;
+
+                        if (deposit.status === 'pending') {
+                            modalCheckDepositStatusBtn.style.display = '';
+                            modalCancelDepositBtn.style.display = '';
+                            modalCheckDepositStatusBtn.disabled = false;
+                            modalCheckDepositStatusBtn.innerHTML = 'Cek Status (API)';
+                        } else {
+                            modalCheckDepositStatusBtn.style.display = 'none';
+                            modalCancelDepositBtn.style.display = 'none';
+                        }
+
+                        const modalElement = document.getElementById('depositDetailModal');
+                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                        modalInstance.show();
+
+                    } else {
+                        modalBody.innerHTML = `<p class="text-danger text-center">${data.message || 'Gagal memuat detail deposit.'}</p>`;
+                        modalCheckDepositStatusBtn.style.display = 'none';
+                        modalCancelDepositBtn.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching deposit detail:', error);
+                    modalBody.innerHTML = `<p class="text-danger text-center">Terjadi kesalahan saat memuat detail deposit.</p>`;
+                    modalCheckDepositStatusBtn.style.display = 'none';
+                    modalCancelDepositBtn.style.display = 'none';
+                });
+        }
+
+        function showOrderDetail(id) {
+            const modalBody = document.getElementById('orderDetailModalBody');
+            modalBody.innerHTML = '<div class="vp-loading-shimmer" style="height: 150px;"></div>';
+
+            const modalCheckOrderStatusBtn = document.getElementById('modalOrderDetailCheckStatusBtn');
+            modalCheckOrderStatusBtn.onclick = null;
+            modalCheckOrderStatusBtn.onclick = () => {
+                modalCheckOrderStatusBtn.disabled = true;
+                modalCheckOrderStatusBtn.innerHTML = 'Checking...';
+                checkOrderStatus(id, true);
+            };
+
+            fetch(`/api/webtrx/order/check`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.data) {
+                    const order = data.data;
+                    let orderStatusBadge = '';
+                    let statusClass = '';
+                    if (order.status === 'pending') {
+                        statusClass = 'status-pending';
+                    } else if (order.status === 'success') {
+                        statusClass = 'status-success';
+                    } else if (['failed', 'cancel', 'failed_refunded'].includes(order.status)) {
+                        statusClass = 'status-failed';
+                    }
+                    orderStatusBadge = `<span class="status-badge ${statusClass}">${order.status}</span>`;
+
+                    modalBody.innerHTML = `
+                        <div class="detail-item">
+                            <strong>ID Transaksi:</strong> ${order.id || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Ref ID:</strong> ${order.reff_id || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Layanan:</strong> ${order.layanan || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Target:</strong> ${order.target || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Harga:</strong> Rp ${parseInt(order.price).toLocaleString('id-ID')}
+                        </div>
+                        <div class="detail-item">
+                            <strong>SN/Resi:</strong> ${order.sn ? order.sn : '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Status:</strong> ${orderStatusBadge}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Tanggal:</strong> ${new Date(order.created_at).toLocaleString('id-ID')}
+                        </div>
+                    `;
+
+                    if (modalCheckOrderStatusBtn) {
+                        modalCheckOrderStatusBtn.disabled = false;
+                        modalCheckOrderStatusBtn.innerHTML = 'Cek Status (API)';
+                        if (['success', 'failed', 'cancel'].includes(order.status)) {
+                           modalCheckOrderStatusBtn.style.display = 'none';
+                        } else {
+                           modalCheckOrderStatusBtn.style.display = '';
+                        }
+                    }
+
+                    const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                    modal.show();
+
+                } else {
+                    modalBody.innerHTML = `<p class="text-danger text-center">${data.message || 'Gagal memuat detail order.'}</p>`;
+                    if (modalCheckOrderStatusBtn) modalCheckOrderStatusBtn.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching order detail:', error);
+                modalBody.innerHTML = `<p class="text-danger text-center">Terjadi kesalahan saat memuat detail order.</p>`;
+                if (modalCheckOrderStatusBtn) modalCheckOrderStatusBtn.style.display = 'none';
+            });
+        }
+
+        function checkDepositStatus(id, calledFromModal = false) {
+            const checkDepositStatusBtn = document.getElementById('modalDepositDetailCheckStatusBtn');
+            const modalBody = document.getElementById('depositDetailModalBody');
+            
+            if (checkDepositStatusBtn) {
+                checkDepositStatusBtn.disabled = true;
+                checkDepositStatusBtn.innerHTML = 'Checking...';
+            }
+
+            fetch(`/api/webtrx/deposit/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    const deposit = data.data;
+                    let depositStatusBadge = '';
+                    let statusClass = '';
+                    if (deposit.status === 'pending') {
+                        statusClass = 'status-pending';
+                    } else if (deposit.status === 'success') {
+                        statusClass = 'status-success';
+                    } else if (['failed', 'expired', 'cancel'].includes(deposit.status)) {
+                        statusClass = 'status-failed';
+                    }
+                    depositStatusBadge = `<span class="status-badge ${statusClass}">${deposit.status}</span>`;
+
+                    let qrCodeHtml = '';
+                    if (deposit.status === 'pending' && deposit.qr_image) {
+                        qrCodeHtml = `<div class="detail-item text-center"><strong>QR Code:</strong> <br><img src="${deposit.qr_image}" alt="QR Code" style="max-width: 150px; height: auto; margin-top: 10px;"></div>`;
+                    }
+
+                    if (modalBody) {
+                        modalBody.innerHTML = `
+                            <div class="detail-item"><strong>ID Transaksi:</strong> ${deposit.id || '-'}</div>
+                            <div class="detail-item"><strong>Ref ID:</strong> ${deposit.reff_id || '-'}</div>
+                            <div class="detail-item"><strong>Nominal:</strong> Rp ${deposit.nominal.toLocaleString('id-ID')}</div>
+                            <div class="detail-item"><strong>Fee:</strong> Rp ${deposit.fee.toLocaleString('id-ID')}</div>
+                            <div class="detail-item"><strong>Diterima:</strong> Rp ${deposit.get_balance.toLocaleString('id-ID')}</div>
+                            <div class="detail-item"><strong>Metode:</strong> ${deposit.metode || '-'}</div>
+                            ${deposit.tujuan ? `<div class="detail-item"><strong>Tujuan:</strong> ${deposit.tujuan}</div>` : ''}
+                            ${deposit.atas_nama ? `<div class="detail-item"><strong>Atas Nama:</strong> ${deposit.atas_nama}</div>` : ''}
+                            <div class="detail-item"><strong>Status:</strong> ${depositStatusBadge}</div>
+                            <div class="detail-item"><strong>Tanggal:</strong> ${new Date(deposit.created_at).toLocaleString('id-ID')}</div>
+                            ${qrCodeHtml}
+                        `;
+                    }
+
+                    if (checkDepositStatusBtn) {
+                        checkDepositStatusBtn.disabled = false;
+                        checkDepositStatusBtn.innerHTML = 'Cek Status (API)';
+                        if (['success', 'failed', 'expired', 'cancel'].includes(deposit.status)) {
+                            checkDepositStatusBtn.style.display = 'none';
+                            document.getElementById('modalCancelDepositBtn').style.display = 'none';
+                            if (deposit.status === 'success') {
+                                setTimeout(() => location.reload(), 2000);
+                            }
+                        } else {
+                            checkDepositStatusBtn.style.display = '';
+                        }
+                    }
+                } else {
+                    const errorMessage = data.message || 'Gagal memperbarui status.';
+                    if (modalBody) modalBody.innerHTML = `<p class="text-danger text-center">${errorMessage}</p>`;
+                    if (checkDepositStatusBtn) {
+                        checkDepositStatusBtn.disabled = false;
+                        checkDepositStatusBtn.innerHTML = 'Cek Status (API)';
+                        checkDepositStatusBtn.style.display = 'none';
+                        document.getElementById('modalCancelDepositBtn').style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking deposit status:', error);
+                const errorMessage = 'Error checking status.';
+                if (modalBody) modalBody.innerHTML = `<p class="text-danger text-center">${errorMessage}</p>`;
+                if (checkDepositStatusBtn) {
+                    checkDepositStatusBtn.disabled = false;
+                    checkDepositStatusBtn.innerHTML = 'Cek Status (API)';
+                    checkDepositStatusBtn.style.display = 'none';
+                    document.getElementById('modalCancelDepositBtn').style.display = 'none';
+                }
+            });
+        }
+
+        function checkOrderStatus(id, calledFromModal = false) {
+            const modalCheckOrderStatusBtn = document.getElementById('modalOrderDetailCheckStatusBtn');
+            const modalBody = document.getElementById('orderDetailModalBody');
+
+            if(calledFromModal && modalCheckOrderStatusBtn) {
+                modalCheckOrderStatusBtn.disabled = true;
+                modalCheckOrderStatusBtn.innerHTML = 'Checking...';
+            }
+
+            fetch(`/api/webtrx/order/check`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.data) {
+                    const order = data.data;
+                    let orderStatusBadge = '';
+                    let statusClass = '';
+                    if (order.status === 'pending') {
+                        statusClass = 'status-pending';
+                    } else if (order.status === 'success') {
+                        statusClass = 'status-success';
+                    } else if (['failed', 'cancel', 'failed_refunded'].includes(order.status)) {
+                        statusClass = 'status-failed';
+                    }
+                    orderStatusBadge = `<span class="status-badge ${statusClass}">${order.status}</span>`;
+
+                    modalBody.innerHTML = `
+                        <div class="detail-item">
+                            <strong>ID Transaksi:</strong> ${order.id || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Ref ID:</strong> ${order.reff_id || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Layanan:</strong> ${order.layanan || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Target:</strong> ${order.target || '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Harga:</strong> Rp ${parseInt(order.price).toLocaleString('id-ID')}
+                        </div>
+                        <div class="detail-item">
+                            <strong>SN/Resi:</strong> ${order.sn ? order.sn : '-'}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Status:</strong> ${orderStatusBadge}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Tanggal:</strong> ${new Date(order.created_at).toLocaleString('id-ID')}
+                        </div>
+                    `;
+
+                    if (modalCheckOrderStatusBtn) {
+                        modalCheckOrderStatusBtn.disabled = false;
+                        modalCheckOrderStatusBtn.innerHTML = 'Cek Status (API)';
+                        if (['success', 'failed', 'cancel'].includes(order.status)) {
+                           modalCheckOrderStatusBtn.style.display = 'none';
+                        } else {
+                           modalCheckOrderStatusBtn.style.display = '';
+                        }
+                    }
+
+                    const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                    modal.show();
+
+                } else {
+                    modalBody.innerHTML = `<p class="text-danger text-center">${data.message || 'Gagal memuat detail order.'}</p>`;
+                    if (modalCheckOrderStatusBtn) modalCheckOrderStatusBtn.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching order detail:', error);
+                modalBody.innerHTML = `<p class="text-danger text-center">Terjadi kesalahan saat memuat detail order.</p>`;
+                if (modalCheckOrderStatusBtn) modalCheckOrderStatusBtn.style.display = 'none';
+            });
+        }
+
+        function cancelDeposit(id) {
+            if (!confirm("Anda yakin ingin membatalkan deposit ini? Aksi ini tidak dapat diurungkan.")) {
+                return;
+            }
+
+            const detailBtn = document.querySelector(`#depositDetailModal .btn[onclick*="'${id}'"][onclick*="showDepositDetail"]`);
+            const cancelBtn = document.getElementById('modalCancelDepositBtn');
+            const checkBtn = document.getElementById('modalDepositDetailCheckStatusBtn');
+
+            if (detailBtn) detailBtn.style.pointerEvents = 'none';
+            if (cancelBtn) {
+                cancelBtn.style.pointerEvents = 'none';
+                cancelBtn.innerHTML = 'Cancelling...';
+            }
+            if (checkBtn) checkBtn.style.pointerEvents = 'none';
+
+            fetch(`/api/webtrx/deposit/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    alert('Deposit berhasil dibatalkan!');
+                    location.reload();
+                } else {
+                    alert(`Gagal membatalkan deposit: ${data.message || 'Terjadi kesalahan.'}`);
+                    if (detailBtn) detailBtn.style.pointerEvents = 'auto';
+                    if (cancelBtn) {
+                        cancelBtn.style.pointerEvents = 'auto';
+                        cancelBtn.innerHTML = 'Batal';
+                    }
+                    if (checkBtn) checkBtn.style.pointerEvents = 'auto';
+                }
+            })
+            .catch(error => {
+                console.error('Error cancelling deposit:', error);
+                alert('Terjadi kesalahan saat membatalkan deposit.');
+                if (detailBtn) detailBtn.style.pointerEvents = 'auto';
+                if (cancelBtn) {
+                    cancelBtn.style.pointerEvents = 'auto';
+                    cancelBtn.innerHTML = 'Batal';
+                }
+                if (checkBtn) checkBtn.style.pointerEvents = 'auto';
+            }); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLayoutForSidebar();
+            setActiveSidebarLink();
+            setActiveBottomNav();
+            fetchDashboardData();
+            fetchNotifications();
+        });
+    </script>
 </body>
 </html>
