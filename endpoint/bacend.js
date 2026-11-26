@@ -468,20 +468,21 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
     let localData = userWithHistory.historyDeposit[0];
     let localStatus = String(localData.status || "pending").toLowerCase();
+    const displayTrxId = String(localData.trx_id || localData.reff_id || id);
 
     // ================= STATUS TERMINAL =================
     if (!["pending", "processing"].includes(localStatus)) {
       const nominal = Number(localData.nominal) || 0;
       const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
       const feeTotal = Number(localData.fee) || 0;
-      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + kodeUnik + feeTotal;
+      const totalAmount = Number(localData.total_amount) > 0 ? Number(localData.total_amount) : nominal + feeTotal;
 
       return res.status(200).json({
         success: true,
         data: {
           id,
-          trx_id: id,
-          reff_id: localData.reff_id || localData.provider_reference_id || "-",
+          trx_id: displayTrxId,
+          reff_id: displayTrxId,
           nominal,
           kode_unik: kodeUnik,
           tambahan: kodeUnik,
@@ -498,8 +499,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           created_at: localData.created_at || null,
           expires_at: localData.provider_expires_at || null,
           paid_at: localData.provider_time || null,
-          provider_id: localData.provider_id || null,
-          provider_reference_id: localData.provider_reference_id || null,
+          provider_id: localData.provider_id || id,
+          provider_reference_id: displayTrxId,
           provider_amount: Number(localData.provider_amount) || totalAmount,
           provider_status: localData.provider_status || null,
           provider_time: localData.provider_time || null
@@ -560,7 +561,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         : rawProviderStatus;
 
       const pId = String(providerTrx.id || providerTrx.invoice_id || targetPaymentId);
-      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || pId);
+      const pRef = String(providerTrx.trx_id || providerTrx.reff_id || displayTrxId);
 
       let pPaidAt = providerTrx.settlement_time || providerTrx.updated_at || providerTrx.created_at || null;
       if (typeof pPaidAt === "number") {
@@ -586,6 +587,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           {
             $set: {
               "historyDeposit.$.status": "success",
+              "historyDeposit.$.trx_id": pRef,
+              "historyDeposit.$.reff_id": pRef,
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
@@ -603,7 +606,13 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           localStatus = "success";
         }
       } else if (["failed", "expired", "cancel", "cancelled", "gagal", "batal"].includes(providerStatus)) {
-        const mappedStatus = providerStatus === "gagal" ? "failed" : providerStatus === "batal" ? "cancel" : providerStatus;
+        const mappedStatus =
+          providerStatus === "gagal"
+            ? "failed"
+            : providerStatus === "batal" || providerStatus === "cancelled"
+            ? "cancelled"
+            : providerStatus;
+
         const updateResult = await User.updateOne(
           {
             _id: user._id,
@@ -617,6 +626,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
           {
             $set: {
               "historyDeposit.$.status": mappedStatus,
+              "historyDeposit.$.trx_id": pRef,
+              "historyDeposit.$.reff_id": pRef,
               "historyDeposit.$.provider_id": pId,
               "historyDeposit.$.provider_reference_id": pRef,
               "historyDeposit.$.provider_amount": Number(providerTrx.total_bayar || providerTrx.amount) || 0,
@@ -640,6 +651,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
     localData = refreshedUser?.historyDeposit?.[0] || localData;
     localStatus = String(localData.status || localStatus || "pending").toLowerCase();
+    const updatedTrxId = String(localData.trx_id || localData.reff_id || displayTrxId);
 
     const nominal = Number(localData.nominal) || 0;
     const kodeUnik = Number(localData.kode_unik || localData.tambahan) || 0;
@@ -650,8 +662,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
       success: true,
       data: {
         id,
-        trx_id: id,
-        reff_id: localData.reff_id || localData.provider_reference_id || "-",
+        trx_id: updatedTrxId,
+        reff_id: updatedTrxId,
         nominal,
         kode_unik: kodeUnik,
         tambahan: kodeUnik,
@@ -668,8 +680,8 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
         created_at: localData.created_at || null,
         expires_at: localData.provider_expires_at || null,
         paid_at: localData.provider_time || null,
-        provider_id: localData.provider_id || null,
-        provider_reference_id: localData.provider_reference_id || null,
+        provider_id: localData.provider_id || id,
+        provider_reference_id: updatedTrxId,
         provider_amount: Number(localData.provider_amount) || totalAmount,
         provider_status: localData.provider_status || null,
         provider_time: localData.provider_time || null
@@ -708,6 +720,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
     const currentData = userHistory.historyDeposit[0];
+    const displayTrxId = String(currentData.trx_id || currentData.reff_id || id);
 
     if (currentData.status !== "pending") {
       return res.status(400).json({
@@ -766,7 +779,8 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       message: result?.message || "Deposit berhasil dibatalkan.",
       data: {
         id: id,
-        trx_id: id,
+        trx_id: displayTrxId,
+        reff_id: displayTrxId,
         status: "cancelled"
       }
     });
@@ -776,6 +790,7 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, message: "Terjadi kesalahan: " + error.message });
   }
 });
+
 
 
 
