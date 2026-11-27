@@ -1,6 +1,7 @@
 const express = require("express");
 const qs = require("qs");
 const cloudscraper = require("cloudscraper");
+const axios = require("axios");
 const router = express.Router();
 
 const domain = process.env.PTERO_DOMAIN;
@@ -16,7 +17,6 @@ const {
   editHistoryOrder,
   sendOrderSuccessEmail,
 } = require("../index.js");
-const axios = require("axios");
 
 const DITZ_BASE_URL = process.env.DITZ_BASE_URL || "https://www.ditznesia.com/api/dev";
 const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
@@ -51,7 +51,6 @@ function extractUsernameFromProviderData(d) {
       ""
   ).trim();
 }
-
 
 const cloudscraperHeaders = {
   "Content-Type": "application/x-www-form-urlencoded",
@@ -146,6 +145,7 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
         fee_persen: feePersen,
         status: "aktif",
         img_url: `${fullUrl}/media/metode/qrisfast.png`,
+        thumbnail: `${fullUrl}/media/metode/qrisfast.png`,
       },
     ];
 
@@ -202,7 +202,13 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
       });
     }
 
-    const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
+    const rawQrImage =
+      paymentData.qr_link ||
+      paymentData.qr_image ||
+      paymentData.qris_url ||
+      paymentData.url ||
+      `${fullUrl}/media/metode/qrisfast.png`;
     const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
     const apiTotalBayar = parseInt(paymentData.total_bayar || paymentData.amount, 10) || totalBayarRequest;
     const feeDitznesia = Math.max(Number(paymentData.fee) || 0, Math.max(0, apiTotalBayar - totalBayarRequest));
@@ -220,7 +226,7 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
       get_balance: saldoDiterima,
       metode: "QRIS",
       status: initialStatus,
-      qr_image: rawQrImage || null,
+      qr_image: rawQrImage,
       created_at: new Date(),
     });
 
@@ -238,7 +244,9 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
         fee: totalAdminGabungan,
         total_amount: totalAmount,
         get_balance: saldoDiterima,
-        qr_image: rawQrImage || null,
+        qr_image: rawQrImage,
+        img_url: rawQrImage,
+        thumbnail: rawQrImage,
         qris_string: qrisString,
         status: initialStatus,
       },
@@ -372,6 +380,7 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
         fee: Number(localData.fee) || 0,
         get_balance: Number(localData.get_balance) || 0,
         metode: localData.metode || "QRIS",
+        qr_image: localData.qr_image || null,
         status: localStatus,
         created_at: localData.created_at,
       },
@@ -443,13 +452,21 @@ router.get("/produk", validateApiKey, async (req, res) => {
       ? listGames.filter((item) => String(item.game || "").toLowerCase().includes(String(search).toLowerCase()))
       : listGames;
 
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
+
     return res.status(200).json({
       success: true,
-      data: filtered.map((item) => ({
-        game: item.game,
-        products: item.products,
-        need_zone: Boolean(item.need_zone),
-      })),
+      data: filtered.map((item) => {
+        const resolvedImg =
+          item.img_url || item.thumbnail || item.image || item.icon || `${fullUrl}/media/metode/default.png`;
+        return {
+          game: item.game,
+          products: item.products,
+          need_zone: Boolean(item.need_zone),
+          img_url: resolvedImg,
+          thumbnail: item.thumbnail || resolvedImg,
+        };
+      }),
     });
   } catch (error) {
     return res.status(500).json({
@@ -480,19 +497,25 @@ router.get("/layanan/price-list", validateApiKey, async (req, res) => {
       products = products.filter((item) => String(item.code) === String(code));
     }
 
-    const modifiedData = products.map((item) => ({
-      code: item.code,
-      name: item.name,
-      category: item.game || item.category || null,
-      type: item.type || "topup_game",
-      provider: item.game || item.provider || null,
-      price: applyMarkup30Percent(item.price).toString(),
-      need_zone: Boolean(item.need_zone),
-      check_name: Boolean(item.check_name),
-      note: item.note || null,
-      status: item.status || "available",
-      img_url: item.img_url || null,
-    }));
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
+    const modifiedData = products.map((item) => {
+      const resolvedImg =
+        item.img_url || item.thumbnail || item.image || item.icon || `${fullUrl}/media/metode/default.png`;
+      return {
+        code: item.code,
+        name: item.name,
+        category: item.game || item.category || null,
+        type: item.type || "topup_game",
+        provider: item.game || item.provider || null,
+        price: applyMarkup30Percent(item.price).toString(),
+        need_zone: Boolean(item.need_zone),
+        check_name: Boolean(item.check_name),
+        note: item.note || null,
+        status: item.status || "available",
+        img_url: resolvedImg,
+        thumbnail: item.thumbnail || resolvedImg,
+      };
+    });
 
     return res.status(200).json({
       success: true,
