@@ -74,14 +74,19 @@
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       transform: translate(-1px, -1px);
       box-shadow: 5px 5px 0px var(--border);
     }
 
-    .btn:active {
+    .btn:active:not(:disabled) {
       transform: translate(2px, 2px);
       box-shadow: 2px 2px 0px var(--border);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .btn-white {
@@ -93,9 +98,16 @@
       color: #ffffff;
     }
 
-    .btn-green:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    .btn-danger {
+      background: #ff5d8f;
+      color: #ffffff;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      border-radius: 10px;
+      box-shadow: 2px 2px 0px var(--border);
     }
 
     .hero-box {
@@ -235,39 +247,10 @@
       color: var(--ink);
     }
 
-    .chip-game {
-      background: var(--zone-bg);
-      color: var(--zone-ink);
-    }
-
     .item-name {
       font-size: 1rem;
       font-weight: 900;
       line-height: 1.3;
-    }
-
-    .detail-list {
-      background: #ffffff;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .detail-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .detail-line span:last-child {
-      color: var(--ink);
-      font-weight: 800;
     }
 
     .price-row {
@@ -283,13 +266,6 @@
       font-size: 1.08rem;
       font-weight: 900;
       color: var(--primary-dark);
-    }
-
-    .item-price-ori {
-      font-size: 0.78rem;
-      color: #777;
-      text-decoration: line-through;
-      font-weight: 700;
     }
 
     .order-panel {
@@ -377,6 +353,211 @@
       background: #ffe4e6;
       color: #881337;
     }
+
+    /* ================= POPUP CARD ID MODAL ================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(19, 33, 26, 0.65);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .id-card-modal {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 8px 8px 0px var(--border);
+      overflow: hidden;
+      animation: popIn 0.16s ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.94) translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      background: var(--warn);
+      border-bottom: 3px solid var(--border);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+    }
+
+    .modal-body {
+      padding: 18px;
+    }
+
+    .id-card-box {
+      background: var(--card-soft);
+      border: 2.5px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 4px 4px 0px var(--border);
+      margin-bottom: 14px;
+    }
+
+    .id-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 2px dashed var(--border);
+    }
+
+    .id-card-badge {
+      background: var(--zone-bg);
+      color: var(--zone-ink);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      font-weight: 900;
+    }
+
+    .id-card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 6px 0;
+      font-size: 0.9rem;
+    }
+
+    .id-card-row span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .id-card-row strong {
+      text-align: right;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .username-highlight {
+      background: #c8f5d6;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 2px 8px;
+      color: #0d4a26;
+      display: inline-block;
+    }
+
+    .sn-box {
+      margin-top: 10px;
+      background: #fffbeb;
+      border: 2.5px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .sn-label {
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sn-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--ink);
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    .spinner-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 22px 12px;
+      gap: 12px;
+    }
+
+    .comic-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--card-alt);
+      border-top-color: var(--primary);
+      border-right-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      font-size: 0.76rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .status-pending, .status-processing {
+      background: var(--warn);
+      color: var(--ink);
+    }
+
+    .status-success, .status-sukses {
+      background: #c8f5d6;
+      color: #0d4a26;
+    }
+
+    .status-failed, .status-gagal, .status-failed_refunded {
+      background: #ffe4e6;
+      color: #881337;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
@@ -443,7 +624,7 @@
             <span>check_name</span>
             <span id="sumCheckName">-</span>
           </div>
-          </div>
+        </div>
 
         <form id="orderForm">
           <div class="form-group">
@@ -477,6 +658,19 @@
     </div>
   </div>
 
+  <!-- POPUP CARD ID MODAL -->
+  <div id="idCardModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="id-card-modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">KONFIRMASI DATA AKUN</h3>
+        <button type="button" id="closeModalTopBtn" class="btn btn-white btn-sm" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBodyContent">
+        <!-- Konten dinamis: Loading Cek ID -> Konfirmasi Card ID -> Loading Order -> Sukses & SN -->
+      </div>
+    </div>
+  </div>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     let sessionData = {};
@@ -506,8 +700,15 @@
     const submitOrderBtn = document.getElementById("submitOrderBtn");
     const orderAlert = document.getElementById("orderAlert");
 
+    const modalBackdrop = document.getElementById("idCardModalBackdrop");
+    const modalTitleEl = document.getElementById("modalTitle");
+    const modalBodyEl = document.getElementById("modalBodyContent");
+    const closeModalTopBtn = document.getElementById("closeModalTopBtn");
+
     let allItems = [];
     let selectedItem = null;
+    let activePollTimer = null;
+    let isModalLocked = false;
 
     function formatRupiah(val) {
       const num = parseInt(val, 10);
@@ -515,28 +716,43 @@
       return "Rp " + num.toLocaleString("id-ID");
     }
 
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function showAlert(type, msg) {
       orderAlert.className = `alert show alert-${type === "success" ? "success" : "error"}`;
       orderAlert.textContent = msg;
     }
 
-    function profitInfo(item) {
-      const modal = parseInt(item.price_original, 10);
-      const jual = parseInt(item.price, 10);
-      if (!Number.isFinite(modal) || modal <= 0 || !Number.isFinite(jual)) return null;
-      const nominal = jual - modal;
-      const persen = (nominal / modal) * 100;
-      return { modal, jual, nominal, persen };
+    function stopPolling() {
+      if (activePollTimer) {
+        clearInterval(activePollTimer);
+        activePollTimer = null;
+      }
     }
 
-    function profitView(p) {
-      if (!p) return { cls: "profit-na", nominalText: "-", pctText: "-", full: "-" };
-      const cls = p.nominal > 0 ? "profit-plus" : p.nominal < 0 ? "profit-minus" : "profit-zero";
-      const sign = p.nominal > 0 ? "+" : p.nominal < 0 ? "-" : "";
-      const nominalText = `${sign}${formatRupiah(Math.abs(p.nominal))}`;
-      const pctText = `${sign}${Math.abs(p.persen).toFixed(2)}%`;
-      return { cls, nominalText, pctText, full: `${nominalText} (${pctText})` };
+    function openModal(locked = false) {
+      isModalLocked = locked;
+      closeModalTopBtn.disabled = locked;
+      modalBackdrop.classList.add("open");
     }
+
+    function closeModal(force = false) {
+      if (isModalLocked && !force) return;
+      stopPolling();
+      modalBackdrop.classList.remove("open");
+    }
+
+    closeModalTopBtn.addEventListener("click", () => closeModal(false));
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal(false);
+    });
 
     function selectItemCard(item, cardEl, scrollToOrder = false) {
       selectedItem = item;
@@ -590,18 +806,13 @@
         const card = document.createElement("div");
         card.className = "item-card";
 
-        const gameLabel = item.game || item.provider || activeGame || "-";
-
-        const profit = profitView(profitInfo(item));
-
         card.innerHTML = `
           <div class="item-top">
-            <span class="chip chip-code">KODE: ${item.code ?? "-"}</span>
+            <span class="chip chip-code">KODE: ${escapeHtml(item.code ?? "-")}</span>
           </div>
-          <div class="item-name">${item.name || "-"}</div>
+          <div class="item-name">${escapeHtml(item.name || "-")}</div>
           <div class="price-row">
             <span class="item-price">${formatRupiah(item.price)}</span>
-            <span class="profit-badge ${profit.cls}">${profit.pctText}</span>
           </div>
         `;
 
@@ -627,9 +838,7 @@
         </div>
       `;
 
-      const endpoints = [
-        "/api/webtrx/layanan/price-list"
-      ];
+      const endpoints = ["/api/webtrx/layanan/price-list"];
 
       for (const ep of endpoints) {
         try {
@@ -657,6 +866,326 @@
           <p style="margin-top:6px;color:#496054;">Pastikan endpoint <code>/api/webtrx/layanan/price-list</code> aktif.</p>
         </div>
       `;
+    }
+
+    function renderCheckingLoading(item, tujuan, zone) {
+      modalTitleEl.textContent = "MENGECEK ID AKUN...";
+      openModal(true);
+      modalBodyEl.innerHTML = `
+        <div class="spinner-wrap">
+          <div class="comic-spinner"></div>
+          <strong>Mengecek Username Akun Game...</strong>
+          <p style="font-size:0.84rem;color:var(--muted);">
+            ID: <strong>${escapeHtml(tujuan)}</strong>${zone ? ` • Server: <strong>${escapeHtml(zone)}</strong>` : ""}
+          </p>
+        </div>
+      `;
+    }
+
+    function renderCheckError(message) {
+      modalTitleEl.textContent = "CEK AKUN GAGAL";
+      openModal(false);
+      modalBodyEl.innerHTML = `
+        <div class="id-card-box" style="background:#ffe4e6;">
+          <strong style="color:#881337;display:block;margin-bottom:6px;">Username Tidak Ditemukan</strong>
+          <p style="font-size:0.88rem;color:#881337;">${escapeHtml(message || "Periksa kembali User ID / Server ID Anda.")}</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btnFixId" class="btn btn-white">Perbaiki ID</button>
+        </div>
+      `;
+      document.getElementById("btnFixId").addEventListener("click", () => closeModal(true));
+    }
+
+    function renderConfirmCard(item, tujuan, zone, username) {
+      const usesZone = Boolean(item.need_zone) || Boolean(zone);
+      modalTitleEl.textContent = "KONFIRMASI CARD ID";
+      openModal(false);
+
+      modalBodyEl.innerHTML = `
+        <div class="id-card-box">
+          <div class="id-card-header">
+            <strong style="font-size:0.95rem;">${escapeHtml(item.game || item.provider || activeGame || "PLAYER ID CARD")}</strong>
+            <span class="id-card-badge">KODE ${escapeHtml(item.code)}</span>
+          </div>
+          <div class="id-card-row">
+            <span>Username</span>
+            <strong><span class="username-highlight">${escapeHtml(username || "-")}</span></strong>
+          </div>
+          <div class="id-card-row">
+            <span>User ID</span>
+            <strong>${escapeHtml(tujuan)}</strong>
+          </div>
+          ${usesZone ? `
+          <div class="id-card-row">
+            <span>Server / Zone ID</span>
+            <strong>${escapeHtml(zone || "-")}</strong>
+          </div>` : ""}
+          <div class="id-card-row">
+            <span>Produk</span>
+            <strong>${escapeHtml(item.name)}</strong>
+          </div>
+          <div class="id-card-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:8px;">
+            <span>Total Bayar</span>
+            <strong style="color:var(--primary-dark);font-size:1.02rem;">${formatRupiah(item.price)}</strong>
+          </div>
+        </div>
+        <p style="font-size:0.82rem;color:var(--muted);font-weight:700;">
+          Pastikan Username, ID, dan Server ID di atas sudah benar sebelum melanjutkan order.
+        </p>
+        <div class="modal-actions">
+          <button type="button" id="btnCancelConfirm" class="btn btn-white">Batal</button>
+          <button type="button" id="btnConfirmOrder" class="btn btn-green">Order Sekarang</button>
+        </div>
+      `;
+
+      document.getElementById("btnCancelConfirm").addEventListener("click", () => closeModal(true));
+      document.getElementById("btnConfirmOrder").addEventListener("click", () => {
+        executeOrderAndPoll(item, tujuan, zone, username);
+      });
+    }
+
+    function renderOrderProgressCard({ item, tujuan, zone, username, txId, status, sn, message, isDone }) {
+      const usesZone = Boolean(item.need_zone) || Boolean(zone);
+      const normStatus = String(status || "processing").toLowerCase();
+      const isSuccess = ["success", "sukses"].includes(normStatus);
+      const isFailed = ["failed", "gagal", "failed_refunded", "cancel", "batal"].includes(normStatus);
+
+      modalTitleEl.textContent = isSuccess
+        ? "TRANSAKSI SUKSES!"
+        : isFailed
+        ? "TRANSAKSI GAGAL"
+        : "MEMPROSES ORDER...";
+
+      openModal(!isDone);
+
+      const statusClass = isSuccess
+        ? "status-success"
+        : isFailed
+        ? "status-failed"
+        : "status-processing";
+
+      modalBodyEl.innerHTML = `
+        ${!isDone ? `
+        <div class="spinner-wrap" style="padding:10px 0 14px;">
+          <div class="comic-spinner"></div>
+          <strong style="font-size:0.95rem;">Menunggu Konfirmasi Sukses &amp; SN...</strong>
+          <span style="font-size:0.8rem;color:var(--muted);">Jangan tutup jendela ini sampai proses selesai.</span>
+        </div>` : ""}
+
+        <div class="id-card-box">
+          <div class="id-card-header">
+            <strong style="font-size:0.92rem;">${escapeHtml(item.name)}</strong>
+            <span class="status-pill ${statusClass}">${escapeHtml(normStatus)}</span>
+          </div>
+          ${txId ? `
+          <div class="id-card-row">
+            <span>ID Transaksi</span>
+            <strong style="font-size:0.82rem;">${escapeHtml(txId)}</strong>
+          </div>` : ""}
+          <div class="id-card-row">
+            <span>Username</span>
+            <strong><span class="username-highlight">${escapeHtml(username || "-")}</span></strong>
+          </div>
+          <div class="id-card-row">
+            <span>User ID</span>
+            <strong>${escapeHtml(tujuan)}</strong>
+          </div>
+          ${usesZone ? `
+          <div class="id-card-row">
+            <span>Server / Zone ID</span>
+            <strong>${escapeHtml(zone || "-")}</strong>
+          </div>` : ""}
+          <div class="id-card-row">
+            <span>Harga</span>
+            <strong>${formatRupiah(item.price)}</strong>
+          </div>
+
+          <div class="sn-box">
+            <div class="sn-label">
+              <span>SERIAL NUMBER (SN)</span>
+              ${sn ? `<button type="button" id="btnCopySn" class="btn btn-sm">Salin SN</button>` : ""}
+            </div>
+            <div class="sn-value">${sn ? escapeHtml(sn) : (isFailed ? "-" : "Menunggu SN dari provider...")}</div>
+          </div>
+        </div>
+
+        ${message ? `<p style="font-size:0.82rem;font-weight:700;color:${isFailed ? "#881337" : "var(--muted)"};">${escapeHtml(message)}</p>` : ""}
+
+        ${isDone ? `
+        <div class="modal-actions">
+          <button type="button" id="btnDoneClose" class="btn btn-green">Selesai</button>
+        </div>` : ""}
+      `;
+
+      const copyBtn = document.getElementById("btnCopySn");
+      if (copyBtn && sn) {
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(String(sn));
+            copyBtn.textContent = "Tersalin!";
+            setTimeout(() => { copyBtn.textContent = "Salin SN"; }, 1800);
+          } catch (_) {}
+        });
+      }
+
+      const doneBtn = document.getElementById("btnDoneClose");
+      if (doneBtn) {
+        doneBtn.addEventListener("click", () => closeModal(true));
+      }
+    }
+
+    async function executeOrderAndPoll(item, tujuan, zone, username) {
+      stopPolling();
+      renderOrderProgressCard({
+        item,
+        tujuan,
+        zone,
+        username,
+        txId: "",
+        status: "processing",
+        sn: null,
+        message: "Mengirim pesanan ke server...",
+        isDone: false
+      });
+
+      try {
+        const res = await fetch("/api/webtrx/order/create", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code: item.code,
+            tujuan,
+            target: tujuan,
+            ...(zone ? { zone } : {})
+          })
+        });
+
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          renderOrderProgressCard({
+            item,
+            tujuan,
+            zone,
+            username,
+            txId: json.data?.id || "",
+            status: "failed",
+            sn: null,
+            message: json.message || "Gagal membuat order.",
+            isDone: true
+          });
+          showAlert("error", json.message || "Gagal membuat order.");
+          return;
+        }
+
+        const txData = json.data || {};
+        const txId = txData.id || "";
+        let currentStatus = String(txData.status || "processing").toLowerCase();
+        let currentSn = txData.sn || txData.data || null;
+
+        const isImmediatelyFinal = ["success", "sukses", "failed", "gagal", "failed_refunded", "cancel", "batal"].includes(currentStatus);
+
+        renderOrderProgressCard({
+          item,
+          tujuan,
+          zone,
+          username,
+          txId,
+          status: currentStatus,
+          sn: currentSn,
+          message: txData.message || (isImmediatelyFinal ? "" : "Transaksi sedang diproses provider..."),
+          isDone: isImmediatelyFinal
+        });
+
+        if (isImmediatelyFinal || !txId) {
+          if (["success", "sukses"].includes(currentStatus)) {
+            showAlert("success", `Order berhasil!
+ID: ${txId}
+Status: ${currentStatus}${currentSn ? `
+SN: ${currentSn}` : ""}`);
+          }
+          return;
+        }
+
+        // Polling status order sampai API sukses / gagal
+        const pollStartedAt = Date.now();
+        const maxPollMs = 5 * 60 * 1000;
+
+        activePollTimer = setInterval(async () => {
+          if (Date.now() - pollStartedAt > maxPollMs) {
+            stopPolling();
+            renderOrderProgressCard({
+              item,
+              tujuan,
+              zone,
+              username,
+              txId,
+              status: currentStatus,
+              sn: currentSn,
+              message: "Batas waktu tunggu tercapai. Cek riwayat mutasi order untuk SN terbaru.",
+              isDone: true
+            });
+            return;
+          }
+
+          try {
+            const checkRes = await fetch("/api/webtrx/order/check", {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: txId })
+            });
+
+            if (!checkRes.ok) return;
+            const checkJson = await checkRes.json();
+            const d = checkJson.data || {};
+            currentStatus = String(d.status || currentStatus).toLowerCase();
+            currentSn = d.sn || currentSn || null;
+
+            const isFinal = ["success", "sukses", "failed", "gagal", "failed_refunded", "cancel", "batal"].includes(currentStatus);
+
+            renderOrderProgressCard({
+              item,
+              tujuan,
+              zone,
+              username,
+              txId,
+              status: currentStatus,
+              sn: currentSn,
+              message: d.message || (isFinal ? "" : "Sedang memproses topup & mengambil SN..."),
+              isDone: isFinal
+            });
+
+            if (isFinal) {
+              stopPolling();
+              if (["success", "sukses"].includes(currentStatus)) {
+                showAlert("success", `Order sukses!
+ID: ${txId}
+Username: ${username}
+SN: ${currentSn || "-"}`);
+              } else {
+                showAlert("error", `Order ${currentStatus}.
+ID: ${txId}`);
+              }
+            }
+          } catch (_) {}
+        }, 2000);
+      } catch (err) {
+        stopPolling();
+        renderOrderProgressCard({
+          item,
+          tujuan,
+          zone,
+          username,
+          txId: "",
+          status: "failed",
+          sn: null,
+          message: err.message || "Terjadi kesalahan jaringan.",
+          isDone: true
+        });
+        showAlert("error", err.message || "Terjadi kesalahan jaringan.");
+      }
     }
 
     searchInputEl.addEventListener("input", (e) => {
@@ -705,34 +1234,40 @@
         return;
       }
 
+      orderAlert.className = "alert";
       submitOrderBtn.disabled = true;
-      submitOrderBtn.textContent = "Memproses...";
+      submitOrderBtn.textContent = "Mengecek Username...";
 
       try {
-        const res = await fetch("/api/webtrx/order/create", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            code: selectedItem.code,
-            tujuan,
-            target: tujuan,
-            ...(zone ? { zone } : {})
-          })
-        });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          showAlert(
-            "success",
-            `Order berhasil!
-ID: ${json.data?.id || "-"}
-Status: ${json.data?.status || "pending"}`
-          );
+        // Jika produk mendukung check_name (atau default cek username), cek dulu ke /api/webtrx/check-name
+        if (Boolean(selectedItem.check_name)) {
+          renderCheckingLoading(selectedItem, tujuan, zone);
+
+          const checkRes = await fetch("/api/webtrx/check-name", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              code: selectedItem.code,
+              tujuan,
+              target: tujuan,
+              ...(zone ? { zone } : {})
+            })
+          });
+
+          const checkJson = await checkRes.json();
+          if (!checkRes.ok || !checkJson.success || !checkJson.data?.username) {
+            renderCheckError(checkJson.message || "Username tidak ditemukan. Pastikan User ID dan Server ID benar.");
+            return;
+          }
+
+          renderConfirmCard(selectedItem, tujuan, zone, checkJson.data.username);
         } else {
-          showAlert("error", json.message || "Gagal membuat order.");
+          // Jika produk check_name: false, langsung tampilkan Card ID konfirmasi tanpa wajib nickname provider
+          renderConfirmCard(selectedItem, tujuan, zone, "Tidak memerlukan cek nickname");
         }
       } catch (err) {
-        showAlert("error", err.message || "Terjadi kesalahan jaringan.");
+        renderCheckError(err.message || "Gagal menghubungi layanan cek username.");
       } finally {
         submitOrderBtn.disabled = false;
         submitOrderBtn.textContent = `Order (${formatRupiah(selectedItem.price)})`;
