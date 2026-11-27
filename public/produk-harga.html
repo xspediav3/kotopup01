@@ -1081,8 +1081,15 @@
 
         const txData = json.data || {};
         const txId = txData.id || "";
+        const isCheckUsernameService = /cek\s*username|check\s*username|cek\s*id|cek\s*nickname/i.test(String(item.name || ""));
         let currentStatus = String(txData.status || "processing").toLowerCase();
         let currentSn = txData.sn || txData.data || null;
+        if (isCheckUsernameService && (username || currentSn) && username !== "Tidak memerlukan cek nickname") {
+          currentStatus = "success";
+          if (!currentSn && username) {
+            currentSn = `Username: ${username}`;
+          }
+        }
 
         const isImmediatelyFinal = ["success", "sukses", "failed", "gagal", "failed_refunded", "cancel", "batal"].includes(currentStatus);
 
