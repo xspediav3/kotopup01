@@ -967,6 +967,79 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
   }
 });
 
+
+// 2b. Cek Username / Nickname Akun Game sebelum order (/tp-check)
+router.post("/check-name", requireLogin, async (req, res) => {
+  const user = await User.findById(req.session.userId);
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "User tidak ditemukan atau sesi tidak valid.",
+    });
+  }
+
+  const code = String(req.body.code || "").trim();
+  const target = String(req.body.tujuan || req.body.target || "").trim();
+  const zone = String(req.body.zone || "").trim();
+
+  if (!code || !target) {
+    return res.status(400).json({
+      success: false,
+      message: "Kode produk dan User ID / Target wajib diisi untuk cek username.",
+    });
+  }
+
+  try {
+    const checkRes = await axios.get(`${DITZ_BASE_URL}/tp-check`, {
+      params: {
+        apikey: DITZ_API_KEY,
+        code,
+        target,
+        ...(zone ? { zone } : {}),
+      },
+      timeout: 15000,
+    });
+
+    const raw = checkRes.data || {};
+    const username =
+      raw.name ||
+      raw.username ||
+      raw.nickname ||
+      raw.data?.name ||
+      raw.data?.username ||
+      raw.data?.nickname ||
+      "";
+
+    if (raw.status === false || raw.success === false || !username) {
+      return res.status(400).json({
+        success: false,
+        message: raw.message || "Username tidak ditemukan atau ID / Zone salah.",
+        data: raw,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        username: String(username).trim(),
+        name: String(username).trim(),
+        target,
+        zone: zone || null,
+        code,
+      },
+    });
+  } catch (error) {
+    const apiError = error.response?.data;
+    return res.status(500).json({
+      success: false,
+      message:
+        apiError?.message ||
+        "Gagal mengecek username ke provider. Periksa kembali ID / Zone Anda.",
+      error: apiError || error.message,
+    });
+  }
+});
+
 // 3. Buat order topup game (/tp-order) & pantau status (/tp-orders)
 router.post("/order/create", requireLogin, async (req, res) => {
   const user = await User.findById(req.session.userId);
@@ -1063,7 +1136,7 @@ router.post("/order/create", requireLogin, async (req, res) => {
       code: transactionDetails.code || code,
       target: zone ? `${target} (${zone})` : target,
       price: modifiedPrice.toString(),
-      sn: transactionDetails.sn || null,
+      sn: transactionDetails.sn || transactionDetails.data || null,
       status: transactionDetails.status || "pending",
       created_at: transactionDetails.created_at
         ? new Date(transactionDetails.created_at)
@@ -1091,7 +1164,7 @@ router.post("/order/create", requireLogin, async (req, res) => {
 
         if (statusData && statusData.status) {
           const currentTxStatus = String(statusData.status).toLowerCase();
-          const currentSn = statusData.sn || null;
+          const currentSn = statusData.sn || statusData.data || null;
 
           await editHistoryOrder(user._id, txId, {
             status: currentTxStatus,
@@ -1145,6 +1218,12 @@ router.post("/order/create", requireLogin, async (req, res) => {
       data: {
         ...transactionDetails,
         id: txId,
+        reff_id: transactionDetails.reff_id || reff_id,
+        layanan: transactionDetails.layanan || transactionDetails.service || product.name,
+        code: transactionDetails.code || code,
+        target: zone ? `${target} (${zone})` : target,
+        sn: transactionDetails.sn || transactionDetails.data || null,
+        status: transactionDetails.status || "pending",
         price: modifiedPrice.toString(),
       },
     });
@@ -1164,12 +1243,10 @@ router.post("/order/check", requireLogin, async (req, res) => {
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: "User tidak ditemukan atau sesi tidak valid."
+      message: "User tidak ditemukan atau sesi tidak valid.",
     });
   }
-  const {
-    id
-  } = req.body;
+  const { id } = req.body;
   if (!id) {
     return res.status(400).json({
       success: false,
@@ -1177,48 +1254,95 @@ router.post("/order/check", requireLogin, async (req, res) => {
     });
   }
   try {
-    const userWithOrder = await User.findOne({
-      _id: user._id,
-      "historyOrder.id": id
-    }, {
-      "historyOrder.$": 1
-    });
+    const userWithOrder = await User.findOne(
+      {
+        _id: user._id,
+        "historyOrder.id": id,
+      },
+      {
+        "historyOrder.$": 1,
+      }
+    );
     if (!userWithOrder || !userWithOrder.historyOrder.length) {
       return res.status(404).json({
         success: false,
         message: "Order Tidak Ditemukan Di Mutasi Anda.",
       });
     }
-    const formDataToAtlanticStatus = {
-      api_key: process.env.ATLAN_API_KEY,
-      id: id,
-      type: "prabayar",
-    };
-    const statusResponse = await cloudscraper.post(`${BASE_URL}/transaksi/status`, {
-      body: qs.stringify(formDataToAtlanticStatus),
-      headers: cloudscraperHeaders,
-    });
-    const statusResult = JSON.parse(statusResponse);
-    if (!statusResult || !statusResult.status || !statusResult.data) {
-      return res.status(502).json({
-        success: false,
-        message: statusResult?.message || "Gagal memeriksa status order dari provider.",
-        error: statusResult?.data || statusResult,
-      });
+
+    const localOrder = userWithOrder.historyOrder[0];
+    let currentStatus = String(localOrder.status || "pending").toLowerCase();
+    let currentSn = localOrder.sn || null;
+    let providerMessage = "";
+
+    // Jika status belum final atau SN belum ada, cek langsung ke Ditznesia /tp-orders
+    if (!["success", "sukses", "failed", "gagal", "failed_refunded", "cancel", "batal"].includes(currentStatus) || !currentSn) {
+      try {
+        const statusResponse = await axios.get(`${DITZ_BASE_URL}/tp-orders`, {
+          params: {
+            apikey: DITZ_API_KEY,
+            id: id,
+            limit: 30,
+          },
+          timeout: 12000,
+        });
+
+        const rawStatus = statusResponse.data?.data || statusResponse.data;
+        const statusData = Array.isArray(rawStatus)
+          ? rawStatus.find((item) => String(item.id) === String(id)) || rawStatus[0]
+          : rawStatus;
+
+        if (statusData && statusData.status) {
+          currentStatus = String(statusData.status).toLowerCase();
+          currentSn = statusData.sn || statusData.data || currentSn || null;
+          providerMessage = statusData.message || "";
+
+          await editHistoryOrder(user._id, id, {
+            status: currentStatus,
+            sn: currentSn,
+          });
+
+          if (["failed", "gagal", "cancel", "batal"].includes(currentStatus)) {
+            const orderCheckRefund = await User.findOne(
+              {
+                _id: user._id,
+                "historyOrder.id": id,
+                "historyOrder.status": { $ne: "failed_refunded" },
+              },
+              { "historyOrder.$": 1 }
+            );
+            if (orderCheckRefund && orderCheckRefund.historyOrder.length > 0) {
+              const refundAmount = parseInt(localOrder.price, 10) || 0;
+              await User.updateOne(
+                { _id: user._id, "historyOrder.id": id },
+                {
+                  $inc: { saldo: refundAmount },
+                  $set: { "historyOrder.$.status": "failed_refunded" },
+                }
+              );
+              currentStatus = "failed_refunded";
+            }
+          }
+        }
+      } catch (pollErr) {
+        console.error("Cek status /tp-orders error:", pollErr?.response?.data || pollErr.message);
+      }
     }
-    const orderDetails = statusResult.data;
+
     return res.status(200).json({
+      success: true,
       status: true,
       data: {
-        id: orderDetails.id,
-        reff_id: orderDetails.reff_id,
-        layanan: orderDetails.layanan,
-        code: orderDetails.code,
-        target: orderDetails.target,
-        price: orderDetails.price,
-        sn: orderDetails.sn || null,
-        status: orderDetails.status,
-        created_at: orderDetails.created_at,
+        id: localOrder.id,
+        reff_id: localOrder.reff_id || localOrder.id,
+        layanan: localOrder.layanan,
+        code: localOrder.code,
+        target: localOrder.target,
+        price: localOrder.price,
+        sn: currentSn,
+        status: currentStatus,
+        message: providerMessage,
+        created_at: localOrder.created_at,
       },
       code: 200,
     });
