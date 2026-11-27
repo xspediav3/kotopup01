@@ -2177,6 +2177,70 @@ function validateApiKey(req, res, next) {
     });
 }
 
+
+async function sendOrderSuccessEmail(userOrId, orderDetails = {}) {
+  try {
+    const user =
+      userOrId && typeof userOrId === "object" && userOrId.email
+        ? userOrId
+        : await User.findById(userOrId);
+
+    if (!user || !user.email) {
+      return { sent: false, reason: "Email user tidak ditemukan" };
+    }
+
+    if (!hasWebhookConfig() && !hasSmtpConfig()) {
+      return { sent: false, reason: "Konfigurasi email/webhook belum diatur" };
+    }
+
+    const txId = orderDetails.id || orderDetails.reff_id || "-";
+    const layanan = orderDetails.layanan || orderDetails.service || orderDetails.code || "-";
+    const target = orderDetails.target || "-";
+    const usernameGame = orderDetails.username || orderDetails.nickname || "";
+    const priceNum = Number(orderDetails.price) || 0;
+    const priceFormatted = "Rp " + priceNum.toLocaleString("id-ID");
+    const snText = orderDetails.sn || orderDetails.data || "-";
+    const waktuSukses = formatWibTime(new Date());
+    const chibiUrl = resolveChibiImageUrl(orderDetails.chibiUrl || user.profileUrl || "");
+
+    const metaRows = [
+      { label: "ID Transaksi", value: String(txId) },
+      { label: "Layanan", value: String(layanan) },
+      ...(usernameGame ? [{ label: "Username Akun", value: String(usernameGame) }] : []),
+      { label: "Target / ID", value: String(target) },
+      { label: "Total Harga", value: priceFormatted },
+      { label: "Serial Number (SN)", value: String(snText) },
+      { label: "Waktu Sukses", value: waktuSukses },
+    ];
+
+    const html = renderComicEmailCard({
+      badge: "TRANSAKSI SUKSES",
+      title: "ID Card Transaksi Sukses",
+      greeting: `Halo ${user.username || "Pengguna"}!`,
+      message: `Pesanan ${layanan} Anda telah berstatus SUKSES. Berikut detail ID card transaksi dan SN Anda:`,
+      metaRows,
+      otpCode: "",
+      chibiUrl,
+      footerNote: "Simpan ID Transaksi & SN ini sebagai bukti transaksi resmi XS-Pedia.",
+      accentColor: "#22c55e",
+      badgeBg: "#fef08a",
+    });
+
+    await sendViaWebhookOrSmtp({
+      to: user.email,
+      subject: `Transaksi Sukses (${layanan}) - XS-Pedia`,
+      html,
+      text: `TRANSAKSI SUKSES - XS-Pedia\nID: ${txId}\nLayanan: ${layanan}\nTarget: ${target}\nHarga: ${priceFormatted}\nSN: ${snText}\nWaktu: ${waktuSukses}`,
+      chibiUrl,
+    });
+
+    return { sent: true };
+  } catch (err) {
+    console.error("Gagal mengirim email notifikasi order sukses:", err?.message || err);
+    return { sent: false, reason: err?.message || "Error mengirim email" };
+  }
+}
+
 module.exports = { 
   validateApiKey, 
   User,   
@@ -2189,7 +2253,8 @@ module.exports = {
   editHistoryOrder,
   requireLogin,
   requireAdmin,
-  getCurrentUser
+  getCurrentUser,
+  sendOrderSuccessEmail
 };
 app.use("/h2h", require("./endpoint/api"));
 app.use("/api/webtrx", require("./endpoint/bacend"));
