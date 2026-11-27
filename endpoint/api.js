@@ -11,12 +11,47 @@ const {
   User,
   tambahHistoryDeposit,
   generateReffId,
-  BASE_URL,
-  ATLAN_API_KEY,
   editHistoryDeposit,
   tambahHistoryOrder,
   editHistoryOrder,
+  sendOrderSuccessEmail,
 } = require("../index.js");
+const axios = require("axios");
+
+const DITZ_BASE_URL = process.env.DITZ_BASE_URL || "https://www.ditznesia.com/api/dev";
+const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+function applyMarkup30Percent(rawPrice) {
+  const num = parseFloat(String(rawPrice ?? 0).replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(num) || num <= 0) return 0;
+  return Math.round(num * 1.3);
+}
+
+function isUsernameCheckProduct(productOrName) {
+  const txt =
+    typeof productOrName === "string"
+      ? productOrName
+      : `${productOrName?.name || ""} ${productOrName?.layanan || ""} ${productOrName?.code || ""}`;
+  return /cek\s*username|check\s*username|cek\s*id|cek\s*nickname/i.test(txt);
+}
+
+function extractUsernameFromProviderData(d) {
+  if (!d) return "";
+  if (typeof d === "string") {
+    const m = d.match(/(?:username|nickname|name)\s*[:=]\s*([^\n|]+)/i);
+    return m ? m[1].trim() : d.trim();
+  }
+  return String(
+    d.username ||
+      d.nickname ||
+      d.name ||
+      d.player_name ||
+      d.result?.name ||
+      d.result?.username ||
+      ""
+  ).trim();
+}
+
 
 const cloudscraperHeaders = {
   "Content-Type": "application/x-www-form-urlencoded",
@@ -93,70 +128,34 @@ router.get("/mutasi", validateApiKey, async (req, res) => {
 
 router.get("/deposit/metode", validateApiKey, async (req, res) => {
   try {
-    const formData = {
-      api_key: process.env.ATLAN_API_KEY,
-    };
-
-    const response = await cloudscraper.post("https://atlantich2h.com/deposit/metode", {
-      body: qs.stringify(formData),
-      headers: cloudscraperHeaders,
-    });
-
-    const result = JSON.parse(response);
-
-    if (!result.status || !Array.isArray(result.data)) {
-      return res.status(502).json({
-        success: false,
-        message: "Respon dari server utama tidak valid.",
-      });
-    }
-
+    const fullUrl = `${req.protocol}://${req.get("host")}`;
     const role = req.user?.role || "user";
-    let tambahanPersen = 0;
-    if (role === "user") tambahanPersen = 0.2;
-    if (role === "reseller") tambahanPersen = 0.1;
+    const feePersen =
+      role === "reseller"
+        ? process.env.FEE_PERCENT_RESELLER || "0.7"
+        : process.env.FEE_PERCENT_USER || "1.5";
 
-    const blacklist = ["OVO", "QRIS", "DANA", "ovo", "MANDIRI", "PERMATA"];
-
-    const metodeFormatted = result.data
-      .filter((item) => !blacklist.includes(item.metode?.toUpperCase()))
-      .map((item) => {
-        const metodeUpper = item.metode?.toUpperCase();
-        const localImageMap = {
-          BCA: "/media/metode/bca.png",
-          BRI: "/media/metode/bri.png",
-          BNI: "/media/metode/bni.png",
-          SHOPEEPAY: "/media/metode/shopeepay.png",
-          LINKAJA: "/media/metode/linkaja.png",
-          QRISFAST: "/media/metode/qrisfast.png",
-        };
-        const fullUrl = `${req.protocol}://${req.get("host")}`;
-
-        const baseFee = parseFloat(item.fee_persen) || 0;
-        const adjustedFee = (baseFee + tambahanPersen).toFixed(2);
-
-        return {
-          metode: item.metode,
-          type: item.type,
-          name: item.name,
-          min: item.min,
-          max: item.max,
-          fee: item.fee,
-          fee_persen: adjustedFee,
-          status: item.status,
-          img_url: localImageMap[metodeUpper] ?
-            `${fullUrl}${localImageMap[metodeUpper]}` :
-            `${fullUrl}/media/metode/default.png`,
-        };
-      });
+    const metodeFormatted = [
+      {
+        metode: "qris",
+        type: "ewallet",
+        name: "QRIS All Payment (Otomatis)",
+        min: 1000,
+        max: 5000000,
+        fee: 0,
+        fee_persen: feePersen,
+        status: "aktif",
+        img_url: `${fullUrl}/media/metode/qrisfast.png`,
+      },
+    ];
 
     return res.status(200).json({
       success: true,
-      message: "Daftar metode deposit FelixTopUp",
+      message: "Daftar metode deposit Ditznesia",
       metode: metodeFormatted,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Gagal mengambil metode deposit",
       error: error?.response?.data || error.message,
@@ -165,199 +164,148 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
 });
 
 router.get("/deposit/create", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    nominal,
-    metode: metodePilihanPengguna
-  } = req.query;
+  const { user } = req;
+  const parsedNominal = parseInt(req.query.nominal, 10);
 
-  if (!nominal || isNaN(nominal)) {
+  if (!req.query.nominal || !Number.isFinite(parsedNominal) || parsedNominal < 1000) {
     return res.status(400).json({
       success: false,
-      message: "Nominal harus diisi dan berupa angka.",
+      message: "Minimal deposit Rp1.000",
     });
   }
-
-  const parsedNominal = parseInt(nominal);
-  let selectedMetodeCode = "QRISFAST";
-  let selectedMetodeType = "ewallet";
-  let minDepositForMetode = 500;
-
-  if (metodePilihanPengguna) {
-    try {
-      const metodeResponse = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
-        body: qs.stringify({
-          api_key: process.env.ATLAN_API_KEY
-        }),
-        headers: cloudscraperHeaders,
-      });
-
-      const parsedMetode = JSON.parse(metodeResponse);
-      const allMetode = parsedMetode?.data || [];
-
-      const foundMetode = allMetode.find(
-        (m) =>
-        m.metode?.toUpperCase() === metodePilihanPengguna.toUpperCase() &&
-        (m.status?.toLowerCase() === "aktif" || m.status?.toLowerCase() === "on")
-      );
-
-      if (!foundMetode) {
-        return res.status(400).json({
-          success: false,
-          message: `Metode '${metodePilihanPengguna}' tidak ditemukan atau tidak aktif.`,
-        });
-      }
-
-      selectedMetodeCode = foundMetode.metode;
-      selectedMetodeType = foundMetode.type;
-      minDepositForMetode = parseInt(foundMetode.min) || 0;
-    } catch (err) {
-      return res.status(502).json({
-        success: false,
-        message: "Gagal mengambil data metode dari provider.",
-        error: err.response?.data || err.message,
-      });
-    }
-  }
-
-  if (parsedNominal < minDepositForMetode) {
-    return res.status(400).json({
-      success: false,
-      message: `Nominal minimal untuk metode ${selectedMetodeCode} adalah ${minDepositForMetode}. Nominal Anda: ${parsedNominal}.`,
-    });
-  }
-
-  const reff_id = generateReffId();
-  const formData = {
-    api_key: process.env.ATLAN_API_KEY,
-    reff_id,
-    nominal: parsedNominal,
-    type: selectedMetodeType,
-    metode: selectedMetodeCode,
-  };
 
   try {
-    const depositResponse = await cloudscraper.post(`${BASE_URL}/deposit/create`, {
-      body: qs.stringify(formData),
-      headers: cloudscraperHeaders,
+    const baseUnik = Math.floor(Math.random() * (400 - 100 + 1)) + 100;
+    const kelipatan10k = parsedNominal >= 10000 ? Math.max(1, Math.floor(parsedNominal / 10000)) : 1;
+    const kodeUnik = parsedNominal >= 10000 ? baseUnik * kelipatan10k : baseUnik;
+    const totalBayarRequest = parsedNominal + kodeUnik;
+    const saldoDiterima = parsedNominal;
+
+    const createUrl = `${DITZ_BASE_URL}/deposit/create?apikey=${encodeURIComponent(DITZ_API_KEY)}&nominal=${totalBayarRequest}`;
+    const response = await fetch(createUrl, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0",
+      },
     });
 
-    const result = JSON.parse(depositResponse);
-    if (!result?.status || !result?.data) {
-      return res.status(502).json({
+    const result = await response.json();
+    const paymentData = result?.data || result?.deposit || result;
+    const ditzId = String(paymentData?.id || paymentData?.invoice_id || paymentData?.trx_id || "");
+    const ditzTrxId = String(paymentData?.trx_id || paymentData?.reff_id || ditzId);
+
+    if (!response.ok || result?.success === false || result?.status === false || !ditzId) {
+      return res.status(400).json({
         success: false,
-        message: result?.message || "Gagal membuat deposit.",
-        error: result?.data || result,
+        message: result?.message || result?.error || "Gagal membuat QRIS Ditznesia.",
       });
     }
 
-    const d = result.data;
-    const originalFee = parseInt(d.fee) || 0;
-    const originalGetBalance = parseInt(d.get_balance) || 0;
+    const rawQrImage = paymentData.qr_link || paymentData.qr_image || paymentData.qris_url || paymentData.url || "";
+    const qrisString = paymentData.qr_string || paymentData.qris_string || paymentData.qr_code || "";
+    const apiTotalBayar = parseInt(paymentData.total_bayar || paymentData.amount, 10) || totalBayarRequest;
+    const feeDitznesia = Math.max(Number(paymentData.fee) || 0, Math.max(0, apiTotalBayar - totalBayarRequest));
+    const totalAdminGabungan = kodeUnik + feeDitznesia;
+    const totalAmount = parsedNominal + totalAdminGabungan;
+    const rawStatus = String(paymentData.status || "pending").toLowerCase();
+    const initialStatus = ["berhasil", "paid", "success", "sukses"].includes(rawStatus) ? "success" : rawStatus;
 
-    let additionalFee = 0;
-    if (user.role === "user") {
-      additionalFee = Math.ceil(originalGetBalance * 0.002);
-    } else if (user.role === "reseller") {
-      additionalFee = Math.ceil(originalGetBalance * 0.001);
-    }
-
-    const totalFee = originalFee + additionalFee;
-    const finalBalance = originalGetBalance - additionalFee;
-
-    const history = {
-      id: d.id,
-      reff_id: d.reff_id,
-      nominal: parseInt(d.nominal) || 0,
-      tambahan: parseInt(d.tambahan) || 0,
-      fee: totalFee,
-      get_balance: finalBalance,
-      metode: selectedMetodeCode,
-      bank: d.bank || null,
-      tujuan: d.tujuan || d.nomor_va || null,
-      atas_nama: d.atas_nama || null,
-      status: d.status,
-      qr_image: d.qr_image || d.url || null,
-      created_at: d.created_at ? new Date(d.created_at) : new Date(),
-    };
-
-    await tambahHistoryDeposit(user._id, history);
+    await tambahHistoryDeposit(user._id, {
+      id: ditzTrxId,
+      reff_id: ditzTrxId,
+      nominal: parsedNominal,
+      tambahan: kodeUnik,
+      fee: totalAdminGabungan,
+      get_balance: saldoDiterima,
+      metode: "QRIS",
+      status: initialStatus,
+      qr_image: rawQrImage || null,
+      created_at: new Date(),
+    });
 
     res.status(200).json({
       success: true,
       data: {
-        ...d,
-        fee: totalFee,
-        get_balance: finalBalance,
+        id: ditzTrxId,
+        trx_id: ditzTrxId,
+        reff_id: ditzTrxId,
+        ditz_id: ditzId,
+        metode: "QRIS",
+        nominal: parsedNominal,
+        kode_unik: kodeUnik,
+        tambahan: kodeUnik,
+        fee: totalAdminGabungan,
+        total_amount: totalAmount,
+        get_balance: saldoDiterima,
+        qr_image: rawQrImage || null,
+        qris_string: qrisString,
+        status: initialStatus,
       },
     });
 
     const intervalId = setInterval(async () => {
       try {
-        const statusRes = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
-          body: qs.stringify({
-            api_key: process.env.ATLAN_API_KEY,
-            id: d.id,
-          }),
-          headers: cloudscraperHeaders,
+        const latest = await User.findOne(
+          { _id: user._id, "historyDeposit.id": ditzTrxId },
+          { "historyDeposit.$": 1 }
+        );
+        const latestDeposit = latest?.historyDeposit?.[0];
+        if (!latestDeposit || !["pending", "processing"].includes(String(latestDeposit.status || "").toLowerCase())) {
+          clearInterval(intervalId);
+          return;
+        }
+
+        const statusUrl = `${DITZ_BASE_URL}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(ditzId)}`;
+        const checkRes = await fetch(statusUrl, {
+          method: "GET",
+          headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
         });
+        if (!checkRes.ok) return;
 
-        const statusData = JSON.parse(statusRes);
-        if (statusData?.status && statusData?.data) {
-          const currStatus = statusData.data.status;
-          const currBalance = parseInt(statusData.data.get_balance) || 0;
+        const checkData = await checkRes.json();
+        const providerTrx = checkData?.data || checkData?.deposit || checkData;
+        const rawProvStatus = String(providerTrx?.status || "").toLowerCase();
+        const provStatus = ["berhasil", "paid", "success", "sukses"].includes(rawProvStatus)
+          ? "success"
+          : rawProvStatus;
 
-          const userCheck = await User.findOne({
-            _id: user._id,
-            "historyDeposit.id": d.id
-          }, {
-            "historyDeposit.$": 1,
-            saldo: 1
-          });
-          const txInDb = userCheck?.historyDeposit?.[0];
-
-          if (txInDb && txInDb.status !== currStatus) {
-            await editHistoryDeposit(user._id, d.id, currStatus);
+        if (provStatus === "success") {
+          const upd = await User.updateOne(
+            {
+              _id: user._id,
+              historyDeposit: { $elemMatch: { id: ditzTrxId, status: { $in: ["pending", "processing"] } } },
+            },
+            {
+              $set: { "historyDeposit.$.status": "success" },
+              $inc: { saldo: Number(latestDeposit.get_balance) || saldoDiterima },
+            }
+          );
+          if (upd.modifiedCount > 0) {
+            console.log(`API Deposit SUCCESS ${ditzTrxId}`);
           }
-
-          if (currStatus === "success" && txInDb?.status !== "success") {
-            await User.findByIdAndUpdate(user._id, {
-              $inc: {
-                saldo: finalBalance
-              },
-            });
-          }
-
-          if (["success", "failed", "expired", "cancel"].includes(currStatus)) {
-            clearInterval(intervalId);
-          }
+          clearInterval(intervalId);
+        } else if (["failed", "expired", "cancel", "cancelled", "batal", "gagal"].includes(provStatus)) {
+          await editHistoryDeposit(user._id, ditzTrxId, provStatus === "batal" ? "cancel" : provStatus);
+          clearInterval(intervalId);
         }
       } catch (pollErr) {
-        console.error(
-          `Gagal polling status deposit ID ${d.id}:`,
-          pollErr.response?.data || pollErr.message
-        );
+        console.error("API Ditznesia Deposit Polling Error:", pollErr?.message || pollErr);
       }
-    }, 1000);
+    }, 10000);
+
+    setTimeout(() => clearInterval(intervalId), 15 * 60 * 1000 + 60000);
   } catch (error) {
-    const apiError = error.response?.data;
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: apiError?.message || "Terjadi kesalahan saat membuat deposit.",
-      error: apiError || error.message,
+      message: error?.message || "Terjadi kesalahan saat membuat deposit.",
     });
   }
 });
 
 router.get("/deposit/status", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    id
-  } = req.query;
+  const { user } = req;
+  const { id } = req.query;
 
   if (!id) {
     return res.status(400).json({
@@ -367,87 +315,78 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
   }
 
   try {
-    const userHistory = await User.findOne({
-      _id: user._id,
-      "historyDeposit.id": id
-    }, {
-      "historyDeposit.$": 1
-    });
-
-    if (!userHistory || userHistory.historyDeposit.length === 0) {
+    const userHistory = await User.findOne(
+      { _id: user._id, "historyDeposit.id": id },
+      { "historyDeposit.$": 1 }
+    );
+    if (!userHistory || !userHistory.historyDeposit.length) {
       return res.status(404).json({
         success: false,
         message: "ID deposit tidak ditemukan dalam riwayat Anda.",
       });
     }
 
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      id,
-    };
+    const localData = userHistory.historyDeposit[0];
+    let localStatus = String(localData.status || "pending").toLowerCase();
 
-    const atlanticResponse = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders,
-    });
-
-    const resultFromAtlantic = JSON.parse(atlanticResponse);
-
-    if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
-      return res.status(502).json({
-        success: false,
-        message: resultFromAtlantic?.data?.message ||
-          resultFromAtlantic?.message ||
-          "Gagal memeriksa status deposit ke provider.",
-        error: resultFromAtlantic?.data || resultFromAtlantic,
+    if (["pending", "processing"].includes(localStatus)) {
+      const statusUrl = `${DITZ_BASE_URL}/deposit/status?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(id)}`;
+      const checkRes = await fetch(statusUrl, {
+        method: "GET",
+        headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
       });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        const providerTrx = checkData?.data || checkData?.deposit || checkData;
+        const rawProvStatus = String(providerTrx?.status || localStatus).toLowerCase();
+        const provStatus = ["berhasil", "paid", "success", "sukses"].includes(rawProvStatus)
+          ? "success"
+          : rawProvStatus;
+
+        if (provStatus === "success") {
+          const upd = await User.updateOne(
+            {
+              _id: user._id,
+              historyDeposit: { $elemMatch: { id, status: { $in: ["pending", "processing"] } } },
+            },
+            {
+              $set: { "historyDeposit.$.status": "success" },
+              $inc: { saldo: Number(localData.get_balance) || 0 },
+            }
+          );
+          if (upd.modifiedCount > 0) localStatus = "success";
+        } else if (["failed", "expired", "cancel", "cancelled", "batal", "gagal"].includes(provStatus)) {
+          await editHistoryDeposit(user._id, id, provStatus);
+          localStatus = provStatus;
+        }
+      }
     }
-
-    const depositDetails = resultFromAtlantic.data;
-    const originalGetBalance = parseInt(depositDetails.get_balance) || 0;
-
-    let finalBalance = originalGetBalance;
-    if (user.role === "user") {
-      finalBalance = Math.floor(originalGetBalance * 0.998);
-    } else if (user.role === "reseller") {
-      finalBalance = Math.floor(originalGetBalance * 0.999);
-    }
-
-    const responseData = {
-      id: depositDetails.id,
-      reff_id: depositDetails.reff_id,
-      nominal: parseInt(depositDetails.nominal) || 0,
-      tambahan: parseInt(depositDetails.tambahan) || 0,
-      fee: parseInt(depositDetails.fee) || 0,
-      get_balance: finalBalance,
-      metode: depositDetails.metode,
-      status: depositDetails.status,
-      created_at: depositDetails.created_at,
-    };
 
     return res.status(200).json({
       success: true,
-      data: responseData,
+      data: {
+        id: localData.id,
+        reff_id: localData.reff_id || localData.id,
+        nominal: Number(localData.nominal) || 0,
+        tambahan: Number(localData.tambahan) || 0,
+        fee: Number(localData.fee) || 0,
+        get_balance: Number(localData.get_balance) || 0,
+        metode: localData.metode || "QRIS",
+        status: localStatus,
+        created_at: localData.created_at,
+      },
     });
   } catch (error) {
-    const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.data?.message ||
-        apiError?.message ||
-        "Terjadi kesalahan internal saat memeriksa status deposit.",
-      error: apiError || error.message,
+      message: error?.message || "Terjadi kesalahan internal saat memeriksa status deposit.",
     });
   }
 });
 
 router.get("/deposit/cancel", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    id
-  } = req.query;
+  const { user } = req;
+  const { id } = req.query;
 
   if (!id) {
     return res.status(400).json({
@@ -457,115 +396,103 @@ router.get("/deposit/cancel", validateApiKey, async (req, res) => {
   }
 
   try {
-    const userHistory = await User.findOne({
-      _id: user._id,
-      "historyDeposit.id": id
-    }, {
-      "historyDeposit.$": 1
-    });
-
-    if (!userHistory || userHistory.historyDeposit.length === 0) {
+    const userHistory = await User.findOne(
+      { _id: user._id, "historyDeposit.id": id },
+      { "historyDeposit.$": 1 }
+    );
+    if (!userHistory || !userHistory.historyDeposit.length) {
       return res.status(404).json({
         success: false,
         message: "ID deposit tidak ditemukan dalam riwayat Anda.",
       });
     }
 
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      id,
-    };
-
-    const atlanticResponse = await cloudscraper.post(`${BASE_URL}/deposit/cancel`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders,
+    const cancelUrl = `${DITZ_BASE_URL}/deposit/cancel?apikey=${encodeURIComponent(DITZ_API_KEY)}&id=${encodeURIComponent(id)}`;
+    await fetch(cancelUrl, {
+      method: "GET",
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
     });
 
-    const resultFromAtlantic = JSON.parse(atlanticResponse);
+    await editHistoryDeposit(user._id, id, "cancelled");
 
-    if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
-      return res.status(502).json({
-        success: false,
-        message: resultFromAtlantic?.data?.message ||
-          resultFromAtlantic?.message ||
-          "Gagal membatalkan deposit.",
-        error: resultFromAtlantic?.data || resultFromAtlantic,
-      });
-    }
-
-    const cancelDetails = resultFromAtlantic.data;
     return res.status(200).json({
       success: true,
       data: {
-        id: cancelDetails.id,
-        status: cancelDetails.status,
-        created_at: cancelDetails.created_at,
+        id,
+        status: "cancelled",
+        created_at: new Date(),
       },
     });
   } catch (error) {
-    const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.data?.message ||
-        apiError?.message ||
-        "Terjadi kesalahan internal saat membatalkan deposit.",
-      error: apiError || error.message,
+      message: error?.message || "Terjadi kesalahan internal saat membatalkan deposit.",
+    });
+  }
+});
+
+router.get("/produk", validateApiKey, async (req, res) => {
+  const { search } = req.query;
+  try {
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-games`, {
+      params: { apikey: DITZ_API_KEY },
+    });
+    const rawData = response.data?.data || response.data || [];
+    const listGames = Array.isArray(rawData) ? rawData : [];
+    const filtered = search
+      ? listGames.filter((item) => String(item.game || "").toLowerCase().includes(String(search).toLowerCase()))
+      : listGames;
+
+    return res.status(200).json({
+      success: true,
+      data: filtered.map((item) => ({
+        game: item.game,
+        products: item.products,
+        need_zone: Boolean(item.need_zone),
+      })),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.message || "Gagal memproses data game Ditznesia.",
     });
   }
 });
 
 router.get("/layanan/price-list", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    code
-  } = req.query;
+  const { code, game, provider } = req.query;
+  const selectedGame = game || provider;
 
   try {
-    const formDataToAtlantic = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: "prabayar",
-      code: code,
-    };
+    const params = { apikey: DITZ_API_KEY };
+    if (selectedGame) params.game = selectedGame;
 
-    const response = await cloudscraper.post(`${BASE_URL}/layanan/price_list`, {
-      body: qs.stringify(formDataToAtlantic),
-      headers: cloudscraperHeaders,
-    });
+    const response = await axios.get(`${DITZ_BASE_URL}/tp-products`, { params });
+    const rawData = response.data?.data || response.data || [];
+    let products = Array.isArray(rawData) ? rawData : [];
 
-    const responseBody = JSON.parse(response);
-
-    if (!responseBody || !responseBody.status || !Array.isArray(responseBody.data)) {
-      return res.status(502).json({
-        success: false,
-        message: responseBody?.message || "Gagal mendapatkan daftar harga.",
-        error: responseBody?.data || responseBody,
-      });
+    if (selectedGame) {
+      products = products.filter(
+        (item) => String(item.game || "").toLowerCase() === String(selectedGame).toLowerCase()
+      );
+    }
+    if (code) {
+      products = products.filter((item) => String(item.code) === String(code));
     }
 
-    const modifiedData = responseBody.data.map((item) => {
-      let originalPrice = parseInt(item.price) || 0;
-      let modifiedPrice = originalPrice;
-
-      if (user.role === "user") {
-        modifiedPrice = originalPrice + 100;
-      } else if (user.role === "reseller") {
-        modifiedPrice = originalPrice + 50;
-      }
-
-      return {
-        code: item.code,
-        name: item.name,
-        category: item.category,
-        type: item.type,
-        provider: item.provider,
-        price: modifiedPrice.toString(),
-        note: item.note,
-        status: item.status,
-        img_url: item.img_url,
-      };
-    });
+    const modifiedData = products.map((item) => ({
+      code: item.code,
+      name: item.name,
+      category: item.game || item.category || null,
+      type: item.type || "topup_game",
+      provider: item.game || item.provider || null,
+      price: applyMarkup30Percent(item.price).toString(),
+      need_zone: Boolean(item.need_zone),
+      check_name: Boolean(item.check_name),
+      note: item.note || null,
+      status: item.status || "available",
+      img_url: item.img_url || null,
+    }));
 
     return res.status(200).json({
       success: true,
@@ -574,20 +501,65 @@ router.get("/layanan/price-list", validateApiKey, async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error?.message || "Terjadi kesalahan internal saat memproses permintaan.",
-      error: error,
+      message: error?.response?.data?.message || error?.message || "Terjadi kesalahan saat mengambil daftar harga.",
+    });
+  }
+});
+
+router.get("/check-name", validateApiKey, async (req, res) => {
+  const code = String(req.query.code || "").trim();
+  const target = String(req.query.tujuan || req.query.target || "").trim();
+  const zone = String(req.query.zone || "").trim();
+
+  if (!code || !target) {
+    return res.status(400).json({
+      success: false,
+      message: "Kode produk dan target wajib diisi.",
+    });
+  }
+
+  try {
+    const checkRes = await axios.get(`${DITZ_BASE_URL}/tp-check`, {
+      params: {
+        apikey: DITZ_API_KEY,
+        code,
+        target,
+        ...(zone ? { zone } : {}),
+      },
+      timeout: 15000,
+    });
+
+    const raw = checkRes.data || {};
+    const username = extractUsernameFromProviderData(raw);
+
+    if (raw.status === false || raw.success === false || !username) {
+      return res.status(400).json({
+        success: false,
+        message: raw.message || "Username tidak ditemukan.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        username,
+        name: username,
+        target,
+        zone: zone || null,
+        code,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.message || "Gagal mengecek username ke Ditznesia.",
     });
   }
 });
 
 router.get("/order/create", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    code,
-    tujuan: target
-  } = req.query;
+  const { user } = req;
+  const { code, tujuan: target, zone } = req.query;
 
   if (!code || !target) {
     return res.status(400).json({
@@ -597,31 +569,13 @@ router.get("/order/create", validateApiKey, async (req, res) => {
   }
 
   try {
-    const formDataToAtlanticPriceList = {
-      api_key: process.env.ATLAN_API_KEY,
-      type: "prabayar",
-      code: code,
-    };
+    const productsResponse = await axios.get(`${DITZ_BASE_URL}/tp-products`, {
+      params: { apikey: DITZ_API_KEY },
+    });
 
-    const atlanticPriceListResponse = await cloudscraper.post(
-      `${BASE_URL}/layanan/price_list`, {
-        body: qs.stringify(formDataToAtlanticPriceList),
-        headers: cloudscraperHeaders,
-      }
-    );
-
-    const priceListResult = JSON.parse(atlanticPriceListResponse);
-
-    if (!priceListResult || !priceListResult.status || !priceListResult.data) {
-      return res.status(502).json({
-        success: false,
-        message: priceListResult?.message || "Gagal mendapatkan daftar harga.",
-        error: priceListResult?.data || priceListResult,
-      });
-    }
-
-    const productList = Array.isArray(priceListResult.data) ? priceListResult.data : [priceListResult.data];
-    const product = productList.find((item) => item.code === code && item.status === "available");
+    const rawProducts = productsResponse.data?.data || productsResponse.data || [];
+    const productList = Array.isArray(rawProducts) ? rawProducts : [];
+    const product = productList.find((item) => String(item.code) === String(code));
 
     if (!product) {
       return res.status(400).json({
@@ -630,14 +584,14 @@ router.get("/order/create", validateApiKey, async (req, res) => {
       });
     }
 
-    let originalPrice = parseInt(product.price) || 0;
-    let modifiedPrice = originalPrice;
-
-    if (user.role === "user") {
-      modifiedPrice = originalPrice + 500;
-    } else if (user.role === "reseller") {
-      modifiedPrice = originalPrice + 350;
+    if (product.need_zone && !zone) {
+      return res.status(400).json({
+        success: false,
+        message: "Game ini membutuhkan parameter zone.",
+      });
     }
+
+    const modifiedPrice = applyMarkup30Percent(product.price);
 
     if (user.saldo < modifiedPrice) {
       return res.status(400).json({
@@ -648,95 +602,144 @@ router.get("/order/create", validateApiKey, async (req, res) => {
 
     const reff_id = generateReffId();
 
-    const formDataToAtlanticCreate = {
-      api_key: process.env.ATLAN_API_KEY,
-      code: code,
-      reff_id: reff_id,
-      target: target,
-      type: "prabayar",
-    };
-
-    const atlanticCreateResponse = await cloudscraper.post(
-      `${BASE_URL}/transaksi/create`, {
-        body: qs.stringify(formDataToAtlanticCreate),
-        headers: cloudscraperHeaders,
-      }
-    );
-
-    const createResult = JSON.parse(atlanticCreateResponse);
-
-    if (!createResult || !createResult.status || !createResult.data) {
-      return res.status(502).json({
-        success: false,
-        message: createResult?.message || "Gagal membuat transaksi ke provider.",
-        error: createResult?.data || createResult,
-      });
-    }
-
-    const transactionDetails = createResult.data;
-
-    await User.findByIdAndUpdate(user._id, {
-      $inc: {
-        saldo: -modifiedPrice
+    const orderResponse = await axios.get(`${DITZ_BASE_URL}/tp-order`, {
+      params: {
+        apikey: DITZ_API_KEY,
+        code,
+        target,
+        ...(zone ? { zone } : {}),
+        reff_id,
       },
     });
 
-    const historyDataForDb = {
-      id: transactionDetails.id,
-      reff_id: transactionDetails.reff_id,
-      layanan: transactionDetails.layanan,
-      code: transactionDetails.code,
-      target: transactionDetails.target,
-      price: modifiedPrice.toString(),
-      sn: transactionDetails.sn || null,
-      status: transactionDetails.status,
-      created_at: transactionDetails.created_at ?
-        new Date(transactionDetails.created_at) :
-        new Date(),
-    };
-    await tambahHistoryOrder(user._id, historyDataForDb);
+    const createResult = orderResponse.data;
+    const transactionDetails = createResult?.data || createResult;
+
+    if (!transactionDetails || createResult?.status === false || createResult?.success === false) {
+      return res.status(502).json({
+        success: false,
+        message: createResult?.message || "Gagal membuat transaksi ke Ditznesia.",
+      });
+    }
+
+    await User.findByIdAndUpdate(user._id, {
+      $inc: { saldo: -modifiedPrice },
+    });
+
+    const txId = String(transactionDetails.id || transactionDetails.trx_id || reff_id);
+    const layananName = transactionDetails.layanan || transactionDetails.service || product.name;
+    const targetDisplay = zone ? `${target} (${zone})` : target;
+    const checkedUsername = extractUsernameFromProviderData(transactionDetails);
+    const isCheckUsernameItem = isUsernameCheckProduct(product) || isUsernameCheckProduct(layananName);
+
+    let initialStatus = String(transactionDetails.status || "pending").toLowerCase();
+    let initialSn = transactionDetails.sn || transactionDetails.data || null;
+
+    if (isCheckUsernameItem && (checkedUsername || initialSn)) {
+      initialStatus = "success";
+      if (!initialSn && checkedUsername) {
+        initialSn = `Username: ${checkedUsername}`;
+      }
+    }
+
+    let emailedSuccess = ["success", "sukses"].includes(initialStatus);
+
+    await tambahHistoryOrder(user._id, {
+      id: txId,
+      reff_id: transactionDetails.reff_id || reff_id,
+      layanan: layananName,
+      code: transactionDetails.code || code,
+      target: targetDisplay,
+      price: modifiedPrice,
+      sn: initialSn,
+      status: initialStatus,
+      created_at: transactionDetails.created_at ? new Date(transactionDetails.created_at) : new Date(),
+    });
+
+    if (emailedSuccess && typeof sendOrderSuccessEmail === "function") {
+      await sendOrderSuccessEmail(user, {
+        id: txId,
+        reff_id: transactionDetails.reff_id || reff_id,
+        layanan: layananName,
+        username: checkedUsername,
+        target: targetDisplay,
+        price: modifiedPrice,
+        sn: initialSn,
+      });
+    }
 
     const maxPollingTime = 5 * 60 * 1000;
     const startTime = Date.now();
     const intervalId = setInterval(async () => {
       try {
-        const checkStatusResponse = await cloudscraper.post(
-          `${BASE_URL}/transaksi/status`, {
-            body: qs.stringify({
-              api_key: process.env.ATLAN_API_KEY,
-              id: transactionDetails.id,
-              type: "prabayar",
-            }),
-            headers: cloudscraperHeaders,
+        const statusResponse = await axios.get(`${DITZ_BASE_URL}/tp-orders`, {
+          params: {
+            apikey: DITZ_API_KEY,
+            id: txId,
+          },
+        });
+
+        const rawStatus = statusResponse.data?.data || statusResponse.data;
+        const statusData = Array.isArray(rawStatus)
+          ? rawStatus.find((item) => String(item.id) === String(txId)) || rawStatus[0]
+          : rawStatus;
+
+        if (statusData && statusData.status) {
+          let currentTxStatus = String(statusData.status).toLowerCase();
+          let currentSn = statusData.sn || statusData.data || null;
+          const polledUsername = extractUsernameFromProviderData(statusData) || checkedUsername;
+
+          if (isCheckUsernameItem && (polledUsername || currentSn)) {
+            currentTxStatus = "success";
+            if (!currentSn && polledUsername) {
+              currentSn = `Username: ${polledUsername}`;
+            }
           }
-        );
 
-        const statusUpdateData = JSON.parse(checkStatusResponse);
-
-        if (statusUpdateData && statusUpdateData.status && statusUpdateData.data) {
-          const currentTxStatus = statusUpdateData.data.status;
-          const currentSn = statusUpdateData.data.sn || null;
-
-          await editHistoryOrder(user._id, transactionDetails.id, {
+          await editHistoryOrder(user._id, txId, {
             status: currentTxStatus,
             sn: currentSn,
           });
 
-          if (currentTxStatus === "success") {
+          if (["success", "sukses"].includes(currentTxStatus)) {
+            if (!emailedSuccess && typeof sendOrderSuccessEmail === "function") {
+              emailedSuccess = true;
+              await sendOrderSuccessEmail(user._id, {
+                id: txId,
+                reff_id: statusData.reff_id || reff_id,
+                layanan: statusData.layanan || statusData.service || layananName,
+                username: polledUsername,
+                target: statusData.target || targetDisplay,
+                price: modifiedPrice,
+                sn: currentSn,
+              });
+            }
             clearInterval(intervalId);
           }
 
-          if (["failed", "cancel"].includes(currentTxStatus)) {
-            await User.findByIdAndUpdate(user._id, {
-              $inc: {
-                saldo: modifiedPrice
+          if (["failed", "gagal", "cancel", "batal"].includes(currentTxStatus)) {
+            const orderInDb = await User.findOne(
+              {
+                _id: user._id,
+                "historyOrder.id": txId,
+                "historyOrder.status": { $ne: "failed_refunded" },
               },
-            });
+              { "historyOrder.$": 1 }
+            );
+            if (orderInDb && orderInDb.historyOrder.length > 0) {
+              await User.updateOne(
+                { _id: user._id, "historyOrder.id": txId },
+                {
+                  $inc: { saldo: modifiedPrice },
+                  $set: { "historyOrder.$.status": "failed_refunded" },
+                }
+              );
+            }
             clearInterval(intervalId);
           }
 
           if (
-            ["success", "failed", "cancel"].includes(currentTxStatus) ||
+            ["success", "sukses", "failed", "gagal", "cancel", "batal"].includes(currentTxStatus) ||
             Date.now() - startTime > maxPollingTime
           ) {
             clearInterval(intervalId);
@@ -751,26 +754,27 @@ router.get("/order/create", validateApiKey, async (req, res) => {
       success: true,
       data: {
         ...transactionDetails,
+        id: txId,
+        reff_id: transactionDetails.reff_id || reff_id,
+        layanan: layananName,
+        code: transactionDetails.code || code,
+        target: targetDisplay,
+        sn: initialSn,
+        status: initialStatus,
         price: modifiedPrice.toString(),
       },
     });
   } catch (error) {
-    const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.message || "Terjadi kesalahan internal saat memproses order.",
-      error: apiError || error.message,
+      message: error.response?.data?.message || "Terjadi kesalahan internal saat memproses order.",
     });
   }
 });
 
 router.get("/order/check", validateApiKey, async (req, res) => {
-  const {
-    user
-  } = req;
-  const {
-    id
-  } = req.query;
+  const { user } = req;
+  const { id } = req.query;
 
   if (!id) {
     return res.status(400).json({
@@ -780,12 +784,10 @@ router.get("/order/check", validateApiKey, async (req, res) => {
   }
 
   try {
-    const userWithOrder = await User.findOne({
-      _id: user._id,
-      "historyOrder.id": id
-    }, {
-      "historyOrder.$": 1
-    });
+    const userWithOrder = await User.findOne(
+      { _id: user._id, "historyOrder.id": id },
+      { "historyOrder.$": 1 }
+    );
 
     if (!userWithOrder || !userWithOrder.historyOrder.length) {
       return res.status(404).json({
@@ -794,52 +796,83 @@ router.get("/order/check", validateApiKey, async (req, res) => {
       });
     }
 
-    const formDataToAtlanticStatus = {
-      api_key: process.env.ATLAN_API_KEY,
-      id: id,
-      type: "prabayar",
-    };
+    const localOrder = userWithOrder.historyOrder[0];
+    let currentStatus = String(localOrder.status || "pending").toLowerCase();
+    let currentSn = localOrder.sn || null;
+    let providerMessage = "";
 
-    const checkStatusResponse = await cloudscraper.post(
-      `${BASE_URL}/transaksi/status`, {
-        body: qs.stringify(formDataToAtlanticStatus),
-        headers: cloudscraperHeaders,
-      }
-    );
-
-    const statusResult = JSON.parse(checkStatusResponse);
-
-    if (!statusResult || !statusResult.status || !statusResult.data) {
-      return res.status(502).json({
-        success: false,
-        message: statusResult?.message || "Gagal memeriksa status order.",
-        error: statusResult?.data || statusResult,
+    if (!["success", "sukses", "failed", "gagal", "failed_refunded", "cancel", "batal"].includes(currentStatus) || !currentSn) {
+      const statusResponse = await axios.get(`${DITZ_BASE_URL}/tp-orders`, {
+        params: {
+          apikey: DITZ_API_KEY,
+          id,
+          limit: 30,
+        },
+        timeout: 12000,
       });
-    }
 
-    const orderDetails = statusResult.data;
+      const rawStatus = statusResponse.data?.data || statusResponse.data;
+      const statusData = Array.isArray(rawStatus)
+        ? rawStatus.find((item) => String(item.id) === String(id)) || rawStatus[0]
+        : rawStatus;
+
+      if (statusData && statusData.status) {
+        currentStatus = String(statusData.status).toLowerCase();
+        currentSn = statusData.sn || statusData.data || currentSn || null;
+        providerMessage = statusData.message || "";
+        const checkUserNick = extractUsernameFromProviderData(statusData);
+
+        if (isUsernameCheckProduct(localOrder) && (checkUserNick || currentSn)) {
+          currentStatus = "success";
+          if (!currentSn && checkUserNick) {
+            currentSn = `Username: ${checkUserNick}`;
+          }
+        }
+
+        await editHistoryOrder(user._id, id, {
+          status: currentStatus,
+          sn: currentSn,
+        });
+
+        if (
+          ["success", "sukses"].includes(currentStatus) &&
+          !["success", "sukses"].includes(String(localOrder.status || "").toLowerCase()) &&
+          typeof sendOrderSuccessEmail === "function"
+        ) {
+          await sendOrderSuccessEmail(user, {
+            id: localOrder.id,
+            reff_id: localOrder.reff_id || localOrder.id,
+            layanan: localOrder.layanan,
+            username: checkUserNick,
+            target: localOrder.target,
+            price: localOrder.price,
+            sn: currentSn,
+          });
+        }
+      }
+    }
 
     return res.status(200).json({
       status: true,
+      success: true,
       data: {
-        id: orderDetails.id,
-        reff_id: orderDetails.reff_id,
-        layanan: orderDetails.layanan,
-        code: orderDetails.code,
-        target: orderDetails.target,
-        price: orderDetails.price,
-        sn: orderDetails.sn || null,
-        status: orderDetails.status,
-        created_at: orderDetails.created_at,
+        id: localOrder.id,
+        reff_id: localOrder.reff_id || localOrder.id,
+        layanan: localOrder.layanan,
+        code: localOrder.code,
+        target: localOrder.target,
+        price: localOrder.price,
+        sn: currentSn,
+        status: currentStatus,
+        message: providerMessage,
+        created_at: localOrder.created_at,
       },
       code: 200,
     });
   } catch (error) {
-    const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.message || "Terjadi kesalahan internal saat memeriksa status order.",
-      error: apiError || error.message,
+      message: error.response?.data?.message || "Terjadi kesalahan internal saat memeriksa status order.",
     });
   }
 });
