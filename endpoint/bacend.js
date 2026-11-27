@@ -23,6 +23,7 @@ const {
   editHistoryDeposit,
   tambahHistoryOrder,
   editHistoryOrder,
+  sendOrderSuccessEmail,
 } = require("../index.js");
 
 const cloudscraperHeaders = {
@@ -867,9 +868,18 @@ router.get("/produk-provider", requireLogin, async (req, res) => {
         )
       : products;
 
+    const mappedProducts = filtered.map((item) => {
+      const markedPrice = applyMarkup30Percent(item.price);
+      const { price_original, modal, harga_modal, base_price, cost_price, ...rest } = item;
+      return {
+        ...rest,
+        price: String(markedPrice),
+      };
+    });
+
     return res.json({
       success: true,
-      data: filtered,
+      data: mappedProducts,
     });
   } catch (error) {
     const errData = error.response?.data;
@@ -884,6 +894,37 @@ const axios = require("axios"); // atau gunakan fetch / cloudscraper sesuai kebu
 
 const DITZ_BASE_URL = "https://www.ditznesia.com/api/dev";
 const DITZ_API_KEY = process.env.DITZ_API_KEY || "6985b717a060a0906af01d335034b40f";
+
+
+function applyMarkup30Percent(rawPrice) {
+  const num = parseFloat(String(rawPrice ?? 0).replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(num) || num <= 0) return 0;
+  return Math.round(num * 1.3);
+}
+
+function isUsernameCheckProduct(productOrName) {
+  const txt = typeof productOrName === "string"
+    ? productOrName
+    : `${productOrName?.name || ""} ${productOrName?.layanan || ""} ${productOrName?.code || ""}`;
+  return /cek\s*username|check\s*username|cek\s*id|cek\s*nickname/i.test(txt);
+}
+
+function extractUsernameFromProviderData(d) {
+  if (!d) return "";
+  if (typeof d === "string") {
+    const m = d.match(/(?:username|nickname|name)\s*[:=]\s*([^\n|]+)/i);
+    return m ? m[1].trim() : d.trim();
+  }
+  return String(
+    d.username ||
+      d.nickname ||
+      d.name ||
+      d.player_name ||
+      d.result?.name ||
+      d.result?.username ||
+      ""
+  ).trim();
+}
 
 // 0. Daftar harga layanan / produk topup (disesuaikan ke Ditznesia /tp-products)
 router.post("/layanan/price-list", requireLogin, async (req, res) => {
@@ -926,13 +967,7 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
     }
 
     const modifiedData = products.map((item) => {
-      const originalPrice = parseInt(item.price, 10) || 0;
-      let modifiedPrice = originalPrice;
-      if (user.role === "user") {
-        modifiedPrice = originalPrice + 600;
-      } else if (user.role === "reseller") {
-        modifiedPrice = originalPrice + 260;
-      }
+      const modifiedPrice = applyMarkup30Percent(item.price);
 
       return {
         code: item.code,
@@ -941,7 +976,7 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
         type: item.type || "topup_game",
         provider: item.game || item.provider || null,
         price: modifiedPrice.toString(),
-        price_original: item.price_original ?? null,
+        price_original: null,
         flash: item.flash ?? null,
         need_zone: Boolean(item.need_zone),
         check_name: Boolean(item.check_name),
@@ -1084,13 +1119,7 @@ router.post("/order/create", requireLogin, async (req, res) => {
       });
     }
 
-    let originalPrice = parseInt(product.price, 10) || 0;
-    let modifiedPrice = originalPrice;
-    if (user.role === "user") {
-      modifiedPrice = originalPrice + 600;
-    } else if (user.role === "reseller") {
-      modifiedPrice = originalPrice + 260;
-    }
+    const modifiedPrice = applyMarkup30Percent(product.price);
 
     if (user.saldo < modifiedPrice) {
       return res.status(400).json({
@@ -1101,7 +1130,6 @@ router.post("/order/create", requireLogin, async (req, res) => {
 
     const reff_id = generateReffId();
 
-    // Sesuaikan nama field berikut dengan dokumentasi /tp-order di Ditznesia
     const orderResponse = await axios.get(`${DITZ_BASE_URL}/tp-order`, {
       params: {
         apikey: DITZ_API_KEY,
@@ -1128,22 +1156,51 @@ router.post("/order/create", requireLogin, async (req, res) => {
     });
 
     const txId = transactionDetails.id || transactionDetails.trx_id || reff_id;
+    const layananName = transactionDetails.layanan || transactionDetails.service || product.name;
+    const targetDisplay = zone ? `${target} (${zone})` : target;
+    const checkedUsername = extractUsernameFromProviderData(transactionDetails);
+    const isCheckUsernameItem = isUsernameCheckProduct(product) || isUsernameCheckProduct(layananName);
+
+    let initialStatus = String(transactionDetails.status || "pending").toLowerCase();
+    let initialSn = transactionDetails.sn || transactionDetails.data || null;
+
+    // Jika layanan cek username dan username sudah muncul, langsung set sukses
+    if (isCheckUsernameItem && (checkedUsername || initialSn)) {
+      initialStatus = "success";
+      if (!initialSn && checkedUsername) {
+        initialSn = `Username: ${checkedUsername}`;
+      }
+    }
+
+    let emailedSuccess = ["success", "sukses"].includes(initialStatus);
 
     const historyDataForDb = {
       id: txId,
       reff_id: transactionDetails.reff_id || reff_id,
-      layanan: transactionDetails.layanan || product.name,
+      layanan: layananName,
       code: transactionDetails.code || code,
-      target: zone ? `${target} (${zone})` : target,
-      price: modifiedPrice.toString(),
-      sn: transactionDetails.sn || transactionDetails.data || null,
-      status: transactionDetails.status || "pending",
+      target: targetDisplay,
+      price: modifiedPrice,
+      sn: initialSn,
+      status: initialStatus,
       created_at: transactionDetails.created_at
         ? new Date(transactionDetails.created_at)
         : new Date(),
     };
 
     await tambahHistoryOrder(user._id, historyDataForDb);
+
+    if (emailedSuccess) {
+      await sendOrderSuccessEmail(user, {
+        id: txId,
+        reff_id: transactionDetails.reff_id || reff_id,
+        layanan: layananName,
+        username: checkedUsername,
+        target: targetDisplay,
+        price: modifiedPrice,
+        sn: initialSn,
+      });
+    }
 
     // Polling status menggunakan /tp-orders
     const maxPollingTime = 5 * 60 * 1000;
@@ -1163,8 +1220,16 @@ router.post("/order/create", requireLogin, async (req, res) => {
           : rawStatus;
 
         if (statusData && statusData.status) {
-          const currentTxStatus = String(statusData.status).toLowerCase();
-          const currentSn = statusData.sn || statusData.data || null;
+          let currentTxStatus = String(statusData.status).toLowerCase();
+          let currentSn = statusData.sn || statusData.data || null;
+          const polledUsername = extractUsernameFromProviderData(statusData) || checkedUsername;
+
+          if (isCheckUsernameItem && (polledUsername || currentSn)) {
+            currentTxStatus = "success";
+            if (!currentSn && polledUsername) {
+              currentSn = `Username: ${polledUsername}`;
+            }
+          }
 
           await editHistoryOrder(user._id, txId, {
             status: currentTxStatus,
@@ -1172,6 +1237,18 @@ router.post("/order/create", requireLogin, async (req, res) => {
           });
 
           if (["success", "sukses"].includes(currentTxStatus)) {
+            if (!emailedSuccess) {
+              emailedSuccess = true;
+              await sendOrderSuccessEmail(user._id, {
+                id: txId,
+                reff_id: statusData.reff_id || reff_id,
+                layanan: statusData.layanan || statusData.service || layananName,
+                username: polledUsername,
+                target: statusData.target || targetDisplay,
+                price: modifiedPrice,
+                sn: currentSn,
+              });
+            }
             clearInterval(intervalId);
           }
 
@@ -1222,8 +1299,8 @@ router.post("/order/create", requireLogin, async (req, res) => {
         layanan: transactionDetails.layanan || transactionDetails.service || product.name,
         code: transactionDetails.code || code,
         target: zone ? `${target} (${zone})` : target,
-        sn: transactionDetails.sn || transactionDetails.data || null,
-        status: transactionDetails.status || "pending",
+        sn: initialSn,
+        status: initialStatus,
         price: modifiedPrice.toString(),
       },
     });
@@ -1296,11 +1373,31 @@ router.post("/order/check", requireLogin, async (req, res) => {
           currentStatus = String(statusData.status).toLowerCase();
           currentSn = statusData.sn || statusData.data || currentSn || null;
           providerMessage = statusData.message || "";
+          const checkUserNick = extractUsernameFromProviderData(statusData);
+
+          if (isUsernameCheckProduct(localOrder) && (checkUserNick || currentSn)) {
+            currentStatus = "success";
+            if (!currentSn && checkUserNick) {
+              currentSn = `Username: ${checkUserNick}`;
+            }
+          }
 
           await editHistoryOrder(user._id, id, {
             status: currentStatus,
             sn: currentSn,
           });
+
+          if (["success", "sukses"].includes(currentStatus) && !["success", "sukses"].includes(String(localOrder.status || "").toLowerCase())) {
+            await sendOrderSuccessEmail(user, {
+              id: localOrder.id,
+              reff_id: localOrder.reff_id || localOrder.id,
+              layanan: localOrder.layanan,
+              username: checkUserNick,
+              target: localOrder.target,
+              price: localOrder.price,
+              sn: currentSn,
+            });
+          }
 
           if (["failed", "gagal", "cancel", "batal"].includes(currentStatus)) {
             const orderCheckRefund = await User.findOne(
